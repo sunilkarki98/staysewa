@@ -1,0 +1,17 @@
+/* Dark mode overrides - applied when .dark class is on html element */
+html.dark {
+    /* Backgrounds */
+    --color-bg: #0b1220;
+    --color-surface: #0f172a;
+    --color-elevated: #111827;
+
+    /* Borders */
+    --color-border: #1f2937;
+
+    /* Text */
+    --color-text: #e5e7eb;
+    --color-muted: #9ca3af;
+
+    /* Primary - slightly lighter for dark mode */
+    --color-primary: #3b82f6;
+}

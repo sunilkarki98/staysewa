@@ -1,0 +1,33 @@
+/* Enable class-based dark mode for Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Register CSS variables with Tailwind's theme system */
+@theme {
+  --color-brand: #1f2a44;
+  --color-accent: #c0392b;
+  --color-primary: #2563eb;
+  --color-bg: #ffffff;
+  --color-surface: #f9fafb;
+  --color-elevated: #ffffff;
+  --color-border: #e5e7eb;
+  --color-text: #111827;
+  --color-muted: #6b7280;
+}
+
+:root {
+  /* Brand */
+  --color-brand: #1f2a44;
+  --color-accent: #c0392b;
+
+  /* Backgrounds */
+  --color-bg: #ffffff;
+  --color-surface: #f9fafb;
+  --color-elevated: #ffffff;
+
+  /* Borders */
+  --color-border: #e5e7eb;
+
+  /* Text */
+  --color-text: #111827;
+  --color-muted: #6b7280;
+}

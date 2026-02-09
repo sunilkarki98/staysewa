@@ -1,0 +1,39 @@
+"use client";
+
+import { createContext, useContext, useState, ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import type { StayCategory } from "../types/stay-types";
+
+type UserIntentContextType = {
+    category: StayCategory;
+    setCategory: (category: StayCategory) => void;
+};
+
+const UserIntentContext = createContext<UserIntentContextType | null>(null);
+
+export function UserIntentProvider({ children }: { children: ReactNode }) {
+    const pathname = usePathname();
+
+    // Determine initial category from pathname
+    const getInitialCategory = (): StayCategory => {
+        if (pathname.startsWith("/flats")) return "flats";
+        if (pathname.startsWith("/homestays")) return "homestays";
+        return "hostels";
+    };
+
+    const [category, setCategory] = useState<StayCategory>(getInitialCategory());
+
+    return (
+        <UserIntentContext.Provider value={{ category, setCategory }}>
+            {children}
+        </UserIntentContext.Provider>
+    );
+}
+
+export function useUserIntent(): UserIntentContextType {
+    const ctx = useContext(UserIntentContext);
+    if (!ctx) {
+        throw new Error("useUserIntent must be used inside UserIntentProvider");
+    }
+    return ctx;
+}
