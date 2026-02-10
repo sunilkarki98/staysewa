@@ -7,7 +7,7 @@ import { AppError } from '@/utils/AppError';
  * Validation Middleware
  * Wraps a Zod schema and validates the request body, query, or params.
  */
-export const validate = (schema: z.AnyZodObject) =>
+export const validate = (schema: z.ZodObject<any>) =>
     catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         try {
             await schema.parseAsync({
