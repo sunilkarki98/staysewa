@@ -10,11 +10,12 @@ import {
     PhoneIcon,
     MapPinIcon
 } from "@phosphor-icons/react";
+import Container from "./Container";
 
 const Footer = () => {
     return (
         <footer className="w-full bg-neutral dark:bg-stone-950 border-t border-border dark:border-stone-800 py-12">
-            <div className="w-full max-w-[1600px] mx-auto px-4 md:px-8">
+            <Container>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 mb-12">
                     {/* 1. Brand Section (Wider) */}
                     <div className="lg:col-span-2 space-y-5">
@@ -58,11 +59,6 @@ const Footer = () => {
                             <FooterLink href="/contact">Contact</FooterLink>
                         </ul>
                     </div>
-                    {/* ... keep the rest of the file ... but I need to update SocialLink definition too */}
-                    {/* Actually, I will replace the component usage AND definition in two edits if needed, but I can do it in one if I replace enough context, or replace the definition separately. */}
-                    {/* Since they are far apart, I'll use multi_replace or sequential */}
-                    {/* Wait, the usage is lines 29-33. The component definition is lines 109-118 */}
-                    {/* I'll use multi_replace. */}
 
                     {/* 3. Support */}
                     <div>
@@ -121,7 +117,7 @@ const Footer = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </Container>
         </footer>
     );
 };

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import StayListingSection from "../../components/sections/StayListingSection";
+import Container from "../../components/layout/Container";
 
 export const metadata: Metadata = {
     title: "Flats for Rent in Kathmandu | StaySewa",
@@ -26,5 +27,15 @@ export const metadata: Metadata = {
 };
 
 export default function FlatsPage() {
-    return <StayListingSection />;
+    return (
+        <main className="min-h-screen pt-24 pb-16 bg-neutral dark:bg-black">
+            <Container>
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold text-text dark:text-white mb-2">Flats & Apartments</h1>
+                    <p className="text-muted text-lg">Comfortable, private spaces for short or long term living.</p>
+                </div>
+                <StayListingSection selectedCategory="flats" />
+            </Container>
+        </main>
+    );
 }

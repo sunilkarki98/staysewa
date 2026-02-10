@@ -1,4 +1,4 @@
-import type { StayCategory } from "../types/stay-types";
+import type { StayCategory, StayIntent } from "../types/stay-types";
 
 export type Stay = {
   id: string;
@@ -8,6 +8,7 @@ export type Stay = {
   price: number;
   rating: number;
   type: StayCategory;
+  intent: StayIntent;
 };
 
 export const MOCK_STAYS: Stay[] = [
@@ -22,6 +23,7 @@ export const MOCK_STAYS: Stay[] = [
     price: 900,
     rating: 4.6,
     type: "hostels",
+    intent: "short-stay",
   },
   {
     id: "2",
@@ -34,6 +36,7 @@ export const MOCK_STAYS: Stay[] = [
     price: 4500,
     rating: 4.8,
     type: "flats",
+    intent: "long-stay",
   },
   {
     id: "3",
@@ -46,6 +49,7 @@ export const MOCK_STAYS: Stay[] = [
     price: 2500,
     rating: 4.7,
     type: "homestays",
+    intent: "short-stay",
   },
   {
     id: "4",
@@ -58,6 +62,7 @@ export const MOCK_STAYS: Stay[] = [
     price: 750,
     rating: 4.3,
     type: "hostels",
+    intent: "short-stay",
   },
   {
     id: "5",
@@ -70,6 +75,7 @@ export const MOCK_STAYS: Stay[] = [
     price: 8500,
     rating: 4.9,
     type: "flats",
+    intent: "long-stay",
   },
   {
     id: "6",
@@ -82,5 +88,6 @@ export const MOCK_STAYS: Stay[] = [
     price: 3200,
     rating: 4.8,
     type: "homestays",
+    intent: "short-stay",
   },
 ];

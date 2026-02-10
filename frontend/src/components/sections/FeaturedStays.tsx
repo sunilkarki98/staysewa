@@ -10,7 +10,11 @@ import { motion, AnimatePresence } from "framer-motion";
 
 type Tab = "all" | StayCategory;
 
-export default function FeaturedStays() {
+type FeaturedStaysProps = {
+    compact?: boolean;
+};
+
+export default function FeaturedStays({ compact = false }: FeaturedStaysProps) {
     const [activeTab, setActiveTab] = useState<Tab>("all");
     const scrollRef = useRef<HTMLDivElement>(null);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -27,7 +31,7 @@ export default function FeaturedStays() {
             case "flats": return "/flats";
             case "homestays": return "/homestays";
             case "hostels": return "/hostels";
-            default: return "/hostels"; // Default fallback
+            default: return "/explore"; // Navigate to Explore page for 'all'
         }
     };
 
@@ -55,18 +59,20 @@ export default function FeaturedStays() {
     };
 
     return (
-        <section className="pt-32 pb-8 bg-stone-50 dark:bg-stone-950">
+        <section className={compact ? "py-2" : "pt-32 pb-8 bg-stone-50 dark:bg-stone-950"}>
             <div className="w-full max-w-[1600px] mx-auto px-4 md:px-8">
                 {/* Header & Tabs */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-                    <div>
-                        <h2 className="text-3xl font-bold text-stone-900 dark:text-white mb-2">
-                            Top Rated Stays
-                        </h2>
-                        <p className="text-stone-600 dark:text-stone-400 max-w-xl text-sm leading-relaxed">
-                            Whether you need a short-term hostel, a private flat for a month, or an authentic homestay experience, we have it all.
-                        </p>
-                    </div>
+                <div className={`flex flex-col md:flex-row md:items-end justify-between gap-6 ${compact ? "mb-6" : "mb-12"}`}>
+                    {!compact && (
+                        <div>
+                            <h2 className="text-3xl font-bold text-stone-900 dark:text-white mb-2">
+                                Top Rated Stays
+                            </h2>
+                            <p className="text-stone-600 dark:text-stone-400 max-w-xl text-sm leading-relaxed">
+                                Whether you need a short-term hostel, a private flat for a month, or an authentic homestay experience, we have it all.
+                            </p>
+                        </div>
+                    )}
 
                     {/* Tabs */}
                     <div className="flex p-1 bg-white dark:bg-stone-900 rounded-xl border border-stone-200 dark:border-stone-800 shadow-sm overflow-x-auto md:overflow-visible scrollbar-hide">

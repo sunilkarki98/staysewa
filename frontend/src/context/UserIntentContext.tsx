@@ -4,9 +4,11 @@ import { createContext, useContext, useState, ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import type { StayCategory } from "../types/stay-types";
 
+type CategoryFilter = StayCategory | "all";
+
 type UserIntentContextType = {
-    category: StayCategory;
-    setCategory: (category: StayCategory) => void;
+    category: CategoryFilter;
+    setCategory: (category: CategoryFilter) => void;
 };
 
 const UserIntentContext = createContext<UserIntentContextType | null>(null);
@@ -15,13 +17,14 @@ export function UserIntentProvider({ children }: { children: ReactNode }) {
     const pathname = usePathname();
 
     // Determine initial category from pathname
-    const getInitialCategory = (): StayCategory => {
+    const getInitialCategory = (): CategoryFilter => {
         if (pathname.startsWith("/flats")) return "flats";
         if (pathname.startsWith("/homestays")) return "homestays";
-        return "hostels";
+        if (pathname.startsWith("/hostels")) return "hostels";
+        return "all"; // Default to all (e.g. for /dashboard or /explore)
     };
 
-    const [category, setCategory] = useState<StayCategory>(getInitialCategory());
+    const [category, setCategory] = useState<CategoryFilter>(getInitialCategory());
 
     // Update category when pathname changes
     if (typeof window !== 'undefined') {

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-
+import Container from "./Container";
 import ThemeToggle from "../theme/ThemeToggle";
 import { ProfileMenu } from "../auth/ProfileMenu";
 import { NotificationBell } from "../notifications/NotificationBell";
@@ -32,7 +32,7 @@ export default function Navbar() {
                     : "sticky top-0 z-40 border-b border-gray-200 bg-white/80 backdrop-blur-md dark:border-gray-800 dark:bg-black/80"
                     }`}
             >
-                <div className="w-full max-w-[1600px] mx-auto px-4 md:px-8">
+                <Container>
                     <div className="flex h-16 items-center justify-between">
 
                         {/* LEFT */}
@@ -98,7 +98,7 @@ export default function Navbar() {
                             )}
                         </div>
                     </div>
-                </div>
+                </Container>
             </header>
 
             {isAuthenticated && (

@@ -1,7 +1,7 @@
 "use client";
 
 import { MapPinIcon, StarIcon } from "@phosphor-icons/react";
-import type { StayCategory } from "../../types/stay-types";
+import type { StayCategory, StayIntent } from "../../types/stay-types";
 import ImageCarousel from "../ui/ImageCarousel";
 
 type StayCardProps = {
@@ -12,9 +12,13 @@ type StayCardProps = {
     price: number;
     rating: number;
     type: StayCategory;
+    intent: StayIntent;
 };
 
+import Link from "next/link";
+
 export default function StayCard({
+    id,
     name,
     images,
     location,
@@ -23,7 +27,7 @@ export default function StayCard({
     type,
 }: StayCardProps) {
     return (
-        <div className="group relative overflow-hidden rounded-2xl border border-border dark:border-gray-800 bg-white dark:bg-gray-900 transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer">
+        <Link href={`/stays/${id}`} className="block group relative overflow-hidden rounded-2xl border border-border dark:border-gray-800 bg-white dark:bg-gray-900 transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer">
             {/* Image Carousel */}
             <div className="relative h-64 w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                 <ImageCarousel images={images} alt={name} />
@@ -36,7 +40,7 @@ export default function StayCard({
                 </div>
 
                 {/* Rating Badge - Prominent */}
-                <div className="absolute top-3 right-3 z-10">
+                <div className="absolute top-3 right-3 z-10 flex flex-col items-end gap-2">
                     <div className="flex items-center gap-1 rounded-lg bg-surface/90 dark:bg-black/80 backdrop-blur-sm px-2 py-1 shadow-sm">
                         <StarIcon weight="fill" className="text-secondary" size={14} />
                         <span className="text-xs font-bold text-gray-900 dark:text-white">{rating}</span>
@@ -57,7 +61,6 @@ export default function StayCard({
                         </div>
                     </div>
                 </div>
-
                 <div className="pt-3 border-t border-border dark:border-gray-800 flex items-center justify-between">
                     <div>
                         <span className="text-lg font-bold text-text dark:text-white">
@@ -69,6 +72,6 @@ export default function StayCard({
                     </div>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 }
