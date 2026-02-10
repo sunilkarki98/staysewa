@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import type { StayType } from "../types/stay-types";
+import type { StayType } from "../types/stay";
 
 export function useStayType(): StayType {
   const pathname = usePathname();

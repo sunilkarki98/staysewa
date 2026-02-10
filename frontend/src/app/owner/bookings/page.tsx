@@ -2,38 +2,31 @@
 
 import { MagnifyingGlassIcon, EnvelopeSimpleIcon, PhoneIcon, CheckCircleIcon, XCircleIcon } from "@phosphor-icons/react";
 import { useState } from "react";
-import BookingDetailsDrawer from "@/components/owner/BookingDetailsDrawer";
-
-// Mock Data for Bookings
-const MOCK_BOOKINGS = [
-    { id: "BK-7821", guest: "Sarah Jenkins", email: "sarah.j@email.com", phone: "+977-9841234567", property: "Sunny Hostel", checkIn: "2024-03-15", checkOut: "2024-03-20", status: "pending", amount: 4500 },
-    { id: "BK-7822", guest: "Rajesh Kumar", email: "rajesh.k@email.com", phone: "+977-9812345678", property: "Modern Flat", checkIn: "2024-03-18", checkOut: "2024-04-18", status: "confirmed", amount: 45000 },
-    { id: "BK-7823", guest: "Elena Rodriguez", email: "elena.r@email.com", phone: "+977-9867654321", property: "Cozy Homestay", checkIn: "2024-03-22", checkOut: "2024-03-25", status: "cancelled", amount: 7500 },
-    { id: "BK-7824", guest: "Mike Chen", email: "mike.c@email.com", phone: "+977-9801112233", property: "Sunny Hostel", checkIn: "2024-04-01", checkOut: "2024-04-05", status: "pending", amount: 3600 },
-    { id: "BK-7825", guest: "Priya Sharma", email: "priya.s@email.com", phone: "+977-9855443322", property: "Luxury Apt", checkIn: "2024-04-10", checkOut: "2024-04-15", status: "confirmed", amount: 22000 },
-];
+import BookingDetailsDrawer from "@/components/owner/BookingDetailsDrawer"; // Fix relative import if needed
+import { useBookings } from "@/hooks/useBookings";
+import { Booking } from "@/types/booking";
 
 export default function BookingsPage() {
-    const [bookings, setBookings] = useState(MOCK_BOOKINGS);
+    const { bookings, loading, updateStatus } = useBookings();
     const [filter, setFilter] = useState("all");
-    const [selectedBooking, setSelectedBooking] = useState<typeof MOCK_BOOKINGS[0] | null>(null);
+    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-    const openDrawer = (booking: typeof MOCK_BOOKINGS[0]) => {
+    const openDrawer = (booking: Booking) => {
         setSelectedBooking(booking);
         setIsDrawerOpen(true);
     };
 
-    const handleAction = (id: string, action: "confirm" | "cancel") => {
-        setBookings(prev => prev.map(booking => {
-            if (booking.id === id) {
-                return { ...booking, status: action === "confirm" ? "confirmed" : "cancelled" };
-            }
-            return booking;
-        }));
+    const handleAction = async (id: string, action: "confirm" | "cancel") => {
+        const status = action === "confirm" ? "confirmed" : "cancelled";
+        await updateStatus(id, status);
     };
 
     const filteredBookings = filter === "all" ? bookings : bookings.filter(b => b.status === filter);
+
+    if (loading) {
+        return <div className="p-8 text-center text-stone-500">Loading bookings...</div>;
+    }
 
     return (
         <div className="space-y-6">
@@ -92,85 +85,93 @@ export default function BookingsPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-stone-100 dark:divide-stone-800">
-                            {filteredBookings.map((booking) => (
-                                <tr key={booking.id} className="hover:bg-stone-50 dark:hover:bg-stone-800/30 transition-colors">
-                                    <td className="px-5 py-4 font-mono text-sm font-semibold text-stone-700 dark:text-stone-200">
-                                        {booking.id}
-                                    </td>
-                                    <td className="px-5 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="h-9 w-9 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center justify-center text-sm font-bold flex-shrink-0">
-                                                {booking.guest.charAt(0)}
+                            {filteredBookings.length > 0 ? (
+                                filteredBookings.map((booking) => (
+                                    <tr key={booking.id} className="hover:bg-stone-50 dark:hover:bg-stone-800/30 transition-colors">
+                                        <td className="px-5 py-4 font-mono text-sm font-semibold text-stone-700 dark:text-stone-200">
+                                            {booking.id}
+                                        </td>
+                                        <td className="px-5 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-9 w-9 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                                                    {booking.guest.charAt(0)}
+                                                </div>
+                                                <span className="font-semibold text-stone-900 dark:text-white text-sm">
+                                                    {booking.guest}
+                                                </span>
                                             </div>
-                                            <span className="font-semibold text-stone-900 dark:text-white text-sm">
-                                                {booking.guest}
+                                        </td>
+                                        <td className="px-5 py-4">
+                                            <div className="flex flex-col gap-1.5">
+                                                <div className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-200">
+                                                    <EnvelopeSimpleIcon size={15} weight="bold" className="text-primary/70 flex-shrink-0" />
+                                                    <span className="font-medium">{booking.email}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-200">
+                                                    <PhoneIcon size={15} weight="bold" className="text-primary/70 flex-shrink-0" />
+                                                    <span className="font-medium">{booking.phone}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-5 py-4 text-sm font-medium text-stone-700 dark:text-stone-300">
+                                            {booking.property}
+                                        </td>
+                                        <td className="px-5 py-4">
+                                            <div className="flex flex-col text-sm text-stone-500">
+                                                <span className="font-medium text-stone-700 dark:text-stone-300">{booking.checkIn}</span>
+                                                <span className="text-xs">to {booking.checkOut}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-5 py-4 font-semibold text-sm text-stone-900 dark:text-white">
+                                            NPR {booking.amount.toLocaleString()}
+                                        </td>
+                                        <td className="px-5 py-4 text-center">
+                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border capitalize ${booking.status === 'confirmed' ? "bg-green-50 text-green-700 border-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30" :
+                                                booking.status === 'pending' ? "bg-orange-50 text-orange-700 border-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-900/30" :
+                                                    "bg-red-50 text-red-700 border-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30"
+                                                }`}>
+                                                {booking.status}
                                             </span>
-                                        </div>
-                                    </td>
-                                    <td className="px-5 py-4">
-                                        <div className="flex flex-col gap-1.5">
-                                            <div className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-200">
-                                                <EnvelopeSimpleIcon size={15} weight="bold" className="text-primary/70 flex-shrink-0" />
-                                                <span className="font-medium">{booking.email}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 text-sm text-stone-700 dark:text-stone-200">
-                                                <PhoneIcon size={15} weight="bold" className="text-primary/70 flex-shrink-0" />
-                                                <span className="font-medium">{booking.phone}</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-5 py-4 text-sm font-medium text-stone-700 dark:text-stone-300">
-                                        {booking.property}
-                                    </td>
-                                    <td className="px-5 py-4">
-                                        <div className="flex flex-col text-sm text-stone-500">
-                                            <span className="font-medium text-stone-700 dark:text-stone-300">{booking.checkIn}</span>
-                                            <span className="text-xs">to {booking.checkOut}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-5 py-4 font-semibold text-sm text-stone-900 dark:text-white">
-                                        NPR {booking.amount.toLocaleString()}
-                                    </td>
-                                    <td className="px-5 py-4 text-center">
-                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border capitalize ${booking.status === 'confirmed' ? "bg-green-50 text-green-700 border-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/30" :
-                                            booking.status === 'pending' ? "bg-orange-50 text-orange-700 border-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-900/30" :
-                                                "bg-red-50 text-red-700 border-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30"
-                                            }`}>
-                                            {booking.status}
-                                        </span>
-                                    </td>
-                                    <td className="px-5 py-4">
-                                        <div className="flex items-center justify-end gap-2">
-                                            {booking.status === 'pending' && (
-                                                <>
+                                        </td>
+                                        <td className="px-5 py-4">
+                                            <div className="flex items-center justify-end gap-2">
+                                                {booking.status === 'pending' && (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleAction(booking.id, 'confirm')}
+                                                            className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
+                                                            title="Confirm"
+                                                        >
+                                                            <CheckCircleIcon size={22} weight="fill" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleAction(booking.id, 'cancel')}
+                                                            className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                            title="Reject"
+                                                        >
+                                                            <XCircleIcon size={22} weight="fill" />
+                                                        </button>
+                                                    </>
+                                                )}
+                                                {booking.status !== 'pending' && (
                                                     <button
-                                                        onClick={() => handleAction(booking.id, 'confirm')}
-                                                        className="p-1.5 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
-                                                        title="Confirm"
+                                                        onClick={() => openDrawer(booking)}
+                                                        className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 text-sm font-medium px-3 py-1.5 rounded border border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800"
                                                     >
-                                                        <CheckCircleIcon size={22} weight="fill" />
+                                                        Details
                                                     </button>
-                                                    <button
-                                                        onClick={() => handleAction(booking.id, 'cancel')}
-                                                        className="p-1.5 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                                                        title="Reject"
-                                                    >
-                                                        <XCircleIcon size={22} weight="fill" />
-                                                    </button>
-                                                </>
-                                            )}
-                                            {booking.status !== 'pending' && (
-                                                <button
-                                                    onClick={() => openDrawer(booking)}
-                                                    className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 text-sm font-medium px-3 py-1.5 rounded border border-stone-200 dark:border-stone-800 hover:bg-stone-50 dark:hover:bg-stone-800"
-                                                >
-                                                    Details
-                                                </button>
-                                            )}
-                                        </div>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={8} className="p-8 text-center text-stone-500">
+                                        No bookings found matching "{filter}"
                                     </td>
                                 </tr>
-                            ))}
+                            )}
                         </tbody>
                     </table>
                 </div>

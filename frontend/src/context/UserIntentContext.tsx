@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import type { StayCategory } from "../types/stay-types";
+import type { StayCategory } from "../types/stay";
 
 type CategoryFilter = StayCategory | "all";
 

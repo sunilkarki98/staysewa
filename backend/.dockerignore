@@ -1,0 +1,12 @@
+node_modules
+dist
+.env
+.git
+*.log
+drizzle
+*.js
+*.d.ts
+*.map
+Dockerfile
+.dockerignore
+package-lock.json

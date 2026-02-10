@@ -1,16 +1,30 @@
-export type StayType = "hostel" | "flat" | "homestay";
+export type StayCategory = "hostels" | "flats" | "homestays";
+export type StayIntent = "short-stay" | "long-stay";
+
+export type StayType = {
+  category: StayCategory;
+  intent: StayIntent;
+};
 
 export type Stay = {
   id: string;
   name: string;
-  type: StayType;
+  type: StayCategory; // "hostels" | "flats" | "homestays"
+  intent: StayIntent; // "short-stay" | "long-stay"
 
   location: string;
-  images: string[]; // Changed from single image to array
+  images: string[];
 
   price: number;
   rating: number;
+  reviews?: number; // Count of reviews
 
-  // optional but future-proof
-  badge?: string; // e.g. "Entire Flat"
+  // Optional details for full view
+  description?: string;
+  amenities?: string[];
+  rules?: string[];
+
+  // Meta
+  createdAt?: string;
+  updatedAt?: string;
 };

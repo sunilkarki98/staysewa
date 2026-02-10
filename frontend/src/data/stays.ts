@@ -1,15 +1,4 @@
-import type { StayCategory, StayIntent } from "../types/stay-types";
-
-export type Stay = {
-  id: string;
-  name: string;
-  images: string[];
-  location: string;
-  price: number;
-  rating: number;
-  type: StayCategory;
-  intent: StayIntent;
-};
+import type { Stay } from "../types/stay";
 
 export const MOCK_STAYS: Stay[] = [
   {

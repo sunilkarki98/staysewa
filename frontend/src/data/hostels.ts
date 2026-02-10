@@ -4,7 +4,8 @@ export const hostels: Stay[] = [
   {
     id: "h1",
     name: "Kathmandu Backpackers",
-    type: "hostel",
+    type: "hostels",
+    intent: "short-stay",
     location: "Thamel",
     images: ["/images/heroimg1.png", "/images/img2.png"],
     price: 12,
@@ -13,7 +14,8 @@ export const hostels: Stay[] = [
   {
     id: "h2",
     name: "Thamel Youth Hostel",
-    type: "hostel",
+    type: "hostels",
+    intent: "short-stay",
     location: "Thamel",
     images: ["/images/img2.png", "/images/heroimg1.png"],
     price: 10,
@@ -22,7 +24,8 @@ export const hostels: Stay[] = [
   {
     id: "h3",
     name: "Mountain View Hostel",
-    type: "hostel",
+    type: "hostels",
+    intent: "short-stay",
     location: "Patan",
     images: ["/images/heroimg1.png", "/images/img2.png"],
     price: 15,
@@ -31,7 +34,8 @@ export const hostels: Stay[] = [
   {
     id: "h4",
     name: "Cozy Corner Hostel",
-    type: "hostel",
+    type: "hostels",
+    intent: "short-stay",
     location: "Bhaktapur",
     images: ["/images/img2.png", "/images/heroimg1.png"],
     price: 8,
