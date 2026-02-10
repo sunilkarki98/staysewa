@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import type { StayCategory } from "../types/stay-types";
 
@@ -26,13 +26,10 @@ export function UserIntentProvider({ children }: { children: ReactNode }) {
 
     const [category, setCategory] = useState<CategoryFilter>(getInitialCategory());
 
-    // Update category when pathname changes
-    if (typeof window !== 'undefined') {
-        const newCategory = getInitialCategory();
-        if (newCategory !== category) {
-            setCategory(newCategory);
-        }
-    }
+    // Sync category with URL changes
+    useEffect(() => {
+        setCategory(getInitialCategory());
+    }, [pathname]);
 
     return (
         <UserIntentContext.Provider value={{ category, setCategory }}>

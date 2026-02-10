@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPinIcon, StarIcon, ArrowRight, CheckCircle } from "@phosphor-icons/react";
+import { MapPinIcon, StarIcon, ArrowRightIcon, CheckCircleIcon } from "@phosphor-icons/react";
 import type { StayCategory, StayIntent } from "../../types/stay-types";
 import ImageCarousel from "../ui/ImageCarousel";
 import Link from "next/link";
@@ -78,32 +78,29 @@ export default function CustomerStayCard({
                     </div>
                 </div>
 
-                {/* Price */}
-                <div className="flex items-end gap-1">
-                    <span className="text-lg font-bold text-text dark:text-white">
-                        NPR {price.toLocaleString()}
-                    </span>
-                    <span className="text-xs text-muted dark:text-gray-400 font-medium mb-1">
-                        / {type === 'flats' ? 'month' : 'night'}
-                    </span>
-                </div>
-
-                {/* Actions Row */}
-                <div className="pt-3 border-t border-border dark:border-gray-800 grid grid-cols-2 gap-3">
-                    <Link
-                        href={`/stays/${id}`}
-                        className="flex items-center justify-center gap-2 rounded-lg py-2 text-xs font-bold text-text dark:text-white bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                    >
-                        See More
-                        <ArrowRight size={14} weight="bold" />
-                    </Link>
-                    <Link
-                        href={`/stays/${id}`}
-                        className="flex items-center justify-center gap-2 rounded-lg py-2 text-xs font-bold text-white bg-primary hover:bg-orange-700 transition-colors shadow-sm"
-                    >
-                        Book Now
-                        <CheckCircle size={14} weight="bold" />
-                    </Link>
+                <div className="pt-3 border-t border-border dark:border-gray-800 flex items-center justify-between">
+                    <div>
+                        <span className="text-lg font-bold text-text dark:text-white">
+                            NPR {price.toLocaleString()}
+                        </span>
+                        <span className="text-xs text-muted dark:text-gray-400 font-medium ml-1">
+                            / {type === 'flats' ? 'month' : 'night'}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Link
+                            href="/login"
+                            className="px-3 py-1.5 text-xs font-semibold text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors shadow-sm"
+                        >
+                            Book Now
+                        </Link>
+                        <Link
+                            href={`/stays/${id}`}
+                            className="px-3 py-1.5 text-xs font-semibold text-primary border border-primary/30 rounded-lg hover:bg-primary/5 transition-colors"
+                        >
+                            See More
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>

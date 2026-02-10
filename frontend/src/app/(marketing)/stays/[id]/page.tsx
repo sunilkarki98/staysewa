@@ -5,16 +5,16 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import {
-    MapPin,
-    Star,
-    WifiHigh,
-    Shower,
-    Coffee,
-    ShieldCheck,
-    CaretLeft,
-    CheckCircle,
+    MapPinIcon,
+    StarIcon,
+    WifiHighIcon,
+    ShowerIcon,
+    CoffeeIcon,
+    ShieldCheckIcon,
+    CheckCircleIcon,
+    CaretLeftIcon,
 } from "@phosphor-icons/react";
-import { MOCK_STAYS } from "../../../data/stays";
+import { MOCK_STAYS } from "@/data/stays";
 
 export default function StayDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -43,7 +43,7 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
                     href="/dashboard"
                     className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-muted hover:text-primary dark:text-gray-400 dark:hover:text-primary transition-colors"
                 >
-                    <CaretLeft size={18} />
+                    <CaretLeftIcon size={18} />
                     Back to Dashboard
                 </Link>
 
@@ -75,12 +75,12 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
                                         {stay.name}
                                     </h1>
                                     <div className="mt-2 flex items-center gap-2 text-muted dark:text-gray-400">
-                                        <MapPin size={18} weight="fill" />
+                                        <MapPinIcon size={18} weight="fill" />
                                         <span>{stay.location}</span>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-1 rounded-lg bg-yellow-100 px-3 py-1.5 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-500">
-                                    <Star size={20} weight="fill" />
+                                    <StarIcon size={20} weight="fill" />
                                     <span className="font-bold">{stay.rating}</span>
                                 </div>
                             </div>
@@ -94,25 +94,25 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                 <div className="flex items-center gap-4 p-3 rounded-lg hover:bg-neutral dark:hover:bg-gray-800 transition-colors">
                                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
-                                        <WifiHigh size={24} weight="duotone" />
+                                        <WifiHighIcon size={24} weight="duotone" />
                                     </div>
                                     <span className="text-base text-stone-700 dark:text-gray-300 font-medium">Fast Wifi</span>
                                 </div>
                                 <div className="flex items-center gap-4 p-3 rounded-lg hover:bg-neutral dark:hover:bg-gray-800 transition-colors">
                                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-50 text-orange-600 dark:bg-orange-900/20 dark:text-orange-400">
-                                        <Shower size={24} weight="duotone" />
+                                        <ShowerIcon size={24} weight="duotone" />
                                     </div>
                                     <span className="text-base text-stone-700 dark:text-gray-300 font-medium">Hot Shower</span>
                                 </div>
                                 <div className="flex items-center gap-4 p-3 rounded-lg hover:bg-neutral dark:hover:bg-gray-800 transition-colors">
                                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">
-                                        <Coffee size={24} weight="duotone" />
+                                        <CoffeeIcon size={24} weight="duotone" />
                                     </div>
                                     <span className="text-base text-stone-700 dark:text-gray-300 font-medium">Breakfast Included</span>
                                 </div>
                                 <div className="flex items-center gap-4 p-3 rounded-lg hover:bg-neutral dark:hover:bg-gray-800 transition-colors">
                                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400">
-                                        <ShieldCheck size={24} weight="duotone" />
+                                        <ShieldCheckIcon size={24} weight="duotone" />
                                     </div>
                                     <span className="text-base text-stone-700 dark:text-gray-300 font-medium">24/7 Security</span>
                                 </div>
@@ -157,7 +157,7 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
                                     {bookingStatus === "booking" && "Processing..."}
                                     {bookingStatus === "success" && (
                                         <>
-                                            <CheckCircle size={20} weight="bold" />
+                                            <CheckCircleIcon size={20} weight="bold" />
                                             Booked!
                                         </>
                                     )}

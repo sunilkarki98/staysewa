@@ -1,8 +1,6 @@
 import "./globals.css";
 import { ReactNode } from "react";
-import { UserIntentProvider } from "../context/UserIntentContext";
-import Navbar from "../components/layout/Navbar"; // navbar with theme toggle
-import Footer from "@/components/layout/Footer";
+
 
 export const metadata = {
   title: "My Stays App",
@@ -29,13 +27,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="bg-bg text-text">
-        {/* Wrap everything inside UserIntentProvider */}
-        <UserIntentProvider>
-          {/* Navbar contains the ThemeToggle button */}
-          <Navbar />
-          {children}
-          <Footer />
-        </UserIntentProvider>
+        {children}
       </body>
     </html>
   );

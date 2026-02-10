@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Footer from "../../components/layout/Footer";
+
 
 export const metadata: Metadata = {
     title: "Contact Us | StaySewa",
@@ -110,7 +110,6 @@ export default function ContactPage() {
                     </div>
                 </div>
             </main>
-            <Footer />
         </div>
     );
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import StayListingSection from "../../components/sections/StayListingSection";
-import Container from "../../components/layout/Container";
+import StayListingSection from "@/components/sections/StayListingSection";
+import Container from "@/components/layout/Container";
 
 export const metadata: Metadata = {
   title: "Hostels in Kathmandu | StaySewa",

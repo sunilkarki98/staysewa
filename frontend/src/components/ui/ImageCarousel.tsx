@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { CaretLeft, CaretRight } from "@phosphor-icons/react";
+import Image from "next/image";
 
 type ImageCarouselProps = {
     images: string[];
@@ -53,12 +54,15 @@ export default function ImageCarousel({
                 style={{ transform: `translateX(-${currentIndex * 100}%)` }}
             >
                 {images.map((src, index) => (
-                    <img
-                        key={index}
-                        src={src}
-                        alt={`${alt} - ${index + 1}`}
-                        className="h-full w-full flex-shrink-0 object-cover"
-                    />
+                    <div key={index} className="relative h-full w-full flex-shrink-0">
+                        <Image
+                            src={src}
+                            alt={`${alt} - ${index + 1}`}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                        />
+                    </div>
                 ))}
             </div>
 

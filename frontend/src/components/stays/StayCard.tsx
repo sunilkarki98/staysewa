@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPinIcon, StarIcon } from "@phosphor-icons/react";
+import { MapPinIcon, StarIcon, ArrowRightIcon, CheckCircleIcon } from "@phosphor-icons/react";
 import type { StayCategory, StayIntent } from "../../types/stay-types";
 import ImageCarousel from "../ui/ImageCarousel";
 
@@ -27,7 +27,7 @@ export default function StayCard({
     type,
 }: StayCardProps) {
     return (
-        <Link href={`/stays/${id}`} className="block group relative overflow-hidden rounded-2xl border border-border dark:border-gray-800 bg-white dark:bg-gray-900 transition-all hover:shadow-xl hover:-translate-y-1 cursor-pointer">
+        <div className="group relative overflow-hidden rounded-2xl border border-border dark:border-gray-800 bg-white dark:bg-gray-900 transition-all hover:shadow-xl hover:-translate-y-1">
             {/* Image Carousel */}
             <div className="relative h-64 w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                 <ImageCarousel images={images} alt={name} />
@@ -70,8 +70,22 @@ export default function StayCard({
                             / {type === 'flats' ? 'month' : 'night'}
                         </span>
                     </div>
+                    <div className="flex items-center gap-2">
+                        <Link
+                            href="/login"
+                            className="px-3 py-1.5 text-xs font-semibold text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors shadow-sm"
+                        >
+                            Book Now
+                        </Link>
+                        <Link
+                            href={`/stays/${id}`}
+                            className="px-3 py-1.5 text-xs font-semibold text-primary border border-primary/30 rounded-lg hover:bg-primary/5 transition-colors"
+                        >
+                            See More
+                        </Link>
+                    </div>
                 </div>
             </div>
-        </Link>
+        </div>
     );
 }

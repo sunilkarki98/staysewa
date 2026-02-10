@@ -2,6 +2,7 @@
 
 import SearchBar from "./SearchBar";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 interface HeroProps {
     location?: string;
@@ -9,9 +10,16 @@ interface HeroProps {
 
 export default function Hero({ location = "Kathmandu" }: HeroProps) {
     return (
-        <section className="relative h-[600px] bg-cover bg-center flex items-center justify-center overflow-visible"
-            style={{ backgroundImage: "url(/images/heroimg1.png)" }}
-        >
+        <section className="relative h-[600px] flex items-center justify-center overflow-visible">
+            <div className="absolute inset-0 z-0 overflow-hidden">
+                <Image
+                    src="/images/heroimg1.png"
+                    alt="Hero Background"
+                    fill
+                    priority
+                    className="object-cover"
+                />
+            </div>
 
 
             <div className="relative z-10 max-w-5xl mx-auto text-center text-white px-4 -mt-16 md:mt-20">
@@ -35,7 +43,7 @@ export default function Hero({ location = "Kathmandu" }: HeroProps) {
             </div>
 
             {/* Passing style prop to control positioning of search bar relative to hero bottom */}
-            <div className="absolute -bottom-10 left-0 right-0 z-20 px-4">
+            <div className="absolute -bottom-10 left-0 right-0 z-10 px-4">
                 <SearchBar />
             </div>
         </section>

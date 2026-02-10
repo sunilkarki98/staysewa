@@ -1,12 +1,11 @@
 "use client";
 
-import Container from "../../components/layout/Container";
+import Container from "@/components/layout/Container";
 import { useState, useMemo } from "react";
-import { User, MapPin, CaretDown } from "@phosphor-icons/react";
-import StayListingSection from "../../components/sections/StayListingSection";
-import { StayCategory } from "../../types/stay-types";
-import { motion } from "framer-motion";
-import { MOCK_STAYS } from "../../data/stays";
+import { UserIcon, MapPinIcon, CaretDownIcon } from "@phosphor-icons/react";
+import StayListingSection from "@/components/sections/StayListingSection";
+import { StayCategory } from "@/types/stay-types";
+import { MOCK_STAYS } from "@/data/stays";
 
 export default function DashboardPage() {
     const [activeTab, setActiveTab] = useState<StayCategory | "all">("all");
@@ -38,7 +37,7 @@ export default function DashboardPage() {
                     <div className="relative group">
                         <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-gray-900 border border-border dark:border-gray-800 shadow-sm cursor-pointer hover:border-primary transition-colors">
                             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                                <MapPin size={16} weight="fill" />
+                                <MapPinIcon size={16} weight="fill" />
                             </div>
                             <div className="flex flex-col text-left">
                                 <span className="text-[10px] font-bold text-muted uppercase tracking-wide">Location</span>
@@ -46,7 +45,7 @@ export default function DashboardPage() {
                                     {location === "all" ? "All Kathmandu" : location}
                                 </span>
                             </div>
-                            <CaretDown size={14} className="text-muted" weight="bold" />
+                            <CaretDownIcon size={14} className="text-muted" weight="bold" />
 
                             {/* Hidden Select Overlay */}
                             <select

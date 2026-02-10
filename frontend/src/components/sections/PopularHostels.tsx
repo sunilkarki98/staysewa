@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react";
 import Link from "next/link";
+import Image from "next/image";
 
 type FeaturedCarouselProps = {
     images: string[];
@@ -39,12 +40,15 @@ function FeaturedCarousel({ images, name, autoScrollInterval = 4000 }: FeaturedC
                 style={{ transform: `translateX(-${currentIndex * 100}%)` }}
             >
                 {images.map((src, index) => (
-                    <img
-                        key={index}
-                        src={src}
-                        alt={`${name} - ${index + 1}`}
-                        className="h-full w-full flex-shrink-0 object-cover"
-                    />
+                    <div key={index} className="relative h-full w-full flex-shrink-0">
+                        <Image
+                            src={src}
+                            alt={`${name} - ${index + 1}`}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, 25vw"
+                        />
+                    </div>
                 ))}
             </div>
 

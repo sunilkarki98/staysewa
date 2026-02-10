@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Footer from "../../components/layout/Footer";
 
 export const metadata: Metadata = {
     title: "About Us | StaySewa",
@@ -54,7 +53,6 @@ export default function AboutPage() {
                     </div>
                 </div>
             </main>
-            <Footer />
         </div>
     );
 }
