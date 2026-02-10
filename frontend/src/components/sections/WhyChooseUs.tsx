@@ -11,50 +11,50 @@ const features = [
         title: "Best Prices Guaranteed",
         description: "Transparent pricing with no hidden fees.",
         Icon: TagIcon,
-        gradient: "from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20",
-        iconBg: "bg-blue-100 dark:bg-blue-900/40",
-        iconColor: "text-blue-600 dark:text-blue-400",
-        hoverBorder: "hover:border-blue-400",
+        gradient: "from-orange-100 to-red-100 dark:from-orange-900/40 dark:to-red-900/40",
+        iconBg: "bg-orange-100 dark:bg-orange-800",
+        iconColor: "text-red-600 dark:text-red-300",
+        hoverBorder: "hover:border-orange-500",
     },
     {
         title: "Prime Locations",
         description: "Hostels near top attractions and travel hubs.",
         Icon: MapPinIcon,
-        gradient: "from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20",
-        iconBg: "bg-purple-100 dark:bg-purple-900/40",
-        iconColor: "text-purple-600 dark:text-purple-400",
-        hoverBorder: "hover:border-purple-400",
+        gradient: "from-stone-100 to-orange-100 dark:from-stone-900/40 dark:to-orange-900/40",
+        iconBg: "bg-orange-100 dark:bg-orange-800",
+        iconColor: "text-stone-700 dark:text-stone-300",
+        hoverBorder: "hover:border-stone-500",
     },
     {
         title: "Verified Hostels",
         description: "Checked for safety, cleanliness, and comfort.",
         Icon: ShieldCheckIcon,
-        gradient: "from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20",
-        iconBg: "bg-emerald-100 dark:bg-emerald-900/40",
-        iconColor: "text-emerald-600 dark:text-emerald-400",
-        hoverBorder: "hover:border-emerald-400",
+        gradient: "from-emerald-100 to-teal-100 dark:from-emerald-900/40 dark:to-teal-900/40",
+        iconBg: "bg-orange-100 dark:bg-orange-800",
+        iconColor: "text-emerald-700 dark:text-emerald-300",
+        hoverBorder: "hover:border-emerald-500",
     },
     {
         title: "Real Guest Reviews",
         description: "Honest ratings from real travelers.",
         Icon: StarIcon,
-        gradient: "from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20",
-        iconBg: "bg-amber-100 dark:bg-amber-900/40",
-        iconColor: "text-amber-600 dark:text-amber-400",
-        hoverBorder: "hover:border-amber-400",
+        gradient: "from-amber-100 to-yellow-100 dark:from-amber-900/40 dark:to-yellow-900/40",
+        iconBg: "bg-orange-100 dark:bg-orange-800",
+        iconColor: "text-amber-700 dark:text-amber-300",
+        hoverBorder: "hover:border-amber-500",
     },
 ];
 
 export default function WhyChooseUs() {
     return (
-        <section className="bg-gray-50 dark:bg-gray-900 py-14">
-            <div className="mx-auto max-w-[1400px] px-3">
+        <section className="bg-neutral dark:bg-stone-950 py-8">
+            <div className="w-full max-w-[1600px] mx-auto px-4 md:px-8">
                 {/* Section Header */}
                 <div className="mb-10 text-center">
-                    <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
+                    <h2 className="text-4xl font-bold bg-gradient-to-r from-text via-orange-800 to-red-800 dark:from-white dark:via-orange-200 dark:to-amber-200 bg-clip-text text-transparent">
                         Why Travelers Choose StaySewa
                     </h2>
-                    <p className="mt-2 text-base text-gray-500 dark:text-gray-400">
+                    <p className="mt-4 text-lg text-muted dark:text-stone-400">
                         Everything you need for a smooth stay in Kathmandu
                     </p>
                 </div>
@@ -64,7 +64,7 @@ export default function WhyChooseUs() {
                     {features.map(({ title, description, Icon, gradient, iconBg, iconColor, hoverBorder }, index) => (
                         <div
                             key={index}
-                            className={`group flex items-start gap-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gradient-to-br ${gradient} px-5 py-5 shadow-sm transition-all duration-300 ${hoverBorder} hover:shadow-lg hover:-translate-y-1`}>
+                            className={`group flex items-start gap-4 rounded-xl border border-border dark:border-stone-700/50 bg-gradient-to-br ${gradient} px-5 py-5 shadow-lg shadow-stone-200/50 dark:shadow-none transition-all duration-300 ${hoverBorder} hover:shadow-xl hover:shadow-orange-100 dark:hover:shadow-stone-900 hover:-translate-y-1`}>
                             {/* Icon */}
                             <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${iconBg} ${iconColor} transition-all duration-300 group-hover:scale-110`}>
                                 <Icon size={24} weight="bold" />
@@ -72,10 +72,10 @@ export default function WhyChooseUs() {
 
                             {/* Text */}
                             <div>
-                                <h3 className="text-base font-semibold text-gray-800 dark:text-white leading-tight">
+                                <h3 className="text-base font-semibold text-text dark:text-white leading-tight">
                                     {title}
                                 </h3>
-                                <p className="mt-1.5 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                                <p className="mt-1.5 text-sm text-muted dark:text-gray-400 leading-relaxed">
                                     {description}
                                 </p>
                             </div>

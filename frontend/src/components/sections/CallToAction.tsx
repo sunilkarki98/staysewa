@@ -24,51 +24,44 @@ export default function CallToAction() {
             };
 
     return (
-        <section className="relative overflow-hidden py-24 md:py-32">
-            {/* Background Image */}
+        <section className="relative overflow-hidden py-24">
+            {/* Background Image - No Overlay */}
             <Image src="/images/img2.png" alt="Kathmandu city view" fill priority className="object-cover" />
 
-            {/* Cinematic Overlay - Darker and richer */}
-            <div className="absolute inset-0 bg-gradient-to-b from-gray-900/60 via-gray-900/40 to-gray-900/80" />
-
-
-
-            <div className="relative z-10 mx-auto max-w-7xl px-4 text-center">
+            <div className="relative z-10 w-full max-w-[1600px] mx-auto px-4 md:px-8 text-center">
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="mx-auto max-w-4xl"
+                    className="mx-auto max-w-5xl"
                 >
                     {/* Badge */}
-                    <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-gray-900 border border-gray-700 px-5 py-2 text-sm font-medium text-white shadow-lg">
-                        <MapPinIcon size={16} weight="fill" className="text-blue-400" />
+                    <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-black/40 border border-white/10 px-5 py-2 text-sm font-semibold text-white backdrop-blur-md shadow-lg">
+                        <MapPinIcon size={16} weight="fill" className="text-orange-400" />
                         <span>Stays in {location}</span>
                     </div>
 
-                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white drop-shadow-xl leading-tight">
+                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white drop-shadow-2xl leading-tight mb-6 p-4">
                         Your next stay is <br className="hidden sm:block" />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-purple-300">just a few clicks away</span>
+                        <span className="text-secondary drop-shadow-[0_2px_10px_rgba(251,191,36,0.5)]">just a few clicks away</span>
                     </h2>
 
-                    <p className="mt-6 text-lg md:text-xl text-gray-200/90 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
+                    <p className="text-lg md:text-xl text-stone-100 drop-shadow-xl max-w-2xl mx-auto leading-relaxed mb-10 font-medium">
                         Discover verified hostels and short-term flats with transparent pricing, instant booking, and zero brokerage.
                     </p>
 
-                    <div className="mt-10 flex flex-col items-center gap-5 sm:flex-row sm:justify-center">
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <Link
-                            href={primary.href}
-                            className="group inline-flex items-center gap-3 rounded-full bg-white px-8 py-4 text-base font-bold text-gray-900 shadow-xl shadow-blue-500/20 transition-all hover:bg-blue-50 hover:scale-105 active:scale-95"
+                            href="/search"
+                            className="px-8 py-4 bg-gradient-to-r from-primary to-orange-700 text-white text-lg font-bold rounded-full shadow-lg hover:scale-105 active:scale-95 transition-transform w-full sm:w-auto text-center"
                         >
-                            {primary.icon}
-                            {primary.label}
-                            <ArrowRightIcon size={18} weight="bold" className="transition-transform group-hover:translate-x-1" />
+                            Find a Stay
                         </Link>
 
                         <Link
                             href={category === "flats" ? "/hostels" : "/flats"}
-                            className="group inline-flex items-center gap-3 rounded-full border border-white/40 bg-transparent px-8 py-4 text-base font-medium text-white transition-all hover:bg-white/10 hover:border-white/60"
+                            className="group inline-flex items-center gap-3 rounded-full bg-black/40 border border-white/20 px-8 py-4 text-base font-bold text-white backdrop-blur-md transition-all hover:bg-black/60 hover:scale-105 active:scale-95 shadow-lg"
                         >
                             {category === "flats" ? (
                                 <BackpackIcon size={20} weight="bold" />

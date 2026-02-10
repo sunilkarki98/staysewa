@@ -27,7 +27,7 @@ export default function ImageCarousel({
 
     // Auto-scroll effect
     useEffect(() => {
-        if (isPaused || images.length <= 1) return;
+        if (isPaused || images.length <= 1 || autoScrollInterval <= 0) return;
 
         const interval = setInterval(goToNext, autoScrollInterval);
         return () => clearInterval(interval);
@@ -71,15 +71,7 @@ export default function ImageCarousel({
                             e.stopPropagation();
                             goToPrev();
                         }}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 
-                            h-7 w-7 flex items-center justify-center
-                            rounded-full bg-white/90 dark:bg-black/70 
-                            text-gray-700 dark:text-white
-                            shadow-md backdrop-blur-sm
-                            opacity-0 group-hover:opacity-100
-                            transition-all duration-200
-                            hover:bg-white dark:hover:bg-black
-                            hover:scale-110"
+                        className="absolute left-2 top-1/2 -translate-y-1/2 h-7 w-7 flex items-center justify-center rounded-full bg-white/90 dark:bg-black/70 text-gray-700 dark:text-white shadow-md backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-white dark:hover:bg-black hover:scale-110"
                         aria-label="Previous image"
                     >
                         <CaretLeft size={16} weight="bold" />
@@ -91,15 +83,7 @@ export default function ImageCarousel({
                             e.stopPropagation();
                             goToNext();
                         }}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 
-                            h-7 w-7 flex items-center justify-center
-                            rounded-full bg-white/90 dark:bg-black/70 
-                            text-gray-700 dark:text-white
-                            shadow-md backdrop-blur-sm
-                            opacity-0 group-hover:opacity-100
-                            transition-all duration-200
-                            hover:bg-white dark:hover:bg-black
-                            hover:scale-110"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7 flex items-center justify-center rounded-full bg-white/90 dark:bg-black/70 text-gray-700 dark:text-white shadow-md backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-white dark:hover:bg-black hover:scale-110"
                         aria-label="Next image"
                     >
                         <CaretRight size={16} weight="bold" />
@@ -114,11 +98,7 @@ export default function ImageCarousel({
                                     e.stopPropagation();
                                     setCurrentIndex(index);
                                 }}
-                                className={`h-1.5 rounded-full transition-all duration-300
-                                    ${index === currentIndex
-                                        ? "w-4 bg-white"
-                                        : "w-1.5 bg-white/60 hover:bg-white/80"
-                                    }`}
+                                className={`h-1.5 rounded-full transition-all duration-300 ${index === currentIndex ? "w-4 bg-white" : "w-1.5 bg-white/60 hover:bg-white/80"}`}
                                 aria-label={`Go to image ${index + 1}`}
                             />
                         ))}

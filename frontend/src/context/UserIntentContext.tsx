@@ -23,6 +23,14 @@ export function UserIntentProvider({ children }: { children: ReactNode }) {
 
     const [category, setCategory] = useState<StayCategory>(getInitialCategory());
 
+    // Update category when pathname changes
+    if (typeof window !== 'undefined') {
+        const newCategory = getInitialCategory();
+        if (newCategory !== category) {
+            setCategory(newCategory);
+        }
+    }
+
     return (
         <UserIntentContext.Provider value={{ category, setCategory }}>
             {children}

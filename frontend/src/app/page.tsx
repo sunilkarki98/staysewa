@@ -1,5 +1,5 @@
 import Hero from "../components/sections/Hero";
-import PopularHostels from "../components/sections/PopularHostels";
+import FeaturedStays from "../components/sections/FeaturedStays";
 import HowItWorks from "../components/sections/HowItWorks";
 import CallToAction from "../components/sections/CallToAction";
 import WhyChooseUs from "../components/sections/WhyChooseUs";
@@ -12,7 +12,7 @@ export default function Home() {
       <Hero />
 
       {/* Popular Hostels / Flats */}
-      <PopularHostels />
+      <FeaturedStays />
 
       <WhyChooseUs />
       {/* How it works */}

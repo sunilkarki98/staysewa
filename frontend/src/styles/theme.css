@@ -3,31 +3,82 @@
 
 /* Register CSS variables with Tailwind's theme system */
 @theme {
-  --color-brand: #1f2a44;
-  --color-accent: #c0392b;
-  --color-primary: #2563eb;
-  --color-bg: #ffffff;
-  --color-surface: #f9fafb;
-  --color-elevated: #ffffff;
-  --color-border: #e5e7eb;
-  --color-text: #111827;
-  --color-muted: #6b7280;
+  --color-primary: #ea580c;
+  /* orange-600 */
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #fbbf24;
+  /* amber-400 */
+  --color-secondary-foreground: #1c1917;
+  --color-neutral: #fafaf9;
+  /* stone-50 */
+  --color-neutral-foreground: #1c1917;
+  /* stone-900 */
+
+  --color-brand: var(--color-primary);
+  --color-accent: var(--color-secondary);
+
+  --color-bg: #fafaf9;
+  --color-surface: #ffffff;
+
+  --color-border: #e7e5e4;
+  --color-text: #1c1917;
+  --color-muted: #78716c;
 }
 
 :root {
-  /* Brand */
-  --color-brand: #1f2a44;
-  --color-accent: #c0392b;
+  /* Kathmandu Theme Semantic Colors */
+  --color-primary: #ea580c;
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: #fbbf24;
+  --color-secondary-foreground: #1c1917;
+
+  --color-neutral: #fafaf9;
+  --color-neutral-foreground: #1c1917;
+
+  --color-brand: var(--color-primary);
+  --color-accent: var(--color-secondary);
 
   /* Backgrounds */
-  --color-bg: #ffffff;
-  --color-surface: #f9fafb;
-  --color-elevated: #ffffff;
+  --color-bg: #fafaf9;
+  /* Light: Stone-50 */
+  --color-surface: #ffffff;
+  /* Light: White */
 
   /* Borders */
-  --color-border: #e5e7eb;
+  --color-border: #e7e5e4;
+  /* Stone-200 */
 
   /* Text */
-  --color-text: #111827;
-  --color-muted: #6b7280;
+  --color-text: #1c1917;
+  /* Stone-900 */
+  --color-muted: #78716c;
+  /* Stone-500 */
+}
+
+.dark {
+  /* Kathmandu Dark Theme */
+  --color-primary: #ea580c;
+  /* Keep orange-600 or adjust for dark mode if needed */
+  --color-primary-foreground: #ffffff;
+
+  --color-secondary: #fbbf24;
+
+  --color-neutral: #1c1917;
+  /* Stone-900 */
+  --color-neutral-foreground: #fafaf9;
+  /* Stone-50 */
+
+  --color-bg: #0c0a09;
+  /* Stone-950 */
+  --color-surface: #1c1917;
+  /* Stone-900 */
+
+  --color-border: #292524;
+  /* Stone-800 */
+
+  --color-text: #fafaf9;
+  /* Stone-50 */
+  --color-muted: #a8a29e;
+  /* Stone-400 */
 }

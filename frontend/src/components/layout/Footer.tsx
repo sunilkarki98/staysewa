@@ -2,55 +2,150 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { FacebookLogoIcon, InstagramLogoIcon } from "@phosphor-icons/react";
+import {
+    FacebookLogoIcon,
+    InstagramLogoIcon,
+    TwitterLogoIcon,
+    EnvelopeIcon,
+    PhoneIcon,
+    MapPinIcon
+} from "@phosphor-icons/react";
 
 const Footer = () => {
     return (
-        <footer className="w-full bg-slate-100 dark:bg-zinc-950 border-t border-slate-200 dark:border-zinc-800">
-            <div className="w-full mx-auto">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/90 dark:bg-zinc-900/90 border border-slate-200/50 dark:border-zinc-800/50 rounded-3xl shadow-lg px-8 py-6 backdrop-blur-md">
-
-                    {/* Left: Links */}
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-8 text-lg font-semibold text-gray-700 dark:text-gray-300">
-                        <Link href="/about" className="hover:text-gray-900 dark:hover:text-white transition">About Us</Link>
-                        <Link href="/faqs" className="hover:text-gray-900 dark:hover:text-white transition">FAQs</Link>
-                        <Link href="/terms" className="hover:text-gray-900 dark:hover:text-white transition">Terms & Policies</Link>
-                        <Link href="/contact" className="hover:text-gray-900 dark:hover:text-white transition">Contact Us</Link>
-                        <Link href="/login" className="hover:text-gray-900 dark:hover:text-white transition">Login</Link>
-                        <Link
-                            href="/owner"
-                            className="ml-4 inline-flex items-center justify-center rounded-full bg-blue-600 px-6 py-3 text-lg font-bold text-white transition hover:bg-blue-700 hover:shadow-md active:scale-95"
-                        >
-                            List Your Property
+        <footer className="w-full bg-neutral dark:bg-stone-950 border-t border-border dark:border-stone-800 py-12">
+            <div className="w-full max-w-[1600px] mx-auto px-4 md:px-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 mb-12">
+                    {/* 1. Brand Section (Wider) */}
+                    <div className="lg:col-span-2 space-y-5">
+                        <Link href="/" className="inline-block">
+                            <span className="text-3xl font-bold bg-gradient-to-r from-primary to-orange-700 bg-clip-text text-transparent">
+                                StaySewa
+                            </span>
                         </Link>
-                    </div>
-
-                    {/* Center: Payments */}
-                    <div className="flex items-center gap-6 mt-6 md:mt-0">
-                        <Image src="/payments/esewa.svg" alt="eSewa" width={80} height={32} className="h-10 w-auto" />
-                        <Image src="/payments/khalti.svg" alt="Khalti" width={80} height={32} className="h-10 w-auto" />
-                        <Image src="/payments/fonepay.svg" alt="Fonepay" width={80} height={32} className="h-10 w-auto" />
-                    </div>
-
-                    {/* Right: Social + Copyright */}
-                    <div className="flex flex-col md:flex-row items-center gap-6 mt-6 md:mt-0">
-                        <div className="flex items-center gap-5">
-                            <Link href="https://facebook.com" target="_blank" aria-label="Facebook">
-                                <FacebookLogoIcon size={36} weight="fill" className="text-[#1877F2]" />
-                            </Link>
-                            <Link href="https://instagram.com" target="_blank" aria-label="Instagram">
-                                <InstagramLogoIcon size={36} weight="fill" className="text-pink-500" />
-                            </Link>
+                        <p className="text-muted dark:text-stone-400 text-base leading-relaxed max-w-sm">
+                            Your trusted partner for verified hostels, homestays, and short-term rentals in Kathmandu. Experience comfort and authentic hospitality.
+                        </p>
+                        <div className="flex gap-4 pt-2">
+                            <SocialLink
+                                href="https://facebook.com"
+                                icon={<FacebookLogoIcon size={22} weight="fill" />}
+                                label="Facebook"
+                                hoverClass="hover:text-[#1877F2] hover:border-[#1877F2]/50 hover:bg-[#1877F2]/10"
+                            />
+                            <SocialLink
+                                href="https://instagram.com"
+                                icon={<InstagramLogoIcon size={22} weight="fill" />}
+                                label="Instagram"
+                                hoverClass="hover:text-[#E4405F] hover:border-[#E4405F]/50 hover:bg-[#E4405F]/10"
+                            />
+                            <SocialLink
+                                href="https://twitter.com"
+                                icon={<TwitterLogoIcon size={22} weight="fill" />}
+                                label="Twitter"
+                                hoverClass="hover:text-[#1DA1F2] hover:border-[#1DA1F2]/50 hover:bg-[#1DA1F2]/10"
+                            />
                         </div>
-                        <div className="text-lg text-gray-700 dark:text-gray-300 font-medium text-center md:text-right">
-                            © 2024 <span className="font-bold text-gray-900 dark:text-gray-200">StaySewa</span>. All rights reserved.
-                        </div>
                     </div>
 
+                    {/* 2. Quick Links */}
+                    <div>
+                        <h3 className="text-base font-bold text-stone-900 dark:text-white mb-5">Company</h3>
+                        <ul className="space-y-3">
+                            <FooterLink href="/about">About Us</FooterLink>
+                            <FooterLink href="/blog">Travel Blog</FooterLink>
+                            <FooterLink href="/careers">Careers</FooterLink>
+                            <FooterLink href="/contact">Contact</FooterLink>
+                        </ul>
+                    </div>
+                    {/* ... keep the rest of the file ... but I need to update SocialLink definition too */}
+                    {/* Actually, I will replace the component usage AND definition in two edits if needed, but I can do it in one if I replace enough context, or replace the definition separately. */}
+                    {/* Since they are far apart, I'll use multi_replace or sequential */}
+                    {/* Wait, the usage is lines 29-33. The component definition is lines 109-118 */}
+                    {/* I'll use multi_replace. */}
+
+                    {/* 3. Support */}
+                    <div>
+                        <h3 className="text-base font-bold text-stone-900 dark:text-white mb-5">Legal & Support</h3>
+                        <ul className="space-y-3">
+                            <FooterLink href="/terms">Terms of Service</FooterLink>
+                            <FooterLink href="/privacy">Privacy Policy</FooterLink>
+                            <FooterLink href="/help">Help Center</FooterLink>
+                            <FooterLink href="/safety">Safety Tips</FooterLink>
+                        </ul>
+                    </div>
+
+                    {/* 4. Newsletter / Play Store */}
+                    <div className="lg:col-span-1">
+                        <h3 className="text-base font-bold text-text dark:text-white mb-5">Get Updates</h3>
+                        <form className="flex flex-col gap-3 mb-6">
+                            <input
+                                type="email"
+                                placeholder="Email address"
+                                className="w-full px-4 py-2.5 rounded-lg bg-surface dark:bg-stone-900 border border-border dark:border-stone-700 focus:outline-none focus:ring-2 focus:ring-primary text-base"
+                            />
+                            <button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2.5 px-4 rounded-lg transition-colors text-base shadow-sm">
+                                Subscribe
+                            </button>
+                        </form>
+
+                        <div className="flex items-start gap-3">
+                            <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-orange-600 dark:text-orange-400">
+                                <PhoneIcon size={20} weight="duotone" />
+                            </div>
+                            <div>
+                                <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide">Support Line</p>
+                                <p className="text-base font-bold text-stone-900 dark:text-white">+977 9800000000</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Bottom Bar */}
+                <div className="pt-8 border-t border-stone-200 dark:border-stone-800 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <p className="text-base text-stone-500 dark:text-stone-400">
+                        © {new Date().getFullYear()} StaySewa. All rights reserved.
+                    </p>
+                    <div className="flex items-center gap-8">
+                        {/* Optional Links in Bottom Bar */}
+                        <div className="hidden md:flex gap-6 text-sm text-stone-500 dark:text-stone-400 font-medium">
+                            <Link href="/sitemap" className="hover:text-orange-600 transition-colors">Sitemap</Link>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            <span className="text-xs text-stone-400 font-bold uppercase tracking-wider hidden sm:inline-block">Verified Payments:</span>
+                            <div className="flex gap-2">
+                                <Image src="/paymenticons/esewa.png" alt="eSewa" width={60} height={24} className="h-7 w-auto" />
+                                <Image src="/paymenticons/khalti.png" alt="Khalti" width={60} height={24} className="h-7 w-auto" />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </footer>
     );
 };
+
+const SocialLink = ({ href, icon, label, hoverClass }: { href: string; icon: React.ReactNode; label: string, hoverClass: string }) => (
+    <Link
+        href={href}
+        target="_blank"
+        aria-label={label}
+        className={`w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-stone-900 text-stone-600 dark:text-stone-400 border border-stone-200 dark:border-stone-800 transition-all shadow-sm ${hoverClass}`}
+    >
+        {icon}
+    </Link>
+);
+
+const FooterLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
+    <li>
+        <Link
+            href={href}
+            className="text-base text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium"
+        >
+            {children}
+        </Link>
+    </li>
+);
 
 export default Footer;
