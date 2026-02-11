@@ -265,7 +265,7 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
                                     {stay.stayUnits.map((unit) => (
                                         <div
                                             key={unit.id}
-                                            onClick={() => setSelectedUnitId(unit.id)}
+                                            onClick={() => setSelectedUnitId(unit.id || "")}
                                             className={`cursor-pointer rounded-xl border p-4 transition-all ${selectedUnitId === unit.id
                                                 ? "border-primary bg-primary/5 ring-1 ring-primary"
                                                 : "border-border dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-primary/50"

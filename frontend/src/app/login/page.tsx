@@ -252,7 +252,7 @@ export default function LoginPage() {
                 <div className="mt-6 text-center space-y-2">
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                         Want to list your property?{" "}
-                        <Link href="/owner" className="text-blue-500 hover:text-blue-600 font-medium">
+                        <Link href="/become-host" className="text-blue-500 hover:text-blue-600 font-medium">
                             Owner Portal →
                         </Link>
                     </p>

@@ -56,7 +56,7 @@ export const protect = catchAsync(async (req: Request, res: Response, next: Next
                     id: userId,
                     email: email,
                     fullName: decoded.user_metadata?.full_name || 'StaySewa User',
-                    role: 'customer', // Default role
+                    role: decoded.user_metadata?.role || decoded.app_metadata?.role || 'customer',
                     emailVerified: !!decoded.email,
                     password: null, // Managed by Supabase
                 }).returning();
@@ -78,6 +78,7 @@ export const protect = catchAsync(async (req: Request, res: Response, next: Next
         next();
 
     } catch (err) {
+        console.error('JWT Verification Failed:', err);
         return next(new AppError('Invalid token', 401));
     }
 });

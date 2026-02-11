@@ -1,18 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { UsersService } from "../services/domain";
 import type { ApiError } from "../api/types";
-
-interface UserProfile {
-    id: string;
-    name: string;
-    email: string;
-    phone?: string;
-    role: string;
-    avatar?: string;
-}
+import type { User } from "../types/user";
 
 export function useUser() {
-    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [profile, setProfile] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<ApiError | null>(null);
     const [updating, setUpdating] = useState(false);

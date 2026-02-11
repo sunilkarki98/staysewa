@@ -67,7 +67,19 @@ export const StaysController = {
      * Create a new stay
      */
     createStay: catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
-        const newStay = await StaysService.create(req.body);
+        // Inject Owner ID from Authenticated User (set by auth middleware)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const ownerId = (req as any).user?.id;
+
+        if (!ownerId) {
+            // Fallback for dev/testing if auth not fully wired yet
+            // return next(new AppError('You must be logged in to create a listing', 401));
+        }
+
+        const newStay = await StaysService.create({
+            ...req.body,
+            ownerId: ownerId || req.body.ownerId, // Allow manual override if needed or fallback
+        });
 
         if (redis) {
             await redis.del('stays:all');

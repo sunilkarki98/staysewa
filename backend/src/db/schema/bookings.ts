@@ -31,8 +31,12 @@ export const bookings = pgTable('bookings', {
     currency: text('currency').default('NPR'),
 
     // Status
-    status: bookingStatusEnum('status').default('pending').notNull(),
-    paymentStatus: paymentStatusEnum('payment_status').default('unpaid').notNull(),
+    status: bookingStatusEnum('status').default('initiated').notNull(),
+    paymentStatus: paymentStatusEnum('payment_status').default('not_required').notNull(),
+
+    // Lifecycle
+    expiresAt: timestamp('expires_at', { withTimezone: true }),
+    metadata: jsonb('metadata'), // General metadata including payment trails
 
     specialRequests: text('special_requests'),
     cancellationReason: text('cancellation_reason'),

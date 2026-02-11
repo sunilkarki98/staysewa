@@ -7,8 +7,10 @@ const router = Router();
  * Media Management Routes
  */
 
+import { upload } from '@/middlewares/upload.middleware';
+
 // Global media operations
-router.post('/', MediaController.uploadMedia);
+router.post('/', upload.single('file'), MediaController.uploadMedia);
 router.delete('/:id', MediaController.removeMedia);
 router.patch('/:id/cover', MediaController.setCover);
 

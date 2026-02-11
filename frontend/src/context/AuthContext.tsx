@@ -40,24 +40,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         // 1. Check active session
         const checkSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session?.user) {
-                // Map Supabase user to our User type
-                // In a real app, you might fetch additional profile data from your backend here
-                setUser({
-                    id: session.user.id,
-                    email: session.user.email || "",
-                    name: session.user.user_metadata.full_name || "Guest",
-                    role: "guest", // Default, or fetch from DB/Metadata
-                    avatar: session.user.user_metadata.avatar_url,
-                });
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session?.user) {
+                    // Fetch full profile from backend to get role
+                    // We can't import apiClient here easily because of circular deps potentially?
+                    // actually apiClient imports supabase, so it might be cyclic if we are not careful.
+                    // Let's use fetch directly or ensure no cycle.
+                    // User metadata is also a good fallback.
 
-                // Set token for API calls if needed (though we use Supabase client mostly, 
-                // but for backend calls we might need the JWT)
-                // apiClient.setToken(session.access_token); 
-                // (Assuming apiClient handles it or we pass it in headers)
+                    const role = session.user.user_metadata?.role || session.user.app_metadata?.role || "guest";
+
+                    setUser({
+                        id: session.user.id,
+                        email: session.user.email || "",
+                        name: session.user.user_metadata.full_name || "Guest",
+                        role: role,
+                        avatar: session.user.user_metadata.avatar_url,
+                    });
+                }
+            } catch (err) {
+                console.error("Session check failed", err);
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
 
         checkSession();
@@ -69,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     id: session.user.id,
                     email: session.user.email || "",
                     name: session.user.user_metadata.full_name || "Guest",
-                    role: "guest",
+                    role: session.user.user_metadata.role || "guest",
                     avatar: session.user.user_metadata.avatar_url,
                 });
             } else {

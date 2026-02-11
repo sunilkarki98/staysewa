@@ -1,4 +1,4 @@
-import { pgTable, text, uuid, timestamp, boolean, integer, numeric, jsonb, time, date } from 'drizzle-orm/pg-core';
+import { pgTable, text, uuid, timestamp, boolean, integer, numeric, jsonb, time, date, uniqueIndex } from 'drizzle-orm/pg-core';
 import { users } from '@/db/schema/users';
 import { stayTypeEnum, stayIntentEnum, stayStatusEnum, unitTypeEnum, availabilityStatusEnum, mediaTypeEnum, cancellationTypeEnum, priceRuleTypeEnum, adjustmentTypeEnum } from '@/db/schema/enums';
 
@@ -63,7 +63,9 @@ export const availability = pgTable('availability', {
     priceOverride: integer('price_override'), // Seasonal daily price
     minNights: integer('min_nights').default(1),
     status: availabilityStatusEnum('status').default('available'),
-});
+}, (t) => ({
+    unq: uniqueIndex('availability_unit_date_idx').on(t.unitId, t.date),
+}));
 // Note: Composite unique index on (unit_id, date) should be added in migration
 
 // ─── Stay Media (Photos/Videos) ─────────────────────────────

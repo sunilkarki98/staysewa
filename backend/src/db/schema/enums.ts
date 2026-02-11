@@ -15,9 +15,13 @@ export const mediaTypeEnum = pgEnum('media_type', ['image', 'video']);
 
 // ─── Booking ────────────────────────────────────────────────
 export const bookingStatusEnum = pgEnum('booking_status', [
-    'pending', 'confirmed', 'checked_in', 'completed', 'cancelled', 'no_show',
+    'initiated', 'reserved', 'confirmed', 'checked_in', 'completed', 'cancelled', 'expired', 'no_show',
+    'pending', // Legacy: kept for existing data
 ]);
-export const paymentStatusEnum = pgEnum('payment_status', ['unpaid', 'partial', 'paid', 'refunded']);
+export const paymentStatusEnum = pgEnum('payment_status', [
+    'not_required', 'pending', 'success', 'failed', 'refunded', 'unpaid',
+    'paid', // Legacy: kept for existing data
+]);
 export const cancelledByEnum = pgEnum('cancelled_by', ['customer', 'owner', 'admin', 'system']);
 
 // ─── Payment ────────────────────────────────────────────────

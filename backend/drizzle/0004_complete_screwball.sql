@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "availability_unit_date_idx" ON "availability" USING btree ("unit_id","date");

@@ -6,7 +6,7 @@ export type UnitType = 'private_room' | 'shared_room' | 'entire_place' | 'bed';
 
 // ─── Stay Unit (Room/Bed) ───────────────────────────────────
 export type StayUnit = {
-  id: string;
+  id?: string; // Optional for new units before saving
   name: string;
   type: UnitType;
   maxOccupancy: number;

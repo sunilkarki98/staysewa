@@ -25,6 +25,7 @@ app.use(limiter);
 app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
+app.use('/uploads', express.static('uploads'));
 
 // Routes
 app.get('/health', (_req, res) => {

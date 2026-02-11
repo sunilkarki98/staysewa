@@ -52,11 +52,11 @@ export default function CustomerStayCard({
                 {/* Intent Badge (Restored for Customers) */}
                 {showBadges && (
                     <div className="absolute bottom-3 left-3 z-10">
-                        <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-sm ${intent === 'long-stay'
+                        <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow-sm ${intent === 'long_stay'
                             ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/80 dark:text-purple-300'
                             : 'bg-blue-100 text-blue-700 dark:bg-blue-900/80 dark:text-blue-300'
                             }`}>
-                            {intent === 'long-stay' ? 'Long Term' : 'Short Stay'}
+                            {intent === 'long_stay' ? 'Long Term' : 'Short Stay'}
                         </span>
                     </div>
                 )}
@@ -84,7 +84,7 @@ export default function CustomerStayCard({
                             NPR {price.toLocaleString()}
                         </span>
                         <span className="text-xs text-muted dark:text-gray-400 font-medium ml-1">
-                            / {type === 'flats' ? 'month' : 'night'}
+                            / {type === 'apartment' ? 'month' : 'night'}
                         </span>
                     </div>
                     <div className="flex items-center gap-2">

@@ -15,6 +15,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Forcing root to current directory to avoid scanning up to home
+  outputFileTracingRoot: process.cwd(),
 };
 
 export default withBundleAnalyzer(nextConfig);

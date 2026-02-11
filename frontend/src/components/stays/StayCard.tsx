@@ -3,6 +3,8 @@
 import { MapPinIcon, StarIcon } from "@phosphor-icons/react";
 import type { StayCategory, StayIntent } from "../../types/stay";
 import ImageCarousel from "../ui/ImageCarousel";
+import Link from "next/link";
+
 
 type StayCardProps = {
     id: string;
@@ -15,7 +17,7 @@ type StayCardProps = {
     intent: StayIntent;
 };
 
-import Link from "next/link";
+
 
 export default function StayCard({
     id,
@@ -67,7 +69,7 @@ export default function StayCard({
                             NPR {price.toLocaleString()}
                         </span>
                         <span className="text-xs text-muted dark:text-gray-400 font-medium ml-1">
-                            / {type === 'flats' ? 'month' : 'night'}
+                            / {type === 'apartment' ? 'month' : 'night'}
                         </span>
                     </div>
                     <div className="flex items-center gap-2">

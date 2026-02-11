@@ -11,10 +11,19 @@ export const MediaController = {
      * Save a new media record (URL based)
      */
     uploadMedia: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const { stayId, unitId, url, type, caption, isCover } = req.body;
+        const { stayId, unitId, type, caption, isCover } = req.body;
+        let { url } = req.body;
+
+        if (req.file) {
+            // Construct URL for the uploaded file
+            // Assuming the server is reachable via the host header
+            // For production, this should likely be an Env Var e.g. ASSET_URL
+            url = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        }
 
         if (!stayId || !url) {
-            return next(new AppError('Stay ID and URL are required', 400));
+            // Clean up file if validation fails (optional but good practice)
+            return next(new AppError('Stay ID and URL/File are required', 400));
         }
 
         const media = await MediaService.addMedia({
@@ -23,7 +32,7 @@ export const MediaController = {
             url,
             type: type || 'image',
             caption,
-            isCover: isCover || false,
+            isCover: isCover === 'true' || isCover === true, // Form data might imply string "true"
         });
 
         res.status(201).json({

@@ -12,6 +12,7 @@ import {
     BasicDetailsForm,
     TypeSpecificForm,
     AmenitiesRulesForm,
+    MediaUploadStep,
     ReviewSubmit,
 } from "@/components/owner/listing-form";
 import type {
@@ -21,7 +22,7 @@ import type {
 } from "@/components/owner/listing-form";
 import { useStays } from "@/hooks/useStays";
 
-const STEPS = ["Property Type", "Basic Details", "Specifics", "Amenities", "Review"];
+const STEPS = ["Property Type", "Basic Details", "Specifics", "Amenities", "Photos", "Review"];
 
 export default function AddListingPage() {
     const router = useRouter();
@@ -55,6 +56,8 @@ export default function AddListingPage() {
         checkInTime: "14:00",
         checkOutTime: "11:00",
     });
+
+    const [images, setImages] = useState<string[]>([]);
 
     // ─── Step Defaults on Type Selection ─────────────────────
     const handleTypeSelect = (type: StayCategory) => {
@@ -99,7 +102,8 @@ export default function AddListingPage() {
                 return typeSpecific.simple.basePrice > 0;
             }
             case 3: return true; // amenities and rules are optional
-            case 4: return true;
+            case 4: return images.length > 0; // Photos required? Let's say yes, at least 1.
+            case 5: return true;
             default: return false;
         }
     };
@@ -128,18 +132,44 @@ export default function AddListingPage() {
                 ? Math.min(...typeSpecific.units.map(u => u.basePrice))
                 : typeSpecific.simple.basePrice;
 
-            await createStay({
+            const payload = {
                 name: basicDetails.name,
                 type: propertyType,
                 intent: basicDetails.intent,
-                location: [basicDetails.city, basicDetails.district].filter(Boolean).join(", "),
-                price: basePrice,
                 description: basicDetails.description,
+
+                // Location (Discrete Fields)
+                city: basicDetails.city,
+                district: basicDetails.district,
+                addressLine: basicDetails.addressLine,
+                province: basicDetails.province || undefined,
+
+                // Pricing (Convert to Paisa)
+                basePrice: Math.round(basePrice * 100), // NPR -> Paisa
+
+                // Details
                 amenities: amenitiesRules.amenities,
                 rules: amenitiesRules.rules.split("\n").filter(Boolean),
+                checkInTime: amenitiesRules.checkInTime,
+                checkOutTime: amenitiesRules.checkOutTime,
+
+                // Conditional Fields
                 maxGuests: needsUnits ? undefined : typeSpecific.simple.maxGuests,
-                images: [],
-            });
+
+                // Units (for Hotels/Hostels)
+                stayUnits: needsUnits ? typeSpecific.units.map(u => ({
+                    name: u.name,
+                    type: u.type,
+                    maxOccupancy: u.maxOccupancy,
+                    basePrice: Math.round(u.basePrice * 100), // NPR -> Paisa
+                    quantity: u.quantity,
+                    amenities: u.amenities,
+                })) : undefined,
+
+                images: images,
+            };
+
+            await createStay(payload);
 
             setSubmitted(true);
         } catch (err) {
@@ -179,6 +209,7 @@ export default function AddListingPage() {
                             setBasicDetails({ name: "", description: "", intent: "both", city: "", district: "", addressLine: "", province: "" });
                             setTypeSpecific({ units: [], simple: { basePrice: 0, maxGuests: 2, bedrooms: 1, bathrooms: 1 } });
                             setAmenitiesRules({ amenities: [], rules: "", checkInTime: "14:00", checkOutTime: "11:00" });
+                            setImages([]);
                         }}
                         className="px-6 py-3 text-sm font-semibold text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition"
                     >
@@ -223,6 +254,13 @@ export default function AddListingPage() {
                     />
                 );
             case 4:
+                return (
+                    <MediaUploadStep
+                        images={images}
+                        onChange={setImages}
+                    />
+                );
+            case 5:
                 return (
                     <ReviewSubmit
                         propertyType={propertyType!}

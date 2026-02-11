@@ -11,9 +11,15 @@ export const bookingSchema = {
         }),
     }),
 
+    getBooking: z.object({
+        params: z.object({
+            id: z.string().uuid('Invalid Booking ID'),
+        }),
+    }),
+
     updateStatus: z.object({
         params: z.object({
-            id: z.uuid('Invalid Booking ID'),
+            id: z.string().uuid('Invalid Booking ID'),
         }),
         body: z.object({
             status: z.enum(['pending', 'confirmed', 'checked_in', 'completed', 'cancelled', 'no_show']),

@@ -6,6 +6,7 @@ import {
     Bed,
     DoorOpen,
     Users,
+    IconProps
 } from "@phosphor-icons/react";
 import type { StayCategory } from "@/types/stay";
 import type { ComponentType } from "react";
@@ -19,7 +20,7 @@ type PropertyOption = {
     type: StayCategory;
     title: string;
     description: string;
-    icon: ComponentType<{ size?: number; weight?: string; className?: string }>;
+    icon: ComponentType<IconProps>;
     tags: string[];
 };
 
@@ -84,8 +85,8 @@ export default function PropertyTypeSelector({ selected, onSelect }: PropertyTyp
                             type="button"
                             onClick={() => onSelect(option.type)}
                             className={`group relative text-left p-6 rounded-2xl border-2 transition-all duration-200 ${isSelected
-                                    ? "border-primary bg-primary/5 dark:bg-primary/10 ring-1 ring-primary shadow-lg shadow-primary/10"
-                                    : "border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 hover:border-primary/40 hover:shadow-md"
+                                ? "border-primary bg-primary/5 dark:bg-primary/10 ring-1 ring-primary shadow-lg shadow-primary/10"
+                                : "border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 hover:border-primary/40 hover:shadow-md"
                                 }`}
                         >
                             {/* Selected Indicator */}
@@ -98,8 +99,8 @@ export default function PropertyTypeSelector({ selected, onSelect }: PropertyTyp
                             )}
 
                             <div className={`inline-flex p-3 rounded-xl mb-4 transition-colors ${isSelected
-                                    ? "bg-primary/10 text-primary"
-                                    : "bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 group-hover:text-primary group-hover:bg-primary/10"
+                                ? "bg-primary/10 text-primary"
+                                : "bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 group-hover:text-primary group-hover:bg-primary/10"
                                 }`}>
                                 <Icon size={28} weight="duotone" />
                             </div>
@@ -118,8 +119,8 @@ export default function PropertyTypeSelector({ selected, onSelect }: PropertyTyp
                                     <span
                                         key={tag}
                                         className={`text-xs px-2.5 py-1 rounded-full font-medium ${isSelected
-                                                ? "bg-primary/10 text-primary"
-                                                : "bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400"
+                                            ? "bg-primary/10 text-primary"
+                                            : "bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400"
                                             }`}
                                     >
                                         {tag}

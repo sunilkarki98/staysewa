@@ -68,8 +68,8 @@ export const BookingsController = {
 
         const bookingData = {
             ...req.body,
-            userId: (req as any).user ? (req as any).user.id : undefined, // Optional for now
-            status: 'pending', // Default status
+            userId: (req as any).user ? (req as any).user.id : undefined,
+            // status handled by service (default: reserved)
         };
 
         const newBooking = await BookingsService.create(bookingData);
@@ -91,7 +91,7 @@ export const BookingsController = {
             return next(new AppError('Status is required', 400));
         }
 
-        const updatedBooking = await BookingsService.updateStatus(id as string, status);
+        const updatedBooking = await BookingsService.transitionStatus(id as string, status);
 
         if (!updatedBooking) {
             return next(new AppError('No booking found with that ID', 404));
@@ -109,6 +109,20 @@ export const BookingsController = {
     getMyBookings: catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
         // req.user is guaranteed by protect middleware
         const bookings = await BookingsService.getMyBookings((req as any).user.id);
+
+        res.status(200).json({
+            status: 'success',
+            results: bookings.length,
+            data: { bookings },
+        });
+    }),
+}),
+
+    /**
+     * Get owner's bookings (RBAC: Owner only)
+     */
+    getOwnerBookings: catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
+        const bookings = await BookingsService.getBookingsByOwner((req as any).user.id);
 
         res.status(200).json({
             status: 'success',

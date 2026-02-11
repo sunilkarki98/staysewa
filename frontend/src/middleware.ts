@@ -17,9 +17,11 @@ export function middleware(request: NextRequest) {
         }
     }
 
-    // 2. Auth Routes (Login/Register) - Redirect to home if already logged in
-    if (pathname.startsWith("/login") || pathname.startsWith("/register")) {
+    // 2. Auth Routes (Login/Register/Become Host) - Redirect to home if already logged in
+    if (pathname.startsWith("/login") || pathname.startsWith("/register") || pathname.startsWith("/become-host")) {
         if (token) {
+            // Can be smarter here: if owner -> /owner, if customer -> / (or let them see it?)
+            // For now, redirect to /
             return NextResponse.redirect(new URL("/", request.url));
         }
     }
@@ -34,5 +36,6 @@ export const config = {
         "/my-bookings/:path*",
         "/login",
         "/register",
+        "/become-host",
     ],
 };
