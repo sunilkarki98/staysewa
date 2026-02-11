@@ -1,4 +1,4 @@
-import { db } from '@/db/index';
+import { db } from '../src/db/index';
 import { sql } from 'drizzle-orm';
 
 async function testConnection() {
