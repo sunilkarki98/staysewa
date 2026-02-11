@@ -39,7 +39,7 @@ export default function Navbar() {
                             <Link href="/"
                                 className="text-2xl font-bold transition-colors text-primary"
                             >
-                                StaySewa
+                                StaySewas
                             </Link>
 
                             <nav className={`hidden md:flex items-center gap-8 ${isLandingPage
