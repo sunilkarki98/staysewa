@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import StayListingSection from "@/components/sections/StayListingSection";
 import Container from "@/components/layout/Container";
 
@@ -30,7 +31,9 @@ export default function HostelsPage() {
           <h1 className="text-3xl font-bold text-text dark:text-white mb-2">Hostels in Kathmandu</h1>
           <p className="text-muted text-lg">Social vibes and budget-friendly stays for travelers.</p>
         </div>
-        <StayListingSection selectedCategory="hostel" />
+        <Suspense fallback={<div className="h-96 animate-pulse bg-stone-100 dark:bg-stone-900 rounded-xl" />}>
+          <StayListingSection selectedCategory="hostel" />
+        </Suspense>
       </Container>
     </main>
   );

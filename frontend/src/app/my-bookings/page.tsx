@@ -7,10 +7,16 @@ import { Booking } from "@/types/booking";
 import Link from "next/link";
 import { CalendarCheck, MapPin, Ticket } from "@phosphor-icons/react";
 
+import ReviewModal from "@/components/reviews/ReviewModal";
+
 export default function MyBookingsPage() {
     const { user, isLoading: authLoading } = useAuth();
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
+
+    // Review Modal State
+    const [reviewModalOpen, setReviewModalOpen] = useState(false);
+    const [selectedBooking, setSelectedBooking] = useState<{ id: string, name: string } | null>(null);
 
     useEffect(() => {
         if (!authLoading && user) {
@@ -27,6 +33,11 @@ export default function MyBookingsPage() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleOpenReview = (booking: Booking) => {
+        setSelectedBooking({ id: booking.id, name: booking.property });
+        setReviewModalOpen(true);
     };
 
     if (authLoading || loading) {
@@ -104,17 +115,41 @@ export default function MyBookingsPage() {
                                         <p className="text-sm font-medium text-gray-500">
                                             Total: <span className="text-gray-900 dark:text-white">NPR {booking.amount.toLocaleString()}</span>
                                         </p>
-                                        <Link
-                                            href={`/stays/${booking.id}`} // Assuming stay ID is implicit or we link to booking details
-                                            className="text-sm font-medium text-primary hover:underline"
-                                        >
-                                            View Property
-                                        </Link>
+                                        <div className="flex gap-3">
+                                            {/* Review Button - Only for confirmed/past bookings (logic simplified to 'confirmed' for now) */}
+                                            {booking.status === 'confirmed' && (
+                                                <button
+                                                    onClick={() => handleOpenReview(booking)}
+                                                    className="text-sm font-medium text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-white transition-colors"
+                                                >
+                                                    Rate Stay
+                                                </button>
+                                            )}
+                                            <Link
+                                                href={`/stays/${booking.stayId}`} // Use booking.stayId
+                                                className="text-sm font-medium text-primary hover:underline"
+                                            >
+                                                View Property
+                                            </Link>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         ))}
                     </div>
+                )}
+
+                {selectedBooking && (
+                    <ReviewModal
+                        isOpen={reviewModalOpen}
+                        onClose={() => setReviewModalOpen(false)}
+                        bookingId={selectedBooking.id}
+                        stayName={selectedBooking.name}
+                        onSuccess={() => {
+                            // Optionally refresh bookings or show toast
+                            alert("Thank you for your review!");
+                        }}
+                    />
                 )}
             </div>
         </div>

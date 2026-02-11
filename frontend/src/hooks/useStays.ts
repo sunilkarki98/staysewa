@@ -3,7 +3,17 @@ import { StaysService } from "../services/domain";
 import type { Stay } from "../types/stay";
 import type { ApiError } from "../api/types";
 
-export function useStays() {
+export type StayFilters = {
+    location?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    category?: string;
+    guests?: number;
+    checkIn?: string;
+    checkOut?: string;
+};
+
+export function useStays(filters?: StayFilters) {
     const queryClient = useQueryClient();
 
     const {
@@ -12,8 +22,9 @@ export function useStays() {
         error,
         refetch: refresh,
     } = useQuery<Stay[], ApiError>({
-        queryKey: ["stays"],
-        queryFn: StaysService.getAll,
+        // Include filters in queryKey for automatic refetching
+        queryKey: ["stays", filters],
+        queryFn: () => StaysService.getAll(filters),
     });
 
     const deleteMutation = useMutation({

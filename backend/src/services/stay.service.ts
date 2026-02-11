@@ -1,12 +1,67 @@
 import { db } from '@/db/index';
 import { stays, stayUnits, stayMedia } from '@/db/schema/index';
-import { eq } from 'drizzle-orm';
+import { eq, sql, gte, lte, and, desc, ilike } from 'drizzle-orm';
 import slugify from 'slugify';
 import { v4 as uuidv4 } from 'uuid';
 
 export const StaysService = {
+    /**
+     * Advanced Search with Filtering & Availability
+     */
+    async search(params: {
+        location?: string;
+        minPrice?: number;
+        maxPrice?: number;
+        type?: string; // 'apartment' | 'hostel' | 'homestay'
+        checkIn?: string;
+        checkOut?: string;
+        guests?: number;
+    }) {
+        const { location, minPrice, maxPrice, type, guests } = params;
+
+        // Build where clause
+        const conditions = [];
+
+        if (location && location !== 'all') {
+            // Search across address fields
+            conditions.push(
+                sql`lower(${stays.city}) LIKE ${`%${location.toLowerCase()}%`} OR lower(${stays.addressLine}) LIKE ${`%${location.toLowerCase()}%`} OR lower(${stays.district}) LIKE ${`%${location.toLowerCase()}%`}`
+            );
+        }
+
+        if (type && type !== 'all') {
+            conditions.push(eq(stays.type, type as any));
+        }
+
+        if (minPrice) {
+            conditions.push(gte(stays.basePrice, minPrice));
+        }
+
+        if (maxPrice) {
+            conditions.push(lte(stays.basePrice, maxPrice));
+        }
+
+        if (guests) {
+            // Use stays.maxGuests for simplified top-level filtering
+            conditions.push(gte(stays.maxGuests, guests));
+        }
+
+        // TODO: Date overlap logic (requires checking/joining bookings)
+        // For now, simpler filtering first.
+
+        return await db.query.stays.findMany({
+            where: and(...conditions),
+            with: {
+                stayMedia: true, // Need image for cards
+                stayUnits: true, // Need units for price range maybe
+            },
+            orderBy: desc(stays.createdAt) // Default sort
+        });
+    },
+
+    // Legacy support (optional, or redirect to search)
     async getAll() {
-        return await db.select().from(stays);
+        return this.search({});
     },
 
     async getById(id: string) {

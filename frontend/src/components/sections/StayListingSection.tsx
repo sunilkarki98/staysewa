@@ -23,7 +23,7 @@ export default function StayListingSection({
     onExternalLocationChange,
     onCategoryChange,
 }: StayListingSectionProps) {
-    const { stays, loading, error } = useStays();
+
     const searchParams = useSearchParams();
 
     const [sort, setSort] = useState<SortOption>("recommended");
@@ -42,11 +42,27 @@ export default function StayListingSection({
     const locationFilter = externalLocation !== undefined ? externalLocation : internalLocation;
     const setLocationFilter = onExternalLocationChange || setInternalLocation;
 
-    // Derive locations from live data
+    // Derived Filters for Hook
+    const filters = useMemo(() => {
+        return {
+            location: locationFilter !== 'all' ? locationFilter : undefined,
+            category: selectedCategory !== 'all' ? selectedCategory : undefined,
+            // query: searchQuery, // If backend supports generic query
+            // guests: ... (need to lift state or read from params)
+        };
+    }, [locationFilter, selectedCategory, searchQuery]);
+
+    // Pass filters to hook
+    const { stays, loading, error } = useStays(filters);
+
+    // Derive locations from live data (or static list if needed)
+    // Note: if filtered, locations list might shrink. Better to have static or separate query.
+    // For now, deriving from current stays is okay but might be weird UX.
     const locations = useMemo(() => {
         const locs = new Set(stays.map((s) => s.location));
         return Array.from(locs).sort();
     }, [stays]);
+
 
     const handleSortChange = useCallback((value: SortOption) => {
         setSort(value);

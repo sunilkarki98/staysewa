@@ -19,7 +19,10 @@ router.use('/owners', ownersRouter);
 router.use('/customers', customersRouter);
 router.use('/users', userRoutes);
 router.use('/media', mediaRouter);
+import { reviewsRouter } from '@/routes/reviews.routes';
+
 router.use('/payments', paymentRoutes);
+router.use('/reviews', reviewsRouter);
 router.use('/admin', adminRoutes);
 router.use('/owner/dashboard', ownerDashboardRoutes);
 

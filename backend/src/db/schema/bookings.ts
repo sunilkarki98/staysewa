@@ -65,20 +65,4 @@ export const payments = pgTable('payments', {
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });
 
-// ─── Reviews ────────────────────────────────────────────────
-export const reviews = pgTable('reviews', {
-    id: uuid('id').defaultRandom().primaryKey(),
-    bookingId: uuid('booking_id').references(() => bookings.id).unique().notNull(),
-    stayId: uuid('stay_id').references(() => stays.id).notNull(),
-    reviewerId: uuid('reviewer_id').references(() => users.id).notNull(),
-    rating: integer('rating').notNull(), // 1-5
-    cleanliness: integer('cleanliness'),
-    location: integer('location'),
-    value: integer('value'),
-    communication: integer('communication'),
-    comment: text('comment'),
-    ownerReply: text('owner_reply'),
-    ownerRepliedAt: timestamp('owner_replied_at', { withTimezone: true }),
-    isVisible: boolean('is_visible').default(true),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-});
+

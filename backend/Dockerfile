@@ -1,37 +1,37 @@
 # Production Dockerfile for StaySewa Backend
-# Using Bun for maximum performance
+# Multi-stage build with Node.js
 
 # Stage 1: Build
-FROM oven/bun:1.1 AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
 # Copy dependency files first for caching
-COPY package.json bun.lock tsconfig.json tsup.config.ts ./
+COPY package.json tsconfig.json tsup.config.ts ./
 
 # Install all dependencies
-RUN bun install
+RUN npm install
 
 # Copy source code
 COPY src ./src
 
 # Build the application
-RUN bun run build
+RUN npm run build
 
 # Stage 2: Production Runtime
-FROM oven/bun:1.1-slim AS runner
+FROM node:20-alpine AS runner
 
 WORKDIR /app
 
 # Non-root user for security
-RUN groupadd -g 1001 nodejs && \
-    useradd -u 1001 -g nodejs -s /bin/sh -m nodejs
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
 
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/dist ./dist
 
 # Install production dependencies only
-RUN bun install --production
+RUN npm install --omit=dev && npm cache clean --force
 
 USER nodejs
 
@@ -39,4 +39,4 @@ EXPOSE 4000
 
 ENV NODE_ENV=production
 
-CMD ["bun", "run", "start"]
+CMD ["node", "dist/index.js"]

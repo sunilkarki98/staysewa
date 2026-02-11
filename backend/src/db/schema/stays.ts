@@ -1,4 +1,5 @@
 import { pgTable, text, uuid, timestamp, boolean, integer, numeric, jsonb, time, date, uniqueIndex } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 import { users } from '@/db/schema/users';
 import { stayTypeEnum, stayIntentEnum, stayStatusEnum, unitTypeEnum, availabilityStatusEnum, mediaTypeEnum, cancellationTypeEnum, priceRuleTypeEnum, adjustmentTypeEnum } from '@/db/schema/enums';
 
@@ -119,3 +120,24 @@ export const priceRules = pgTable('price_rules', {
 // Actually, circular imports in Drizzle are tricky. Let's verify.
 // In Drizzle, table references function lazily `() => table`.
 // So we can import bookings.ts even if bookings.ts imports stays.ts.
+
+// ─── Relations ──────────────────────────────────────────────
+
+export const staysRelations = relations(stays, ({ many }) => ({
+    stayUnits: many(stayUnits),
+    stayMedia: many(stayMedia),
+}));
+
+export const stayUnitsRelations = relations(stayUnits, ({ one }) => ({
+    stay: one(stays, {
+        fields: [stayUnits.stayId],
+        references: [stays.id],
+    }),
+}));
+
+export const stayMediaRelations = relations(stayMedia, ({ one }) => ({
+    stay: one(stays, {
+        fields: [stayMedia.stayId],
+        references: [stays.id],
+    }),
+}));

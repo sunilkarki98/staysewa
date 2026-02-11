@@ -3,28 +3,32 @@ services:
     build: ./backend
     ports:
       - "4000:4000"
+    env_file:
+      - ./backend/.env
     environment:
-      - NODE_ENV=production
-      - PORT=4000
-      - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
+      # Override REDIS_URL to point to the Docker Redis service
       - REDIS_URL=redis://redis:6379
-      - KHALTI_SECRET_KEY=${KHALTI_SECRET_KEY}
-      - KHALTI_BASE_URL=${KHALTI_BASE_URL}
-      - CORS_ORIGIN=${CORS_ORIGIN}
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     networks:
       - app-network
+    restart: unless-stopped
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
     ports:
       - "6379:6379"
     volumes:
       - redis-data:/data
     networks:
       - app-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
 
 networks:
   app-network:

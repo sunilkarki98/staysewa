@@ -6,6 +6,7 @@ export interface Booking {
     email: string;
     phone: string;
     property: string;
+    stayId: string; // Add stayId
     checkIn: string; // ISO Date string YYYY-MM-DD
     checkOut: string; // ISO Date string YYYY-MM-DD
     status: BookingStatus;

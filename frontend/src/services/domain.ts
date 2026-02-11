@@ -15,9 +15,19 @@ interface BackendResponse<T> {
 // ─── Stays Service ───────────────────────────────────────────────────────────
 
 export const StaysService = {
-    getAll: async (): Promise<Stay[]> => {
+    getAll: async (filters?: Record<string, any>): Promise<Stay[]> => {
+        const query = new URLSearchParams();
+
+        if (filters) {
+            Object.entries(filters).forEach(([key, value]) => {
+                if (value !== undefined && value !== null && value !== '' && value !== 'all') {
+                    query.append(key, String(value));
+                }
+            });
+        }
+
         const response = await apiClient.get<BackendResponse<{ stays: unknown[] }>>(
-            API_CONFIG.ENDPOINTS.STAYS.LIST
+            `${API_CONFIG.ENDPOINTS.STAYS.LIST}?${query.toString()}`
         );
         return response.data.stays.map(mapStay);
     },
@@ -128,6 +138,7 @@ function mapBooking(raw: unknown): Booking {
         guestsCount: r.guestsCount,
         specialRequests: r.specialRequests,
         paymentStatus: r.paymentStatus,
+        stayId: r.stayId || r.stay_id || "", // Ensure stayId is mapped
     };
 }
 

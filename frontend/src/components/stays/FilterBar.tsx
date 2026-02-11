@@ -143,24 +143,36 @@ export default function FilterBar({
                 </button>
             </div>
 
+            {/* Guests Input */}
+            <div className="relative w-24 shrink-0">
+                <input
+                    type="number"
+                    min={1}
+                    placeholder="Guests"
+                    onChange={(e) => {
+                        // Propagate guest change? 
+                        // Current props don't support it yet. 
+                        // Need to update props interface first.
+                    }}
+                    className="block w-full px-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl leading-5 bg-stone-50 dark:bg-black/50 text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm transition-colors"
+                />
+            </div>
+
             {/* Sort Select */}
-            <div className="relative w-full md:w-48 shrink-0">
+            <div className="relative w-full md:w-36 shrink-0">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <SortAscending size={18} className="text-gray-400" />
                 </div>
                 <select
                     value={sort}
                     onChange={(e) => onSortChange(e.target.value as SortOption)}
-                    className="block w-full pl-10 pr-8 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl leading-5 bg-stone-50 dark:bg-black/50 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm appearance-none cursor-pointer transition-colors"
+                    className="block w-full pl-9 pr-6 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl leading-5 bg-stone-50 dark:bg-black/50 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm appearance-none cursor-pointer transition-colors"
                 >
-                    <option value="recommended">Recommended</option>
-                    <option value="price_low">Price: Low to High</option>
-                    <option value="price_high">Price: High to Low</option>
-                    <option value="rating">Highest Rated</option>
+                    <option value="recommended">Best</option>
+                    <option value="price_low">$ Low</option>
+                    <option value="price_high">$ High</option>
+                    <option value="rating">Rated</option>
                 </select>
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
-                    <div className="h-0 w-0 border-x-4 border-x-transparent border-t-4 border-t-gray-400" />
-                </div>
             </div>
         </div>
     );

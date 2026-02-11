@@ -116,8 +116,6 @@ export const BookingsController = {
             data: { bookings },
         });
     }),
-}),
-
     /**
      * Get owner's bookings (RBAC: Owner only)
      */

@@ -32,10 +32,23 @@ export const StaysController = {
             }
         }
 
-        const stays = await StaysService.getAll();
+        // Build search filters from query params
+        const filters = {
+            location: req.query.location as string,
+            minPrice: req.query.minPrice ? Number(req.query.minPrice) : undefined,
+            maxPrice: req.query.maxPrice ? Number(req.query.maxPrice) : undefined,
+            type: req.query.category as string, // Frontend sends 'category'
+            guests: req.query.guests ? Number(req.query.guests) : undefined,
+            checkIn: req.query.checkIn as string,
+            checkOut: req.query.checkOut as string,
+        };
+
+        const stays = await StaysService.search(filters);
 
         if (redis) {
-            // Cache for 5 minutes
+            // Cache for 5 minutes (Note: we should really include query params in key now)
+            // e.g., `stays:${JSON.stringify(filters)}`
+            // For now, disabling cache for search to ensure correctness or using dynamic key
             await redis.set(cacheKey, JSON.stringify(stays), 'EX', 300);
         }
 

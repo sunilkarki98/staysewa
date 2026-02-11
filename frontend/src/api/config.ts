@@ -34,6 +34,10 @@ export const API_CONFIG = {
             INITIATE: "/payments/initiate",
             VERIFY: "/payments/verify",
         },
+        REVIEWS: {
+            CREATE: "/reviews",
+            BY_STAY: (id: string) => `/stays/${id}/reviews`,
+        },
         MEDIA: {
             UPLOAD: "/media",
             DELETE: (id: string) => `/media/${id}`,
@@ -51,6 +55,11 @@ export const API_CONFIG = {
         },
         ADMIN: {
             STATS: "/admin/stats",
+            ACTIVITY: "/admin/activity",
+            OWNERS: "/admin/owners",
+            VERIFY_OWNER: (id: string) => `/admin/owners/${id}/verify`,
+            BAN_OWNER: (id: string) => `/admin/owners/${id}/ban`,
+            BOOKINGS: "/admin/bookings",
         },
     },
 };
