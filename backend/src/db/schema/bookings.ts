@@ -1,4 +1,4 @@
-import { pgTable, text, uuid, timestamp, boolean, integer, numeric, jsonb, date } from 'drizzle-orm/pg-core';
+import { pgTable, text, uuid, timestamp, boolean, integer, jsonb, date } from 'drizzle-orm/pg-core';
 import { users } from '@/db/schema/users';
 import { stays, stayUnits } from '@/db/schema/stays';
 import { bookingStatusEnum, paymentStatusEnum, paymentMethodEnum, paymentTxnStatusEnum, cancelledByEnum } from '@/db/schema/enums';

@@ -1,52 +1,42 @@
-import { useState, useEffect, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { BookingsService } from "../services/domain";
-import { Booking, BookingStatus } from "../types/booking";
-import { ApiError } from "../api/types";
+import type { Booking, BookingStatus } from "../types/booking";
+import type { ApiError } from "../api/types";
 
 export function useBookings() {
-    const [bookings, setBookings] = useState<Booking[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<ApiError | null>(null);
+    const queryClient = useQueryClient();
 
-    const fetchBookings = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const data = await BookingsService.getAll();
-            setBookings(data);
-        } catch (err) {
-            setError(err as ApiError);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+    const {
+        data: bookings = [],
+        isLoading: loading,
+        error,
+        refetch: refresh,
+    } = useQuery<Booking[], ApiError>({
+        queryKey: ["bookings"],
+        queryFn: BookingsService.getAll,
+    });
 
-    useEffect(() => {
-        fetchBookings();
-    }, [fetchBookings]);
-
-    const updateStatus = async (id: string, status: BookingStatus) => {
-        try {
-            // Optimistic update
-            setBookings((prev) =>
-                prev.map((b) => b.id === id ? { ...b, status } : b)
+    const updateStatusMutation = useMutation({
+        mutationFn: ({ id, status }: { id: string; status: BookingStatus }) =>
+            BookingsService.updateStatus(id, status),
+        onSuccess: (updatedBooking) => {
+            queryClient.setQueryData<Booking[]>(["bookings"], (old) =>
+                old ? old.map((b) => (b.id === updatedBooking.id ? updatedBooking : b)) : []
             );
-
-            await BookingsService.updateStatus(id, status);
-            return true;
-        } catch (err) {
-            // Revert on error
-            setError(err as ApiError);
-            fetchBookings(); // Refresh to ensure sync
-            return false;
-        }
-    };
+        },
+    });
 
     return {
         bookings,
         loading,
         error,
-        refresh: fetchBookings,
-        updateStatus
+        refresh,
+        updateStatus: async (id: string, status: BookingStatus) => {
+            try {
+                return await updateStatusMutation.mutateAsync({ id, status });
+            } catch {
+                return false;
+            }
+        },
     };
 }

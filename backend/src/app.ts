@@ -1,16 +1,28 @@
 import express from 'express';
+import { env } from '@/config/env';
+
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { globalErrorHandler } from '@/middlewares/errorHandler';
 import { AppError } from '@/utils/AppError';
 import routes from '@/routes';
+import { rateLimit } from 'express-rate-limit';
 
 const app = express();
 
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per `window`
+    message: 'Too many requests from this IP, please try again after 15 minutes',
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 // Global Middlewares
 app.use(helmet());
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(limiter);
+app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import StayGrid from "../stays/StayGrid";
 import FilterBar from "../stays/FilterBar";
 import { SortOption } from "../stays/SortBar";
-import { StayIntent, StayCategory } from "../../types/stay-types";
-import { MOCK_STAYS } from "../../data/stays";
+import { StayIntent, StayCategory } from "../../types/stay";
+import { useStays } from "../../hooks/useStays";
+import { useSearchParams } from "next/navigation";
 
 type StayListingSectionProps = {
     isCustomerView?: boolean;
@@ -20,27 +21,62 @@ export default function StayListingSection({
     selectedCategory,
     externalLocation,
     onExternalLocationChange,
-    onCategoryChange
+    onCategoryChange,
 }: StayListingSectionProps) {
-    const [sort, setSort] = useState<SortOption>("recommended");
-    const [searchQuery, setSearchQuery] = useState("");
-    const [intentFilter, setIntentFilter] = useState<StayIntent | "all">("all");
-    const [internalLocation, setInternalLocation] = useState("all");
+    const { stays, loading, error } = useStays();
+    const searchParams = useSearchParams();
 
-    // Use external control if provided, otherwise internal
+    const [sort, setSort] = useState<SortOption>("recommended");
+    const [searchQuery, setSearchQuery] = useState(searchParams.get("query") || "");
+    const [intentFilter, setIntentFilter] = useState<StayIntent | "all">("all");
+    const [internalLocation, setInternalLocation] = useState(searchParams.get("location") || "all");
+
+    // Update internal state if URL params change
+    useEffect(() => {
+        const query = searchParams.get("query");
+        const loc = searchParams.get("location");
+        if (query !== null) setSearchQuery(query);
+        if (loc !== null) setInternalLocation(loc);
+    }, [searchParams]);
+
     const locationFilter = externalLocation !== undefined ? externalLocation : internalLocation;
     const setLocationFilter = onExternalLocationChange || setInternalLocation;
 
-    // Extract unique locations from data for the filter
+    // Derive locations from live data
     const locations = useMemo(() => {
-        // Simple extraction - in real app this might come from API or refined list
-        const locs = new Set(MOCK_STAYS.map(s => s.location));
+        const locs = new Set(stays.map((s) => s.location));
         return Array.from(locs).sort();
-    }, []);
+    }, [stays]);
 
     const handleSortChange = useCallback((value: SortOption) => {
         setSort(value);
     }, []);
+
+    if (loading) {
+        return (
+            <div className="space-y-6">
+                <div className="h-14 bg-stone-200 dark:bg-stone-800 rounded-xl animate-pulse" />
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <div key={i} className="h-64 bg-stone-200 dark:bg-stone-800 rounded-xl animate-pulse" />
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="text-center py-12">
+                <p className="text-lg font-medium text-stone-900 dark:text-white mb-2">
+                    Unable to load stays
+                </p>
+                <p className="text-sm text-muted">
+                    Please check your connection and try again.
+                </p>
+            </div>
+        );
+    }
 
     return (
         <section className="space-y-6">
@@ -66,6 +102,7 @@ export default function StayListingSection({
                 locationFilter={locationFilter}
                 isCustomerView={isCustomerView}
                 explicitCategory={selectedCategory}
+                stays={stays}
             />
         </section>
     );

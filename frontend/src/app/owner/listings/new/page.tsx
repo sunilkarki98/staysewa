@@ -1,99 +1,186 @@
 "use client";
 
-import { useState, SyntheticEvent } from "react";
-import { ArrowLeftIcon, ImageIcon, PlusIcon } from "@phosphor-icons/react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, ArrowRight, CheckCircle } from "@phosphor-icons/react";
 import Link from "next/link";
 
-type ListingFormData = {
-    name: string;
-    type: "hostels" | "flats" | "homestays";
-    intent: "short-stay" | "long-stay";
-    location: string;
-    address: string;
-    price: string;
-    description: string;
-    amenities: string[];
-    rules: string;
-    maxGuests: string;
-    bedrooms: string;
-    bathrooms: string;
-    images: string[];
-};
+import type { StayCategory } from "@/types/stay";
+import {
+    StepProgress,
+    PropertyTypeSelector,
+    BasicDetailsForm,
+    TypeSpecificForm,
+    AmenitiesRulesForm,
+    ReviewSubmit,
+} from "@/components/owner/listing-form";
+import type {
+    BasicDetailsData,
+    TypeSpecificData,
+    AmenitiesRulesData,
+} from "@/components/owner/listing-form";
+import { useStays } from "@/hooks/useStays";
 
-const AMENITY_OPTIONS = [
-    "WiFi", "Hot Water", "AC", "Parking", "Kitchen", "Laundry",
-    "TV", "Garden", "Balcony", "Security", "CCTV", "Power Backup",
-];
+const STEPS = ["Property Type", "Basic Details", "Specifics", "Amenities", "Review"];
 
 export default function AddListingPage() {
-    const [formData, setFormData] = useState<ListingFormData>({
-        name: "",
-        type: "homestays",
-        intent: "short-stay",
-        location: "",
-        address: "",
-        price: "",
-        description: "",
-        amenities: [],
-        rules: "",
-        maxGuests: "",
-        bedrooms: "1",
-        bathrooms: "1",
-        images: [],
-    });
+    const router = useRouter();
+    const { createStay } = useStays();
 
+    const [currentStep, setCurrentStep] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
 
-    const handleChange = (field: keyof ListingFormData, value: string) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
+    // ─── Form State ──────────────────────────────────────────
+    const [propertyType, setPropertyType] = useState<StayCategory | null>(null);
+
+    const [basicDetails, setBasicDetails] = useState<BasicDetailsData>({
+        name: "",
+        description: "",
+        intent: "both",
+        city: "",
+        district: "",
+        addressLine: "",
+        province: "",
+    });
+
+    const [typeSpecific, setTypeSpecific] = useState<TypeSpecificData>({
+        units: [],
+        simple: { basePrice: 0, maxGuests: 2, bedrooms: 1, bathrooms: 1 },
+    });
+
+    const [amenitiesRules, setAmenitiesRules] = useState<AmenitiesRulesData>({
+        amenities: [],
+        rules: "",
+        checkInTime: "14:00",
+        checkOutTime: "11:00",
+    });
+
+    // ─── Step Defaults on Type Selection ─────────────────────
+    const handleTypeSelect = (type: StayCategory) => {
+        setPropertyType(type);
+
+        // Set default intent based on type
+        const intentDefaults: Record<StayCategory, BasicDetailsData["intent"]> = {
+            hotel: "short_stay",
+            hostel: "short_stay",
+            homestay: "both",
+            apartment: "long_stay",
+            room: "long_stay",
+        };
+        setBasicDetails((prev) => ({ ...prev, intent: intentDefaults[type] }));
+
+        // Add a default unit for hotels/hostels
+        if ((type === "hotel" || type === "hostel") && typeSpecific.units.length === 0) {
+            setTypeSpecific((prev) => ({
+                ...prev,
+                units: [{
+                    tempId: Math.random().toString(36).slice(2, 9),
+                    name: "",
+                    type: type === "hostel" ? "bed" : "private_room",
+                    maxOccupancy: type === "hostel" ? 6 : 2,
+                    basePrice: 0,
+                    quantity: 1,
+                    amenities: [],
+                }],
+            }));
+        }
     };
 
-    const toggleAmenity = (amenity: string) => {
-        setFormData((prev) => ({
-            ...prev,
-            amenities: prev.amenities.includes(amenity)
-                ? prev.amenities.filter((a) => a !== amenity)
-                : [...prev.amenities, amenity],
-        }));
+    // ─── Validation ──────────────────────────────────────────
+    const canProceed = (): boolean => {
+        switch (currentStep) {
+            case 0: return propertyType !== null;
+            case 1: return basicDetails.name.trim() !== "" && basicDetails.city.trim() !== "" && basicDetails.district.trim() !== "";
+            case 2: {
+                if (propertyType === "hotel" || propertyType === "hostel") {
+                    return typeSpecific.units.length > 0 && typeSpecific.units.every(u => u.name.trim() !== "" && u.basePrice > 0);
+                }
+                return typeSpecific.simple.basePrice > 0;
+            }
+            case 3: return true; // amenities and rules are optional
+            case 4: return true;
+            default: return false;
+        }
     };
 
-    const handleSubmit = (e: SyntheticEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    // ─── Navigation ──────────────────────────────────────────
+    const goNext = () => {
+        if (currentStep < STEPS.length - 1 && canProceed()) {
+            setCurrentStep((prev) => prev + 1);
+        }
+    };
+
+    const goBack = () => {
+        if (currentStep > 0) {
+            setCurrentStep((prev) => prev - 1);
+        }
+    };
+
+    // ─── Submit Handler ──────────────────────────────────────
+    const handleSubmit = async () => {
+        if (!propertyType) return;
         setIsSubmitting(true);
 
-        // Mock submission
-        setTimeout(() => {
-            setIsSubmitting(false);
+        try {
+            const needsUnits = propertyType === "hotel" || propertyType === "hostel";
+            const basePrice = needsUnits
+                ? Math.min(...typeSpecific.units.map(u => u.basePrice))
+                : typeSpecific.simple.basePrice;
+
+            await createStay({
+                name: basicDetails.name,
+                type: propertyType,
+                intent: basicDetails.intent,
+                location: [basicDetails.city, basicDetails.district].filter(Boolean).join(", "),
+                price: basePrice,
+                description: basicDetails.description,
+                amenities: amenitiesRules.amenities,
+                rules: amenitiesRules.rules.split("\n").filter(Boolean),
+                maxGuests: needsUnits ? undefined : typeSpecific.simple.maxGuests,
+                images: [],
+            });
+
             setSubmitted(true);
-            console.log("Listing submitted:", formData);
-        }, 1500);
+        } catch (err) {
+            console.error("Failed to create listing:", err);
+            alert("Failed to create listing. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
+    // ─── Success Screen ──────────────────────────────────────
     if (submitted) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-                <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
-                    <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
+                <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6 animate-bounce">
+                    <CheckCircle size={40} weight="fill" className="text-green-600 dark:text-green-400" />
                 </div>
                 <h2 className="text-2xl font-bold text-stone-900 dark:text-white mb-2">
                     Listing Submitted!
                 </h2>
-                <p className="text-stone-500 dark:text-stone-400 mb-6 max-w-md">
-                    Your property has been submitted for review. You'll be notified once it's approved and live on StaySewa.
+                <p className="text-stone-500 dark:text-stone-400 mb-8 max-w-md">
+                    Your property &ldquo;{basicDetails.name}&rdquo; has been submitted for review.
+                    You&apos;ll be notified once it&apos;s approved and live on StaySewa.
                 </p>
                 <div className="flex gap-3">
                     <Link
                         href="/owner/listings"
-                        className="px-5 py-2.5 text-sm font-semibold text-white bg-primary rounded-xl hover:bg-primary/90 transition shadow-sm"
+                        className="px-6 py-3 text-sm font-bold text-white bg-primary rounded-xl hover:bg-primary/90 transition shadow-sm"
                     >
                         View My Listings
                     </Link>
                     <button
-                        onClick={() => { setSubmitted(false); setFormData({ name: "", type: "homestays", intent: "short-stay", location: "", address: "", price: "", description: "", amenities: [], rules: "", maxGuests: "", bedrooms: "1", bathrooms: "1", images: [] }); }}
-                        className="px-5 py-2.5 text-sm font-semibold text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition"
+                        onClick={() => {
+                            setSubmitted(false);
+                            setCurrentStep(0);
+                            setPropertyType(null);
+                            setBasicDetails({ name: "", description: "", intent: "both", city: "", district: "", addressLine: "", province: "" });
+                            setTypeSpecific({ units: [], simple: { basePrice: 0, maxGuests: 2, bedrooms: 1, bathrooms: 1 } });
+                            setAmenitiesRules({ amenities: [], rules: "", checkInTime: "14:00", checkOutTime: "11:00" });
+                        }}
+                        className="px-6 py-3 text-sm font-semibold text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700 rounded-xl hover:bg-stone-50 dark:hover:bg-stone-800 transition"
                     >
                         Add Another
                     </button>
@@ -102,272 +189,107 @@ export default function AddListingPage() {
         );
     }
 
+    // ─── Render Current Step ─────────────────────────────────
+    const renderStep = () => {
+        switch (currentStep) {
+            case 0:
+                return (
+                    <PropertyTypeSelector
+                        selected={propertyType}
+                        onSelect={handleTypeSelect}
+                    />
+                );
+            case 1:
+                return (
+                    <BasicDetailsForm
+                        data={basicDetails}
+                        propertyType={propertyType!}
+                        onChange={setBasicDetails}
+                    />
+                );
+            case 2:
+                return (
+                    <TypeSpecificForm
+                        propertyType={propertyType!}
+                        data={typeSpecific}
+                        onChange={setTypeSpecific}
+                    />
+                );
+            case 3:
+                return (
+                    <AmenitiesRulesForm
+                        data={amenitiesRules}
+                        onChange={setAmenitiesRules}
+                    />
+                );
+            case 4:
+                return (
+                    <ReviewSubmit
+                        propertyType={propertyType!}
+                        basicDetails={basicDetails}
+                        typeSpecific={typeSpecific}
+                        amenitiesRules={amenitiesRules}
+                        isSubmitting={isSubmitting}
+                        onSubmit={handleSubmit}
+                    />
+                );
+            default:
+                return null;
+        }
+    };
+
     return (
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto pb-12">
             {/* Header */}
-            <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center gap-4 mb-6">
                 <Link
                     href="/owner/listings"
                     className="p-2 text-stone-500 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-colors"
                 >
-                    <ArrowLeftIcon size={20} weight="bold" />
+                    <ArrowLeft size={20} weight="bold" />
                 </Link>
                 <div>
                     <h1 className="text-2xl font-bold text-stone-900 dark:text-white">
                         Add New Listing
                     </h1>
                     <p className="text-stone-500 text-sm mt-0.5">
-                        Fill in the details to list your property on StaySewa
+                        List your property on StaySewa
                     </p>
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
-                {/* Basic Info */}
-                <section className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 space-y-5">
-                    <h2 className="text-lg font-bold text-stone-900 dark:text-white">
-                        Basic Information
-                    </h2>
+            {/* Step Progress */}
+            <StepProgress currentStep={currentStep} steps={STEPS} />
 
-                    <div>
-                        <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                            Property Name *
-                        </label>
-                        <input
-                            type="text"
-                            required
-                            value={formData.name}
-                            onChange={(e) => handleChange("name", e.target.value)}
-                            placeholder="e.g. Cozy Mountain Homestay"
-                            className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
-                        />
-                    </div>
+            {/* Form Content */}
+            <div className="min-h-[400px]">
+                {renderStep()}
+            </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                                Property Type *
-                            </label>
-                            <select
-                                value={formData.type}
-                                onChange={(e) => handleChange("type", e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
-                            >
-                                <option value="homestays">Homestay</option>
-                                <option value="hostels">Hostel</option>
-                                <option value="flats">Flat / Apartment</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                                Stay Intent *
-                            </label>
-                            <select
-                                value={formData.intent}
-                                onChange={(e) => handleChange("intent", e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
-                            >
-                                <option value="short-stay">Short Stay (per night)</option>
-                                <option value="long-stay">Long Stay (per month)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                            Description *
-                        </label>
-                        <textarea
-                            required
-                            value={formData.description}
-                            onChange={(e) => handleChange("description", e.target.value)}
-                            placeholder="Describe your property, what makes it special, the neighborhood, nearby attractions..."
-                            rows={4}
-                            className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition resize-none"
-                        />
-                    </div>
-                </section>
-
-                {/* Location & Pricing */}
-                <section className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 space-y-5">
-                    <h2 className="text-lg font-bold text-stone-900 dark:text-white">
-                        Location & Pricing
-                    </h2>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                                Area / Neighborhood *
-                            </label>
-                            <input
-                                type="text"
-                                required
-                                value={formData.location}
-                                onChange={(e) => handleChange("location", e.target.value)}
-                                placeholder="e.g. Thamel, Kathmandu"
-                                className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                                Full Address
-                            </label>
-                            <input
-                                type="text"
-                                value={formData.address}
-                                onChange={(e) => handleChange("address", e.target.value)}
-                                placeholder="Street address (optional)"
-                                className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                            <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                                Price (NPR) *
-                            </label>
-                            <input
-                                type="number"
-                                required
-                                min="0"
-                                value={formData.price}
-                                onChange={(e) => handleChange("price", e.target.value)}
-                                placeholder="e.g. 1500"
-                                className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                                Bedrooms
-                            </label>
-                            <select
-                                value={formData.bedrooms}
-                                onChange={(e) => handleChange("bedrooms", e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
-                            >
-                                {[1, 2, 3, 4, 5, 6].map((n) => (
-                                    <option key={n} value={n}>{n}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                                Bathrooms
-                            </label>
-                            <select
-                                value={formData.bathrooms}
-                                onChange={(e) => handleChange("bathrooms", e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
-                            >
-                                {[1, 2, 3, 4].map((n) => (
-                                    <option key={n} value={n}>{n}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                            Max Guests
-                        </label>
-                        <input
-                            type="number"
-                            min="1"
-                            value={formData.maxGuests}
-                            onChange={(e) => handleChange("maxGuests", e.target.value)}
-                            placeholder="e.g. 4"
-                            className="w-full sm:w-32 px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
-                        />
-                    </div>
-                </section>
-
-                {/* Amenities */}
-                <section className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 space-y-5">
-                    <h2 className="text-lg font-bold text-stone-900 dark:text-white">
-                        Amenities
-                    </h2>
-                    <div className="flex flex-wrap gap-2">
-                        {AMENITY_OPTIONS.map((amenity) => {
-                            const selected = formData.amenities.includes(amenity);
-                            return (
-                                <button
-                                    key={amenity}
-                                    type="button"
-                                    onClick={() => toggleAmenity(amenity)}
-                                    className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${selected
-                                        ? "bg-primary/10 border-primary text-primary dark:bg-primary/20"
-                                        : "bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:border-stone-300 dark:hover:border-stone-600"
-                                        }`}
-                                >
-                                    {amenity}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </section>
-
-                {/* Photos */}
-                <section className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 space-y-5">
-                    <h2 className="text-lg font-bold text-stone-900 dark:text-white">
-                        Photos
-                    </h2>
-                    <div className="border-2 border-dashed border-stone-300 dark:border-stone-700 rounded-xl p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
-                        <ImageIcon size={40} className="mx-auto text-stone-400 mb-3" />
-                        <p className="text-sm font-semibold text-stone-600 dark:text-stone-300">
-                            Click to upload photos
-                        </p>
-                        <p className="text-xs text-stone-400 mt-1">
-                            PNG, JPG up to 5MB each. Upload up to 10 photos.
-                        </p>
-                        <p className="text-xs text-stone-400 mt-3 italic">
-                            (Photo upload will be available once backend is connected)
-                        </p>
-                    </div>
-                </section>
-
-                {/* House Rules */}
-                <section className="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 space-y-5">
-                    <h2 className="text-lg font-bold text-stone-900 dark:text-white">
-                        House Rules
-                    </h2>
-                    <textarea
-                        value={formData.rules}
-                        onChange={(e) => handleChange("rules", e.target.value)}
-                        placeholder="e.g. No smoking, quiet hours after 10 PM, no pets..."
-                        rows={3}
-                        className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition resize-none"
-                    />
-                </section>
-
-                {/* Submit */}
-                <div className="flex items-center justify-between pt-2 pb-8">
-                    <Link
-                        href="/owner/listings"
-                        className="px-5 py-2.5 text-sm font-semibold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition"
-                    >
-                        Cancel
-                    </Link>
+            {/* Navigation Buttons */}
+            {currentStep < STEPS.length - 1 && (
+                <div className="flex items-center justify-between pt-6 mt-6 border-t border-stone-200 dark:border-stone-800">
                     <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="px-8 py-3 text-sm font-bold text-white bg-primary rounded-xl hover:bg-primary/90 transition-all shadow-sm shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        type="button"
+                        onClick={goBack}
+                        disabled={currentStep === 0}
+                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition disabled:opacity-30 disabled:cursor-not-allowed"
                     >
-                        {isSubmitting ? (
-                            <>
-                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                Submitting...
-                            </>
-                        ) : (
-                            <>
-                                <PlusIcon size={16} weight="bold" />
-                                Submit Listing
-                            </>
-                        )}
+                        <ArrowLeft size={16} />
+                        Back
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={goNext}
+                        disabled={!canProceed()}
+                        className="flex items-center gap-2 px-6 py-3 text-sm font-bold text-white bg-primary rounded-xl hover:bg-primary/90 transition-all shadow-sm shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Next Step
+                        <ArrowRight size={16} />
                     </button>
                 </div>
-            </form>
+            )}
         </div>
     );
 }

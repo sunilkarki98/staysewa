@@ -1,12 +1,16 @@
+"use client";
+
 import Image from "next/image";
+import { useLocation } from "@/context/LocationContext";
 
 export default function PlanTripCTA() {
+    const { city } = useLocation();
     return (
         <section className="relative h-65 w-full overflow-hidden rounded-none">
             {/* Background Image */}
             <Image
                 src="/cta/kathmandu.jpg" // <-- your image path
-                alt="Kathmandu city view"
+                alt={`${city} city view`}
                 fill
                 priority
                 className="object-cover"
@@ -19,7 +23,7 @@ export default function PlanTripCTA() {
             <div className="relative z-10 mx-auto flex h-full max-w-7xl items-center px-4">
                 <div className="max-w-xl text-white">
                     <h2 className="text-2xl font-semibold md:text-3xl">
-                        Plan Your Trip to Kathmandu
+                        Plan Your Trip to {city}
                     </h2>
                     <p className="mt-2 text-sm text-white/90">
                         Safe, Affordable, and Easy to Book

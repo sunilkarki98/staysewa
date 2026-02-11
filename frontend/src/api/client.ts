@@ -1,5 +1,6 @@
 import { API_CONFIG } from "./config";
-import { ApiError, ApiResponse } from "./types";
+import type { ApiError } from "./types";
+import { supabase } from "../lib/supabase";
 
 interface RequestConfig extends RequestInit {
     params?: Record<string, string>;
@@ -12,29 +13,57 @@ class ApiClient {
         this.baseUrl = baseUrl;
     }
 
+    private async getAuthHeaders(): Promise<Record<string, string>> {
+        const headers: Record<string, string> = {};
+
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.access_token) {
+                headers["Authorization"] = `Bearer ${session.access_token}`;
+            }
+        } catch {
+            // Auth not available — proceed without token
+        }
+
+        return headers;
+    }
+
     private async request<T>(
         endpoint: string,
         config: RequestConfig = {}
     ): Promise<T> {
         const { params, ...customConfig } = config;
-        const headers = {
+
+        const authHeaders = await this.getAuthHeaders();
+
+        const headers: Record<string, string> = {
             "Content-Type": "application/json",
-            ...customConfig.headers,
+            ...authHeaders,
+            ...(customConfig.headers as Record<string, string>),
         };
 
         // Build URL with query params
         const url = new URL(`${this.baseUrl}${endpoint}`);
         if (params) {
             Object.entries(params).forEach(([key, value]) => {
-                if (value) url.searchParams.append(key, value);
+                if (value !== undefined && value !== null) {
+                    url.searchParams.append(key, value);
+                }
             });
         }
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
 
         try {
             const response = await fetch(url.toString(), {
                 ...customConfig,
                 headers,
+                signal: controller.signal,
+                credentials: "include", // Send cookies for JWT
             });
+
+            clearTimeout(timeoutId);
 
             const data = await response.json();
 
@@ -48,13 +77,22 @@ class ApiClient {
 
             return data as T;
         } catch (error) {
-            // Network errors or JSON parsing errors
-            if (error instanceof TypeError) {
+            clearTimeout(timeoutId);
+
+            if (error instanceof DOMException && error.name === "AbortError") {
                 throw {
-                    message: "Network Error: Please check your internet connection.",
-                    status: 0
+                    message: "Request timed out. Please try again.",
+                    status: 408,
                 } as ApiError;
             }
+
+            if (error instanceof TypeError) {
+                throw {
+                    message: "Network error. Please check your connection.",
+                    status: 0,
+                } as ApiError;
+            }
+
             throw error as ApiError;
         }
     }
@@ -63,7 +101,7 @@ class ApiClient {
         return this.request<T>(endpoint, { ...config, method: "GET" });
     }
 
-    public post<T>(endpoint: string, body: any, config?: RequestConfig) {
+    public post<T>(endpoint: string, body: unknown, config?: RequestConfig) {
         return this.request<T>(endpoint, {
             ...config,
             method: "POST",
@@ -71,7 +109,7 @@ class ApiClient {
         });
     }
 
-    public put<T>(endpoint: string, body: any, config?: RequestConfig) {
+    public put<T>(endpoint: string, body: unknown, config?: RequestConfig) {
         return this.request<T>(endpoint, {
             ...config,
             method: "PUT",
@@ -79,8 +117,62 @@ class ApiClient {
         });
     }
 
+    public patch<T>(endpoint: string, body: unknown, config?: RequestConfig) {
+        return this.request<T>(endpoint, {
+            ...config,
+            method: "PATCH",
+            body: JSON.stringify(body),
+        });
+    }
+
     public delete<T>(endpoint: string, config?: RequestConfig) {
         return this.request<T>(endpoint, { ...config, method: "DELETE" });
+    }
+
+    /**
+     * Upload files via multipart/form-data.
+     * Does NOT set Content-Type — browser sets it with boundary automatically.
+     */
+    public async upload<T>(endpoint: string, formData: FormData): Promise<T> {
+        const authHeaders = await this.getAuthHeaders();
+        const url = `${this.baseUrl}${endpoint}`;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT * 3);
+
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: authHeaders, // No Content-Type — browser handles multipart boundary
+                body: formData,
+                signal: controller.signal,
+                credentials: "include",
+            });
+
+            clearTimeout(timeoutId);
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw {
+                    message: data.message || "Upload failed",
+                    status: response.status,
+                    errors: data.errors,
+                } as ApiError;
+            }
+
+            return data as T;
+        } catch (error) {
+            clearTimeout(timeoutId);
+
+            if (error instanceof DOMException && error.name === "AbortError") {
+                throw { message: "Upload timed out.", status: 408 } as ApiError;
+            }
+            if (error instanceof TypeError) {
+                throw { message: "Network error during upload.", status: 0 } as ApiError;
+            }
+            throw error as ApiError;
+        }
     }
 }
 

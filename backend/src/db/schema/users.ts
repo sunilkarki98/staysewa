@@ -1,5 +1,5 @@
 import { pgTable, text, uuid, timestamp, boolean, integer, date, jsonb } from 'drizzle-orm/pg-core';
-import { userRoleEnum, verificationStatusEnum } from '@/db/schema/enums';
+import { userRoleEnum, verificationStatusEnum, idTypeEnum } from '@/db/schema/enums';
 
 // ─── Users (Unified Auth) ───────────────────────────────────
 export const users = pgTable('users', {
@@ -22,9 +22,13 @@ export const users = pgTable('users', {
 export const ownerProfiles = pgTable('owner_profiles', {
     id: uuid('id').defaultRandom().primaryKey(),
     userId: uuid('user_id').references(() => users.id).notNull().unique(),
+    nationality: text('nationality').default('Nepali'),
     businessName: text('business_name'),
     panNumber: text('pan_number'),
-    citizenshipNumber: text('citizenship_number'),
+    idType: idTypeEnum('id_type'),
+    idNumber: text('id_number'),
+    idFrontUrl: text('id_front_url'),
+    idBackUrl: text('id_back_url'),
     bankName: text('bank_name'),
     bankAccount: text('bank_account'),
     address: text('address'),
@@ -39,8 +43,10 @@ export const customerProfiles = pgTable('customer_profiles', {
     userId: uuid('user_id').references(() => users.id).notNull().unique(),
     dateOfBirth: date('date_of_birth'),
     nationality: text('nationality').default('Nepali'),
-    idType: text('id_type'),
+    idType: idTypeEnum('id_type'),
     idNumber: text('id_number'),
+    idFrontUrl: text('id_front_url'),
+    idBackUrl: text('id_back_url'),
     emergencyContact: text('emergency_contact'),
     preferences: jsonb('preferences').default({}),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),

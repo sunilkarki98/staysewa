@@ -14,9 +14,8 @@ export const AuthService = {
      * Generate JWT for a user
      */
     generateToken(id: string) {
-        const secret = process.env.JWT_SECRET || 'fallback_secret';
-        return jwt.sign({ id }, secret, {
-            expiresIn: (process.env.JWT_EXPIRES_IN || '30d') as any,
+        return jwt.sign({ id }, env.JWT_SECRET, {
+            expiresIn: env.JWT_EXPIRES_IN as any,
         });
     },
 
@@ -40,7 +39,7 @@ export const AuthService = {
         const isMatch = await this.comparePasswords(pass, user.password);
         if (!isMatch) return null;
 
-        const { password, ...userWithoutPassword } = user;
+        const { password: _password, ...userWithoutPassword } = user;
         return userWithoutPassword;
     },
 
@@ -56,7 +55,7 @@ export const AuthService = {
         }).returning();
 
         const user = result[0];
-        const { password, ...userWithoutPassword } = user;
+        const { password: _password, ...userWithoutPassword } = user;
         return userWithoutPassword;
     }
 };

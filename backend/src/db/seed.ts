@@ -1,5 +1,5 @@
-import { db, client } from '@/./index';
-import { users, ownerProfiles, customerProfiles, stays, stayUnits, bookings, availability } from '@/./schema/index';
+import { db, client } from '@/db/index';
+import { users, ownerProfiles, customerProfiles, stays, stayUnits, bookings } from '@/db/schema/index';
 
 const seed = async () => {
     console.log('🌱 Seeding database...');

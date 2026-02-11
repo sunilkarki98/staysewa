@@ -15,6 +15,20 @@
       "when": 1770718014823,
       "tag": "0001_whole_warpath",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770720326896,
+      "tag": "0002_acoustic_the_order",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1770720472343,
+      "tag": "0003_tranquil_the_hood",
+      "breakpoints": true
     }
   ]
 }

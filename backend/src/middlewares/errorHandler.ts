@@ -1,8 +1,9 @@
 import type { Request, Response, NextFunction } from 'express';
-import { AppError } from '@/utils/AppError';
-import { env } from '@/config/env';
 
-export const globalErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
+import { env } from '@/config/env';
+import { logger } from '@/utils/logger';
+
+export const globalErrorHandler = (err: any, req: Request, res: Response, _next: NextFunction) => {
     err.statusCode = err.statusCode || 500;
     err.status = err.status || 'error';
 
@@ -22,7 +23,7 @@ export const globalErrorHandler = (err: any, req: Request, res: Response, next: 
             });
         } else {
             // Programming or other unknown error: don't leak details
-            console.error('ERROR 💥', err);
+            logger.error(err, 'ERROR 💥');
             res.status(500).json({
                 status: 'error',
                 message: 'Something went very wrong!',

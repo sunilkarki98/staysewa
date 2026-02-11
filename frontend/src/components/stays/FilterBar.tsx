@@ -1,7 +1,7 @@
 "use client";
 
-import { MagnifyingGlassIcon, MapPinIcon, Funnel, SortAscending } from "@phosphor-icons/react";
-import { StayIntent, StayCategory } from "../../types/stay-types";
+import { MagnifyingGlass, MapPin, Funnel, SortAscending } from "@phosphor-icons/react";
+import { StayIntent, StayCategory } from "../../types/stay";
 import { SortOption } from "./SortBar";
 import { motion } from "framer-motion";
 
@@ -34,7 +34,7 @@ export default function FilterBar({
     activeCategory,
     onCategoryChange,
 }: FilterBarProps) {
-    const tabs: (StayCategory | "all")[] = ["all", "hostels", "flats", "homestays"];
+    const tabs: (StayCategory | "all")[] = ["all", "hostel", "apartment", "homestay"];
 
     return (
         <div className="flex flex-col xl:flex-row items-center gap-4 p-2 rounded-2xl bg-white dark:bg-gray-900 border border-border dark:border-gray-800 shadow-sm">
@@ -75,7 +75,7 @@ export default function FilterBar({
             {/* Search Input (Grow) */}
             <div className="relative flex-1 w-full xl:w-auto">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MagnifyingGlassIcon size={18} className="text-gray-400" />
+                    <MagnifyingGlass size={18} className="text-gray-400" />
                 </div>
                 <input
                     type="text"
@@ -90,7 +90,7 @@ export default function FilterBar({
             {!hideLocation && (
                 <div className="relative w-full md:w-48">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <MapPinIcon size={18} className="text-gray-400" />
+                        <MapPin size={18} className="text-gray-400" />
                     </div>
                     <select
                         value={locationFilter}
@@ -123,8 +123,8 @@ export default function FilterBar({
                 </button>
                 <div className="w-px h-4 bg-gray-300 dark:bg-gray-700" />
                 <button
-                    onClick={() => onIntentChange("short-stay")}
-                    className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${intentFilter === "short-stay"
+                    onClick={() => onIntentChange("short_stay")}
+                    className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${intentFilter === "short_stay"
                         ? "bg-white dark:bg-gray-800 text-blue-600 shadow-sm"
                         : "text-gray-500 hover:text-gray-700 dark:text-gray-400"
                         }`}
@@ -133,8 +133,8 @@ export default function FilterBar({
                 </button>
                 <div className="w-px h-4 bg-gray-300 dark:bg-gray-700" />
                 <button
-                    onClick={() => onIntentChange("long-stay")}
-                    className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${intentFilter === "long-stay"
+                    onClick={() => onIntentChange("long_stay")}
+                    className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${intentFilter === "long_stay"
                         ? "bg-white dark:bg-gray-800 text-purple-600 shadow-sm"
                         : "text-gray-500 hover:text-gray-700 dark:text-gray-400"
                         }`}

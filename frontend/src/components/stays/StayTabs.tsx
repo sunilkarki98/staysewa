@@ -2,12 +2,12 @@
 
 import clsx from "clsx";
 import { useUserIntent } from "../../context/UserIntentContext";
-import type { StayCategory } from "../../types/stay-types";
+import type { StayCategory } from "../../types/stay";
 
 const TABS: { label: string; value: StayCategory }[] = [
-    { label: "Hostels", value: "hostels" },
-    { label: "Flats", value: "flats" },
-    { label: "Homestays", value: "homestays" },
+    { label: "Hostels", value: "hostel" },
+    { label: "Apartments", value: "apartment" },
+    { label: "Homestays", value: "homestay" },
 ];
 
 export default function StayTabs() {

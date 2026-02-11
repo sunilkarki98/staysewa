@@ -20,6 +20,11 @@ const themeScript = `
   })();
 `;
 
+import { AuthProvider } from "@/context/AuthContext";
+
+import { LocationProvider } from "@/context/LocationContext";
+import QueryProvider from "@/components/providers/QueryProvider";
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -27,7 +32,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className="bg-bg text-text">
-        {children}
+        <QueryProvider>
+          <AuthProvider>
+            <LocationProvider>
+              {children}
+            </LocationProvider>
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

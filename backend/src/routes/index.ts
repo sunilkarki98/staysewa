@@ -6,6 +6,9 @@ import customersRouter from '@/routes/customers.routes';
 import userRoutes from '@/routes/user.routes';
 import mediaRouter from '@/routes/media.routes';
 import authRouter from '@/routes/auth.routes';
+import paymentRoutes from '@/routes/payment.routes';
+import adminRoutes from '@/routes/admin.routes';
+import ownerDashboardRoutes from '@/routes/owner-dashboard.routes';
 
 const router = Router();
 
@@ -16,5 +19,8 @@ router.use('/owners', ownersRouter);
 router.use('/customers', customersRouter);
 router.use('/users', userRoutes);
 router.use('/media', mediaRouter);
+router.use('/payments', paymentRoutes);
+router.use('/admin', adminRoutes);
+router.use('/owner/dashboard', ownerDashboardRoutes);
 
 export default router;

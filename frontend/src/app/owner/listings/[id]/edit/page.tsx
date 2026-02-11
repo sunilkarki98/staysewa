@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeftIcon, ImageIcon, PlusIcon, FloppyDisk } from "@phosphor-icons/react";
+import { ArrowLeftIcon, ImageIcon, FloppyDisk } from "@phosphor-icons/react";
 import Link from "next/link";
 import Image from "next/image";
-import { MOCK_STAYS } from "../../../../../data/stays";
+import { StaysService } from "@/services/domain";
+import type { StayCategory, StayIntent } from "@/types/stay";
 
 type ListingFormData = {
     name: string;
-    type: "hostels" | "flats" | "homestays";
-    intent: "short-stay" | "long-stay";
+    type: StayCategory;
+    intent: StayIntent;
     location: string;
     address: string;
     price: string;
@@ -33,13 +34,10 @@ export default function EditListingPage() {
     const router = useRouter();
     const listingId = params.id as string;
 
-    // Find the existing listing from mock data
-    const existingListing = MOCK_STAYS.find((s) => s.id === listingId);
-
     const [formData, setFormData] = useState<ListingFormData>({
         name: "",
-        type: "homestays",
-        intent: "short-stay",
+        type: "homestay",
+        intent: "short_stay",
         location: "",
         address: "",
         price: "",
@@ -55,29 +53,36 @@ export default function EditListingPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [saved, setSaved] = useState(false);
     const [notFound, setNotFound] = useState(false);
+    const [isLoadingData, setIsLoadingData] = useState(true);
 
-    // Pre-populate form with existing data
+    // Fetch listing from API
     useEffect(() => {
-        if (existingListing) {
-            setFormData({
-                name: existingListing.name,
-                type: existingListing.type,
-                intent: existingListing.intent,
-                location: existingListing.location,
-                address: "",
-                price: existingListing.price.toString(),
-                description: `A wonderful ${existingListing.type.slice(0, -1)} located in ${existingListing.location}. Features comfortable accommodations and great amenities.`,
-                amenities: ["WiFi", "Hot Water"],
-                rules: "No smoking indoors. Quiet hours after 10 PM.",
-                maxGuests: "4",
-                bedrooms: existingListing.type === "hostels" ? "1" : "2",
-                bathrooms: "1",
-                images: existingListing.images,
-            });
-        } else {
-            setNotFound(true);
-        }
-    }, [existingListing]);
+        const fetchListing = async () => {
+            try {
+                const listing = await StaysService.getById(listingId);
+                setFormData({
+                    name: listing.name,
+                    type: listing.type,
+                    intent: listing.intent,
+                    location: listing.location,
+                    address: "",
+                    price: listing.price.toString(),
+                    description: listing.description || `A wonderful ${listing.type.slice(0, -1)} located in ${listing.location}.`,
+                    amenities: listing.amenities || ["WiFi", "Hot Water"],
+                    rules: listing.rules?.join("\n") || "",
+                    maxGuests: "4",
+                    bedrooms: listing.type === "hostel" ? "1" : "2",
+                    bathrooms: "1",
+                    images: listing.images,
+                });
+            } catch {
+                setNotFound(true);
+            } finally {
+                setIsLoadingData(false);
+            }
+        };
+        fetchListing();
+    }, [listingId]);
 
     const handleChange = (field: keyof ListingFormData, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -92,17 +97,37 @@ export default function EditListingPage() {
         }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSaving(true);
-
-        // Mock save
-        setTimeout(() => {
-            setIsSaving(false);
+        try {
+            await StaysService.update(listingId, {
+                name: formData.name,
+                type: formData.type,
+                intent: formData.intent,
+                location: formData.location,
+                price: Number(formData.price),
+                description: formData.description,
+                amenities: formData.amenities,
+                rules: formData.rules.split("\n").filter(Boolean),
+            });
             setSaved(true);
-            console.log("Listing updated:", formData);
-        }, 1500);
+        } catch (err) {
+            console.error("Failed to update listing:", err);
+        } finally {
+            setIsSaving(false);
+        }
     };
+
+    if (isLoadingData) {
+        return (
+            <div className="max-w-3xl mx-auto space-y-6 animate-pulse">
+                <div className="h-8 w-48 bg-stone-200 dark:bg-stone-800 rounded" />
+                <div className="h-64 bg-stone-200 dark:bg-stone-800 rounded-2xl" />
+                <div className="h-48 bg-stone-200 dark:bg-stone-800 rounded-2xl" />
+            </div>
+        );
+    }
 
     if (notFound) {
         return (
@@ -116,7 +141,7 @@ export default function EditListingPage() {
                     Listing Not Found
                 </h2>
                 <p className="text-stone-500 dark:text-stone-400 mb-6">
-                    The listing you're trying to edit doesn't exist.
+                    The listing you&apos;re trying to edit doesn&apos;t exist.
                 </p>
                 <Link
                     href="/owner/listings"
@@ -238,9 +263,11 @@ export default function EditListingPage() {
                                 onChange={(e) => handleChange("type", e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
                             >
-                                <option value="homestays">Homestay</option>
-                                <option value="hostels">Hostel</option>
-                                <option value="flats">Flat / Apartment</option>
+                                <option value="homestay">Homestay</option>
+                                <option value="hostel">Hostel</option>
+                                <option value="hotel">Hotel</option>
+                                <option value="apartment">Apartment</option>
+                                <option value="room">Room</option>
                             </select>
                         </div>
 
@@ -253,8 +280,8 @@ export default function EditListingPage() {
                                 onChange={(e) => handleChange("intent", e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
                             >
-                                <option value="short-stay">Short Stay (per night)</option>
-                                <option value="long-stay">Long Stay (per month)</option>
+                                <option value="short_stay">Short Stay (per night)</option>
+                                <option value="long_stay">Long Stay (per month)</option>
                             </select>
                         </div>
                     </div>
@@ -382,8 +409,8 @@ export default function EditListingPage() {
                                     type="button"
                                     onClick={() => toggleAmenity(amenity)}
                                     className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${selected
-                                            ? "bg-primary/10 border-primary text-primary dark:bg-primary/20"
-                                            : "bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:border-stone-300 dark:hover:border-stone-600"
+                                        ? "bg-primary/10 border-primary text-primary dark:bg-primary/20"
+                                        : "bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:border-stone-300 dark:hover:border-stone-600"
                                         }`}
                                 >
                                     {amenity}

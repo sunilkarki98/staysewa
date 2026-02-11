@@ -3,17 +3,38 @@
 import { useState } from "react";
 import { GoogleLogo, Phone, ArrowRight } from "@phosphor-icons/react";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
+    const { loginWithGoogle, loginWithPhone, verifyOtp } = useAuth();
     const [phoneNumber, setPhoneNumber] = useState("");
     const [showOtp, setShowOtp] = useState(false);
     const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    const handleSendOtp = () => {
+    const handleGoogleSignIn = async () => {
+        try {
+            setLoading(true);
+            await loginWithGoogle();
+        } catch (err: any) {
+            setError(err.message);
+            setLoading(false);
+        }
+    };
+
+    const handleSendOtp = async () => {
         if (phoneNumber.length >= 10) {
-            setShowOtp(true);
-            // TODO: Integrate with backend OTP service
-            console.log("Sending OTP to:", phoneNumber);
+            try {
+                setLoading(true);
+                setError("");
+                await loginWithPhone(phoneNumber);
+                setShowOtp(true);
+            } catch (err: any) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
@@ -31,21 +52,18 @@ export default function LoginPage() {
         }
     };
 
-    const handleVerifyOtp = () => {
+    const handleVerifyOtp = async () => {
         const otpValue = otp.join("");
         if (otpValue.length === 6) {
-            // TODO: Verify OTP with backend
-            console.log("Verifying OTP:", otpValue);
-            // Mock success - redirect to home
-            window.location.href = "/";
+            try {
+                setLoading(true);
+                setError("");
+                await verifyOtp(phoneNumber, otpValue);
+            } catch (err: any) {
+                setError(err.message);
+                setLoading(false);
+            }
         }
-    };
-
-    const handleGoogleSignIn = () => {
-        // TODO: Integrate with Google OAuth
-        console.log("Google Sign In clicked");
-        // Mock success - redirect to home
-        window.location.href = "/";
     };
 
     return (
@@ -73,11 +91,18 @@ export default function LoginPage() {
                         </p>
                     </div>
 
+                    {error && (
+                        <div className="mb-6 p-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 rounded-lg text-center">
+                            {error}
+                        </div>
+                    )}
+
                     {!showOtp ? (
                         <>
                             {/* Google Sign In */}
                             <button
                                 onClick={handleGoogleSignIn}
+                                disabled={loading}
                                 className="w-full flex items-center justify-center gap-3 px-4 py-3.5 
                                     bg-white dark:bg-gray-800 
                                     border border-gray-200 dark:border-gray-700 
@@ -85,10 +110,10 @@ export default function LoginPage() {
                                     font-medium transition-all duration-200
                                     hover:bg-gray-50 dark:hover:bg-gray-750 
                                     hover:border-gray-300 dark:hover:border-gray-600
-                                    hover:shadow-md active:scale-[0.98]"
+                                    hover:shadow-md active:scale-[0.98] disabled:opacity-50"
                             >
                                 <GoogleLogo size={22} weight="bold" className="text-red-500" />
-                                Continue with Google
+                                {loading ? "Connecting..." : "Continue with Google"}
                             </button>
 
                             {/* Divider */}
@@ -123,7 +148,7 @@ export default function LoginPage() {
 
                                 <button
                                     onClick={handleSendOtp}
-                                    disabled={phoneNumber.length < 10}
+                                    disabled={phoneNumber.length < 10 || loading}
                                     className="w-full flex items-center justify-center gap-2 px-4 py-3.5 
                                         bg-gradient-to-r from-blue-500 to-indigo-600 
                                         text-white font-semibold rounded-xl
@@ -133,8 +158,8 @@ export default function LoginPage() {
                                         active:scale-[0.98]
                                         disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-lg"
                                 >
-                                    Send OTP
-                                    <ArrowRight size={18} weight="bold" />
+                                    {loading ? "Sending..." : "Send OTP"}
+                                    {!loading && <ArrowRight size={18} weight="bold" />}
                                 </button>
                             </div>
                         </>
@@ -179,7 +204,7 @@ export default function LoginPage() {
 
                             <button
                                 onClick={handleVerifyOtp}
-                                disabled={otp.some((d) => !d)}
+                                disabled={otp.some((d) => !d) || loading}
                                 className="w-full flex items-center justify-center gap-2 px-4 py-3.5 
                                     bg-gradient-to-r from-blue-500 to-indigo-600 
                                     text-white font-semibold rounded-xl
@@ -189,8 +214,8 @@ export default function LoginPage() {
                                     active:scale-[0.98]
                                     disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                             >
-                                Verify & Continue
-                                <ArrowRight size={18} weight="bold" />
+                                {loading ? "Verifying..." : "Verify & Continue"}
+                                {!loading && <ArrowRight size={18} weight="bold" />}
                             </button>
 
                             <div className="text-center">

@@ -10,7 +10,7 @@ export const CustomersController = {
     /**
      * Get all customers
      */
-    getAllCustomers: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    getAllCustomers: catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
         const customers = await CustomersService.getAll();
         res.status(200).json({
             status: 'success',

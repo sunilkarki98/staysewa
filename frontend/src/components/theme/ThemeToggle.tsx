@@ -1,6 +1,6 @@
 "use client";
 
-import { SunIcon, MoonIcon } from "@phosphor-icons/react";
+import { Sun, Moon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
 export default function ThemeToggle() {
@@ -8,6 +8,7 @@ export default function ThemeToggle() {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
 
         const match = document.cookie.match(/theme=(dark|light)/);
@@ -38,9 +39,9 @@ export default function ThemeToggle() {
             className="rounded-full p-2 bg-white shadow-md hover:bg-gray-100 transition-all active:scale-95"
         >
             {theme === "dark" ? (
-                <MoonIcon size={20} weight="fill" className="text-blue-600" />
+                <Moon size={20} weight="fill" className="text-blue-600" />
             ) : (
-                <SunIcon size={20} weight="fill" className="text-amber-500" />
+                <Sun size={20} weight="fill" className="text-amber-500" />
             )}
         </button>
     );

@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { CaretLeftIcon, CaretRightIcon } from "@phosphor-icons/react";
+import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 import Link from "next/link";
 import Image from "next/image";
+import { useStays } from "../../hooks/useStays";
 
 type FeaturedCarouselProps = {
     images: string[];
@@ -58,13 +59,13 @@ function FeaturedCarousel({ images, name, autoScrollInterval = 4000 }: FeaturedC
                         onClick={(e) => { e.stopPropagation(); goToPrev(); }}
                         className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-black/70 text-gray-700 dark:text-white shadow-md opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
                     >
-                        <CaretLeftIcon size={18} weight="bold" />
+                        <CaretLeft size={18} weight="bold" />
                     </button>
                     <button
                         onClick={(e) => { e.stopPropagation(); goToNext(); }}
                         className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-black/70 text-gray-700 dark:text-white shadow-md opacity-0 group-hover:opacity-100 transition-all hover:scale-110"
                     >
-                        <CaretRightIcon size={18} weight="bold" />
+                        <CaretRight size={18} weight="bold" />
                     </button>
                     <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
                         {images.map((_, index) => (
@@ -81,13 +82,40 @@ function FeaturedCarousel({ images, name, autoScrollInterval = 4000 }: FeaturedC
     );
 }
 
-import { hostels } from "../../data/hostels";
+import { useLocation } from "@/context/LocationContext";
 
 export default function PopularHostels() {
+    const { stays, loading } = useStays();
+    const { city } = useLocation();
+    const hostels = stays.filter((s) => s.type === "hostel").slice(0, 4);
+
+    if (loading) {
+        return (
+            <section className="bg-gray-50 dark:bg-gray-900 pt-24 pb-12">
+                <h2 className="text-center text-2xl font-bold mb-8 text-gray-900 dark:text-white">
+                    Popular Hostels in {city}
+                </h2>
+                <div className="mx-auto grid gap-4 px-3 sm:grid-cols-2 lg:grid-cols-4 max-w-[1400px]">
+                    {Array.from({ length: 4 }).map((_, i) => (
+                        <div key={i} className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden">
+                            <div className="h-56 bg-gray-200 dark:bg-gray-700 animate-pulse" />
+                            <div className="p-4 space-y-3">
+                                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-3/4" />
+                                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse w-1/2" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </section>
+        );
+    }
+
+    if (hostels.length === 0) return null;
+
     return (
         <section className="bg-gray-50 dark:bg-gray-900 pt-24 pb-12">
             <h2 className="text-center text-2xl font-bold mb-8 text-gray-900 dark:text-white">
-                Popular Hostels in Kathmandu
+                Popular Hostels in {city}
             </h2>
 
             <div className="mx-auto grid gap-4 px-3 sm:grid-cols-2 lg:grid-cols-4 max-w-[1400px]">
@@ -110,7 +138,7 @@ export default function PopularHostels() {
                                     Book
                                 </Link>
                                 <Link
-                                    href={`/login?redirect=/stays/${h.id}`}
+                                    href={`/stays/${h.id}`}
                                     className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                                 >
                                     See More

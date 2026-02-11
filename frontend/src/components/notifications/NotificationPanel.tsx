@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "phosphor-react";
+import { X } from "@phosphor-icons/react";
 
 export function NotificationPanel({
     open,

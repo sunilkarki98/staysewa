@@ -34,7 +34,7 @@ export default function HomestaysPage() {
                     <h1 className="text-3xl font-bold text-text dark:text-white mb-2">Homestays</h1>
                     <p className="text-muted text-lg">Live like a local and experience authentic Nepali hospitality.</p>
                 </div>
-                <StayListingSection selectedCategory="homestays" />
+                <StayListingSection selectedCategory="homestay" />
             </Container>
         </main>
     );

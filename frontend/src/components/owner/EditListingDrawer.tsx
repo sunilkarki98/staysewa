@@ -1,6 +1,6 @@
-import { X, MapPin, CurrencyInr, House, Bed, CheckCircle } from "@phosphor-icons/react";
+import { X, MapPin, CurrencyInr, CheckCircle } from "@phosphor-icons/react";
 import React, { useEffect, useState } from "react";
-import { Stay } from "../../data/stays";
+import { Stay } from "../../types/stay";
 
 type EditListingDrawerProps = {
     isOpen: boolean;
@@ -15,6 +15,7 @@ export default function EditListingDrawer({ isOpen, onClose, listing, onSave }: 
 
     useEffect(() => {
         if (isOpen) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsVisible(true);
             document.body.style.overflow = "hidden";
         } else {
@@ -22,15 +23,16 @@ export default function EditListingDrawer({ isOpen, onClose, listing, onSave }: 
             document.body.style.overflow = "unset";
             return () => clearTimeout(timer);
         }
-    }, [isOpen]);
+    }, [isOpen, onClose]);
 
     useEffect(() => {
         if (listing) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setFormData(listing);
         }
     }, [listing]);
 
-    const handleChange = (field: keyof Stay, value: any) => {
+    const handleChange = (field: keyof Stay, value: string | number | string[]) => {
         if (!formData) return;
         setFormData({ ...formData, [field]: value });
     };
@@ -105,9 +107,11 @@ export default function EditListingDrawer({ isOpen, onClose, listing, onSave }: 
                                     onChange={(e) => handleChange("type", e.target.value)}
                                     className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
                                 >
-                                    <option value="homestays">Homestay</option>
-                                    <option value="hostels">Hostel</option>
-                                    <option value="flats">Flat</option>
+                                    <option value="homestay">Homestay</option>
+                                    <option value="hostel">Hostel</option>
+                                    <option value="hotel">Hotel</option>
+                                    <option value="apartment">Apartment</option>
+                                    <option value="room">Room</option>
                                 </select>
                             </div>
                             <div>
@@ -119,8 +123,8 @@ export default function EditListingDrawer({ isOpen, onClose, listing, onSave }: 
                                     onChange={(e) => handleChange("intent", e.target.value)}
                                     className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
                                 >
-                                    <option value="short-stay">Short Stay</option>
-                                    <option value="long-stay">Long Stay</option>
+                                    <option value="short_stay">Short Stay</option>
+                                    <option value="long_stay">Long Stay</option>
                                 </select>
                             </div>
                         </div>
@@ -144,7 +148,7 @@ export default function EditListingDrawer({ isOpen, onClose, listing, onSave }: 
                         <div>
                             <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5 flex items-center gap-2">
                                 <CurrencyInr size={16} />
-                                Price (NPR) / {formData.intent === 'short-stay' ? "Night" : "Month"}
+                                Price (NPR) / {formData.intent === 'short_stay' ? "Night" : "Month"}
                             </label>
                             <input
                                 type="number"

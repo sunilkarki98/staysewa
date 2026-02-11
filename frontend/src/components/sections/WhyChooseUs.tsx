@@ -45,7 +45,10 @@ const features = [
     },
 ];
 
+import { useLocation } from "@/context/LocationContext";
+
 export default function WhyChooseUs() {
+    const { city } = useLocation();
     return (
         <section className="bg-neutral dark:bg-stone-950 py-8">
             <div className="w-full max-w-[1600px] mx-auto px-4 md:px-8">
@@ -55,7 +58,7 @@ export default function WhyChooseUs() {
                         Why Travelers Choose StaySewa
                     </h2>
                     <p className="mt-4 text-lg text-muted dark:text-stone-400">
-                        Everything you need for a smooth stay in Kathmandu
+                        Everything you need for a smooth stay in {city}
                     </p>
                 </div>
 

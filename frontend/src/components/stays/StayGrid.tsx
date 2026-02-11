@@ -1,10 +1,12 @@
 "use client";
 
+import { useMemo } from "react";
 import { useUserIntent } from "../../context/UserIntentContext";
-import { MOCK_STAYS } from "../../data/stays";
+import { useLocation } from "@/context/LocationContext";
 import StayCard from "./StayCard";
 import type { SortOption } from "./SortBar";
-import type { StayIntent, StayCategory } from "../../types/stay-types";
+import type { StayIntent, StayCategory } from "../../types/stay";
+import type { Stay } from "../../types/stay";
 import CustomerStayCard from "./CustomerStayCard";
 
 type StayGridProps = {
@@ -14,6 +16,7 @@ type StayGridProps = {
     locationFilter?: string;
     isCustomerView?: boolean;
     explicitCategory?: StayCategory | "all";
+    stays: Stay[];
 };
 
 export default function StayGrid({
@@ -22,49 +25,49 @@ export default function StayGrid({
     intentFilter = "all",
     locationFilter = "all",
     isCustomerView = false,
-    explicitCategory
+    explicitCategory,
+    stays: rawStays,
 }: StayGridProps) {
     const { category: contextCategory } = useUserIntent();
-    // Use explicit category if provided (for dashboard), otherwise fallback to context (for explore/listing pages)
+    const { city } = useLocation();
     const category = explicitCategory || contextCategory;
 
-    let stays = category === "all"
-        ? MOCK_STAYS
-        : MOCK_STAYS.filter((stay) => stay.type === category);
+    const stays = useMemo(() => {
+        let filtered = category === "all"
+            ? rawStays
+            : rawStays.filter((stay) => stay.type === category);
 
-    // Intent filtering
-    if (intentFilter !== "all") {
-        stays = stays.filter((stay) => stay.intent === intentFilter);
-    }
+        // Intent filtering
+        if (intentFilter !== "all") {
+            filtered = filtered.filter((stay) => stay.intent === intentFilter);
+        }
 
-    // Location filtering
-    if (locationFilter && locationFilter !== "all") {
-        stays = stays.filter((stay) => stay.location.includes(locationFilter));
-    }
+        // Location filtering
+        if (locationFilter && locationFilter !== "all") {
+            filtered = filtered.filter((stay) => stay.location.includes(locationFilter));
+        }
 
-    // Simple search filtering
-    if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        stays = stays.filter(s => s.location.toLowerCase().includes(q) || s.name.toLowerCase().includes(q));
-    }
+        // Search filtering
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            filtered = filtered.filter(
+                (s) => s.location.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)
+            );
+        }
 
-    // 🔽 Sorting logic
-    if (sort === "price_low") {
-        stays = [...stays].sort((a, b) => a.price - b.price);
-    }
+        // Sorting
+        const sorted = [...filtered];
+        if (sort === "price_low") sorted.sort((a, b) => a.price - b.price);
+        if (sort === "price_high") sorted.sort((a, b) => b.price - a.price);
+        if (sort === "rating") sorted.sort((a, b) => b.rating - a.rating);
 
-    if (sort === "price_high") {
-        stays = [...stays].sort((a, b) => b.price - a.price);
-    }
+        return sorted;
+    }, [rawStays, category, intentFilter, locationFilter, searchQuery, sort]);
 
-    if (sort === "rating") {
-        stays = [...stays].sort((a, b) => b.rating - a.rating);
-    }
-
-    // Dynamic Header Logic
     const getHeaderText = () => {
         const catText = category === "all" ? "Stays" : category;
-        const locationText = searchQuery.trim() ? `in "${searchQuery}"` : "in Kathmandu"; // Default location
+        const currentLoc = (locationFilter && locationFilter !== "all") ? locationFilter : city;
+        const locationText = searchQuery.trim() ? `in "${searchQuery}"` : `in ${currentLoc}`;
         return `${catText} ${locationText}`;
     };
 
@@ -85,7 +88,7 @@ export default function StayGrid({
                 </div>
             ) : (
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {stays.map((stay) => (
+                    {stays.map((stay) =>
                         isCustomerView ? (
                             <CustomerStayCard
                                 key={stay.id}
@@ -95,7 +98,7 @@ export default function StayGrid({
                         ) : (
                             <StayCard key={stay.id} {...stay} />
                         )
-                    ))}
+                    )}
                 </div>
             )}
         </section>

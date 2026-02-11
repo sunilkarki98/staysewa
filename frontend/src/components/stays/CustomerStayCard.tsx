@@ -1,7 +1,7 @@
 "use client";
 
-import { MapPinIcon, StarIcon, ArrowRightIcon, CheckCircleIcon } from "@phosphor-icons/react";
-import type { StayCategory, StayIntent } from "../../types/stay-types";
+import { MapPinIcon, StarIcon } from "@phosphor-icons/react";
+import type { StayCategory, StayIntent } from "../../types/stay";
 import ImageCarousel from "../ui/ImageCarousel";
 import Link from "next/link";
 

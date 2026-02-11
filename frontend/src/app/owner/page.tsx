@@ -14,7 +14,7 @@ export default function OwnerDashboardPage() {
                         Dashboard Overview
                     </h1>
                     <p className="text-stone-500 text-sm mt-1">
-                        Here's what's happening with your properties today.
+                        Here&apos;s what&apos;s happening with your properties today.
                     </p>
                 </div>
 

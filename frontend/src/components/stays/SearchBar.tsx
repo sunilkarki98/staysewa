@@ -2,7 +2,7 @@
 
 import { MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { useUserIntent } from "../../context/UserIntentContext";
-import { useState } from "react";
+
 
 type SearchBarProps = {
     value: string;
@@ -13,11 +13,11 @@ export default function SearchBar({ value, onChange }: SearchBarProps) {
     const { category } = useUserIntent();
 
     const placeholder =
-        category === "flats"
-            ? "Search flats by area or landmark"
-            : category === "homestays"
+        category === "apartment"
+            ? "Search apartments by area or landmark"
+            : category === "homestay"
                 ? "Search homestays or hosts"
-                : category === "hostels"
+                : category === "hostel"
                     ? "Search hostels or locations"
                     : "Search all stays";
 

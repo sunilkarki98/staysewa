@@ -1,47 +1,75 @@
-import { useState, useEffect, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { StaysService } from "../services/domain";
-import { Stay } from "../types/stay";
-import { ApiError } from "../api/types";
+import type { Stay } from "../types/stay";
+import type { ApiError } from "../api/types";
 
 export function useStays() {
-    const [stays, setStays] = useState<Stay[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<ApiError | null>(null);
+    const queryClient = useQueryClient();
 
-    const fetchStays = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const data = await StaysService.getAll();
-            setStays(data);
-        } catch (err) {
-            setError(err as ApiError);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+    const {
+        data: stays = [],
+        isLoading: loading,
+        error,
+        refetch: refresh,
+    } = useQuery<Stay[], ApiError>({
+        queryKey: ["stays"],
+        queryFn: StaysService.getAll,
+    });
 
-    useEffect(() => {
-        fetchStays();
-    }, [fetchStays]);
+    const deleteMutation = useMutation({
+        mutationFn: StaysService.delete,
+        onSuccess: (_, id) => {
+            queryClient.setQueryData<Stay[]>(["stays"], (old) =>
+                old ? old.filter((stay) => stay.id !== id) : []
+            );
+        },
+    });
 
-    const deleteStay = async (id: string) => {
-        try {
-            await StaysService.delete(id);
-            // Optimistic update
-            setStays((prev) => prev.filter((stay) => stay.id !== id));
-            return true;
-        } catch (err) {
-            setError(err as ApiError);
-            return false;
-        }
-    };
+    const createMutation = useMutation({
+        mutationFn: StaysService.create,
+        onSuccess: (newStay) => {
+            queryClient.setQueryData<Stay[]>(["stays"], (old) =>
+                old ? [newStay, ...old] : [newStay]
+            );
+        },
+    });
+
+    const updateMutation = useMutation({
+        mutationFn: ({ id, data }: { id: string; data: Partial<Stay> }) =>
+            StaysService.update(id, data),
+        onSuccess: (updatedStay) => {
+            queryClient.setQueryData<Stay[]>(["stays"], (old) =>
+                old ? old.map((s) => (s.id === updatedStay.id ? updatedStay : s)) : []
+            );
+        },
+    });
 
     return {
         stays,
         loading,
         error,
-        refresh: fetchStays,
-        deleteStay
+        refresh,
+        deleteStay: async (id: string) => {
+            try {
+                await deleteMutation.mutateAsync(id);
+                return true;
+            } catch {
+                return false;
+            }
+        },
+        createStay: async (data: Partial<Stay>) => {
+            try {
+                return await createMutation.mutateAsync(data);
+            } catch {
+                return null;
+            }
+        },
+        updateStay: async (id: string, data: Partial<Stay>) => {
+            try {
+                return await updateMutation.mutateAsync({ id, data });
+            } catch {
+                return null;
+            }
+        },
     };
 }

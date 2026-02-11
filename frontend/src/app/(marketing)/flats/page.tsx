@@ -34,7 +34,7 @@ export default function FlatsPage() {
                     <h1 className="text-3xl font-bold text-text dark:text-white mb-2">Flats & Apartments</h1>
                     <p className="text-muted text-lg">Comfortable, private spaces for short or long term living.</p>
                 </div>
-                <StayListingSection selectedCategory="flats" />
+                <StayListingSection selectedCategory="apartment" />
             </Container>
         </main>
     );

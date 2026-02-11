@@ -1,0 +1,189 @@
+
+> staysewa@0.1.0 lint
+> eslint .
+
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/app/(marketing)/dashboard/page.tsx
+  22:11  warning  'tabs' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/app/(marketing)/stays/[id]/page.tsx
+   33:27  error  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+  218:44  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/app/login/page.tsx
+  20:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  33:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  62:27  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/app/my-bookings/page.tsx
+  57:38  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/app/owner/bookings/page.tsx
+  171:68  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  171:77  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/app/owner/listings/[id]/edit/page.tsx
+    5:36  warning  'PlusIcon' is defined but never used                             @typescript-eslint/no-unused-vars
+   33:11  warning  'router' is assigned a value but never used                      @typescript-eslint/no-unused-vars
+  143:36  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  143:60  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/app/owner/listings/new/page.tsx
+  85:69  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  85:92  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/app/owner/page.tsx
+  17:29  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  17:36  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/app/owner/settings/page.tsx
+  15:12  warning  'saveError' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  25:23  error    Unexpected any. Specify a different type        @typescript-eslint/no-explicit-any
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/app/profile/page.tsx
+   4:10  warning  'User' is defined but never used          @typescript-eslint/no-unused-vars
+  44:23  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/components/layout/Footer.tsx
+   9:5  warning  'EnvelopeSimple' is defined but never used  @typescript-eslint/no-unused-vars
+  11:5  warning  'MapPin' is defined but never used          @typescript-eslint/no-unused-vars
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/components/layout/Navbar.tsx
+  16:13  warning  'user' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  16:36  warning  'isLoading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/components/owner/BookingDetailsDrawer.tsx
+  30:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/components/owner/BookingDetailsDrawer.tsx:30:13
+  28 |     useEffect(() => {
+  29 |         if (isOpen) {
+> 30 |             setIsVisible(true);
+     |             ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  31 |             document.body.style.overflow = "hidden"; // Prevent background scrolling
+  32 |         } else {
+  33 |             const timer = setTimeout(() => setIsVisible(false), 300); // Wait for transition  react-hooks/set-state-in-effect
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/components/owner/EditListingDrawer.tsx
+   1:34  warning  'House' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+   1:41  warning  'Bed' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       @typescript-eslint/no-unused-vars
+  18:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/components/owner/EditListingDrawer.tsx:18:13
+  16 |     useEffect(() => {
+  17 |         if (isOpen) {
+> 18 |             setIsVisible(true);
+     |             ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  19 |             document.body.style.overflow = "hidden";
+  20 |         } else {
+  21 |             const timer = setTimeout(() => setIsVisible(false), 300);  react-hooks/set-state-in-effect
+  29:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/components/owner/EditListingDrawer.tsx:29:13
+  27 |     useEffect(() => {
+  28 |         if (listing) {
+> 29 |             setFormData(listing);
+     |             ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  30 |         }
+  31 |     }, [listing]);
+  32 |                                                                                                               react-hooks/set-state-in-effect
+  33:53  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              @typescript-eslint/no-explicit-any
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/components/owner/ListingTable.tsx
+   14:11  warning  'router' is assigned a value but never used                      @typescript-eslint/no-unused-vars
+  141:64  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  141:77  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/components/sections/CallToAction.tsx
+   4:10  warning  'ArrowRight' is defined but never used        @typescript-eslint/no-unused-vars
+  15:11  warning  'primary' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/components/sections/StayListingSection.tsx
+  38:29  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/components/sections/StayListingSection.tsx:38:29
+  36 |         const query = searchParams.get("query");
+  37 |         const loc = searchParams.get("location");
+> 38 |         if (query !== null) setSearchQuery(query);
+     |                             ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  39 |         if (loc !== null) setInternalLocation(loc);
+  40 |     }, [searchParams]);
+  41 |  react-hooks/set-state-in-effect
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/components/stays/CustomerStayCard.tsx
+  3:32  warning  'ArrowRightIcon' is defined but never used   @typescript-eslint/no-unused-vars
+  3:48  warning  'CheckCircleIcon' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/components/stays/SearchBar.tsx
+  5:10  warning  'useState' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/components/stays/StayCard.tsx
+  3:32  warning  'ArrowRightIcon' is defined but never used   @typescript-eslint/no-unused-vars
+  3:48  warning  'CheckCircleIcon' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/components/theme/ThemeToggle.tsx
+  11:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/components/theme/ThemeToggle.tsx:11:9
+   9 |
+  10 |     useEffect(() => {
+> 11 |         setMounted(true);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  12 |
+  13 |         const match = document.cookie.match(/theme=(dark|light)/);
+  14 |         let initial: "light" | "dark" = "light";  react-hooks/set-state-in-effect
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/context/AuthContext.tsx
+  7:10  warning  'apiClient' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/context/UserIntentContext.tsx
+  31:9  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+/home/cosmic-soul/Desktop/staysewa/frontend/src/context/UserIntentContext.tsx:31:9
+  29 |     // Sync category with URL changes
+  30 |     useEffect(() => {
+> 31 |         setCategory(getInitialCategory());
+     |         ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  32 |     }, [pathname]);
+  33 |
+  34 |     return (  react-hooks/set-state-in-effect
+  32:8  warning  React Hook useEffect has a missing dependency: 'getInitialCategory'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  react-hooks/exhaustive-deps
+
+✖ 46 problems (25 errors, 21 warnings)
+

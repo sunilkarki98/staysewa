@@ -1,16 +1,18 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import type { StayType } from "../types/stay";
+import type { StayCategory, StayIntent } from "../types/stay";
+
+export type StayType = { category: StayCategory; intent: StayIntent };
 
 export function useStayType(): StayType {
   const pathname = usePathname();
 
   if (pathname.startsWith("/flats"))
-    return { category: "flats", intent: "short-stay" };
+    return { category: "apartment", intent: "long_stay" };
   if (pathname.startsWith("/homestays"))
-    return { category: "homestays", intent: "short-stay" };
+    return { category: "homestay", intent: "short_stay" };
 
   // default
-  return { category: "hostels", intent: "short-stay" };
+  return { category: "hostel", intent: "short_stay" };
 }

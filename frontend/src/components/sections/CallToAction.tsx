@@ -1,27 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRightIcon, BackpackIcon, HouseIcon, MapPinIcon } from "@phosphor-icons/react";
+import { Backpack, House, MapPin } from "@phosphor-icons/react";
 import Link from "next/link";
 import Image from "next/image";
 import { useUserIntent } from "../../context/UserIntentContext";
+import { useLocation } from "@/context/LocationContext";
 
 export default function CallToAction() {
     const { category } = useUserIntent(); // ✅ destructured
-    const location = "Kathmandu";
-
-    const primary =
-        category === "flats"
-            ? {
-                label: "Browse Flats",
-                href: "/flats",
-                icon: <HouseIcon size={20} weight="bold" />,
-            }
-            : {
-                label: "Explore Hostels",
-                href: "/hostels",
-                icon: <BackpackIcon size={20} weight="bold" />,
-            };
+    const { city } = useLocation();
+    const location = city;
 
     return (
         <section className="relative overflow-hidden py-24">
@@ -38,7 +27,7 @@ export default function CallToAction() {
                 >
                     {/* Badge */}
                     <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-black/40 border border-white/10 px-5 py-2 text-sm font-semibold text-white backdrop-blur-md shadow-lg">
-                        <MapPinIcon size={16} weight="fill" className="text-orange-400" />
+                        <MapPin size={16} weight="fill" className="text-orange-400" />
                         <span>Stays in {location}</span>
                     </div>
 
@@ -60,15 +49,15 @@ export default function CallToAction() {
                         </Link>
 
                         <Link
-                            href={category === "flats" ? "/hostels" : "/flats"}
+                            href={category === "apartment" ? "/hostels" : "/flats"}
                             className="group inline-flex items-center gap-3 rounded-full bg-black/40 border border-white/20 px-8 py-4 text-base font-bold text-white backdrop-blur-md transition-all hover:bg-black/60 hover:scale-105 active:scale-95 shadow-lg"
                         >
-                            {category === "flats" ? (
-                                <BackpackIcon size={20} weight="bold" />
+                            {category === "apartment" ? (
+                                <Backpack size={20} weight="bold" />
                             ) : (
-                                <HouseIcon size={20} weight="bold" />
+                                <House size={20} weight="bold" />
                             )}
-                            {category === "flats" ? "Explore Hostels" : "Browse Flats"}
+                            {category === "apartment" ? "Explore Hostels" : "Browse Apartments"}
                         </Link>
                     </div>
                 </motion.div>

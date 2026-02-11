@@ -168,7 +168,7 @@ export default function BookingsPage() {
                             ) : (
                                 <tr>
                                     <td colSpan={8} className="p-8 text-center text-stone-500">
-                                        No bookings found matching "{filter}"
+                                        No bookings found matching &quot;{filter}&quot;
                                     </td>
                                 </tr>
                             )}

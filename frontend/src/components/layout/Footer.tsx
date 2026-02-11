@@ -3,16 +3,16 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-    FacebookLogoIcon,
-    InstagramLogoIcon,
-    TwitterLogoIcon,
-    EnvelopeIcon,
-    PhoneIcon,
-    MapPinIcon
+    FacebookLogo,
+    InstagramLogo,
+    TwitterLogo,
+    Phone
 } from "@phosphor-icons/react";
 import Container from "./Container";
+import { useLocation } from "@/context/LocationContext";
 
 const Footer = () => {
+    const { city } = useLocation();
     return (
         <footer className="w-full bg-neutral dark:bg-stone-950 border-t border-border dark:border-stone-800 py-12">
             <Container>
@@ -24,25 +24,25 @@ const Footer = () => {
                                 StaySewa
                             </span>
                         </Link>
-                        <p className="text-muted dark:text-stone-400 text-base leading-relaxed max-w-sm">
-                            Your trusted partner for verified hostels, homestays, and short-term rentals in Kathmandu. Experience comfort and authentic hospitality.
+                        <p className="mt-6 text-stone-600 dark:text-stone-400 leading-relaxed max-w-sm">
+                            Your trusted partner for verified hostels, homestays, and short-term rentals in {city}. Experience comfort and authentic hospitality.
                         </p>
                         <div className="flex gap-4 pt-2">
                             <SocialLink
                                 href="https://facebook.com"
-                                icon={<FacebookLogoIcon size={22} weight="fill" />}
+                                icon={<FacebookLogo size={22} weight="fill" />}
                                 label="Facebook"
                                 hoverClass="hover:text-[#1877F2] hover:border-[#1877F2]/50 hover:bg-[#1877F2]/10"
                             />
                             <SocialLink
                                 href="https://instagram.com"
-                                icon={<InstagramLogoIcon size={22} weight="fill" />}
+                                icon={<InstagramLogo size={22} weight="fill" />}
                                 label="Instagram"
                                 hoverClass="hover:text-[#E4405F] hover:border-[#E4405F]/50 hover:bg-[#E4405F]/10"
                             />
                             <SocialLink
                                 href="https://twitter.com"
-                                icon={<TwitterLogoIcon size={22} weight="fill" />}
+                                icon={<TwitterLogo size={22} weight="fill" />}
                                 label="Twitter"
                                 hoverClass="hover:text-[#1DA1F2] hover:border-[#1DA1F2]/50 hover:bg-[#1DA1F2]/10"
                             />
@@ -87,7 +87,7 @@ const Footer = () => {
 
                         <div className="flex items-start gap-3">
                             <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg text-orange-600 dark:text-orange-400">
-                                <PhoneIcon size={20} weight="duotone" />
+                                <Phone size={20} weight="duotone" />
                             </div>
                             <div>
                                 <p className="text-xs font-semibold text-stone-500 uppercase tracking-wide">Support Line</p>
@@ -122,7 +122,7 @@ const Footer = () => {
     );
 };
 
-const SocialLink = ({ href, icon, label, hoverClass }: { href: string; icon: React.ReactNode; label: string, hoverClass: string }) => (
+const SocialLink = ({ href, icon, label, hoverClass }: { href: string; icon: React.ReactNode; label: string; hoverClass: string }) => (
     <Link
         href={href}
         target="_blank"

@@ -27,6 +27,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, booking, onActio
 
     useEffect(() => {
         if (isOpen) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsVisible(true);
             document.body.style.overflow = "hidden"; // Prevent background scrolling
         } else {
@@ -34,7 +35,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, booking, onActio
             document.body.style.overflow = "unset";
             return () => clearTimeout(timer);
         }
-    }, [isOpen]);
+    }, [isOpen, onClose]);
 
     if (!isVisible && !isOpen) return null;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell } from "phosphor-react";
+import { Bell } from "@phosphor-icons/react";
 
 export function NotificationBell({
     onClick,

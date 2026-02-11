@@ -1,10 +1,38 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { MagnifyingGlassIcon, MapPinIcon, CalendarCheckIcon, UsersIcon, PlusIcon, MinusIcon } from "@phosphor-icons/react";
+import { useState, useRef, useEffect } from "react";
+import { MagnifyingGlass, MapPin, CalendarCheck, Users, Plus, Minus } from "@phosphor-icons/react";
+import { useLocation } from "@/context/LocationContext";
+import { useRouter } from "next/navigation";
 
 export default function SearchBar() {
-    const [location, setLocation] = useState("Kathmandu");
+    const { city } = useLocation();
+    const router = useRouter();
+    const [location, setLocation] = useState(city);
+
+    const isDirtyRef = useRef(false);
+
+    // Sync state when context city changes (e.g. after detection), but only if user hasn't typed
+
+    useEffect(() => {
+        if (!isDirtyRef.current && city) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setLocation(city);
+        }
+    }, [city]);
+
+    const handleSearch = () => {
+        const params = new URLSearchParams();
+        if (location) params.set("location", location);
+        if (checkIn) params.set("checkIn", checkIn);
+        if (checkOut) params.set("checkOut", checkOut);
+
+        const guestCount = totalGuests;
+        if (guestCount > 0) params.set("guests", guestCount.toString());
+
+        router.push(`/hostels?${params.toString()}`);
+    };
+
     const [checkIn, setCheckIn] = useState("");
     const [checkOut, setCheckOut] = useState("");
     const [counts, setCounts] = useState({
@@ -47,15 +75,19 @@ export default function SearchBar() {
 
                     {/* Location */}
                     <div className="col-span-2 md:col-span-1 relative flex items-center rounded-xl bg-white/40 px-3 py-2.5 md:px-4 md:py-3 hover:bg-white/60 dark:bg-white/5 dark:hover:bg-white/10 transition-all cursor-text group">
-                        <MapPinIcon size={20} className="text-gray-900 dark:text-gray-100 group-hover:text-orange-500 transition-colors mr-3 md:w-6 md:h-6" weight="bold" />
+                        <MapPin size={20} className="text-gray-900 dark:text-gray-100 group-hover:text-orange-500 transition-colors mr-3 md:w-6 md:h-6" weight="bold" />
                         <div className="flex flex-col flex-1">
                             <span className="text-[10px] font-bold text-gray-800 dark:text-gray-300 uppercase tracking-widest">Location</span>
                             <input
                                 type="text"
                                 value={location}
-                                onChange={(e) => setLocation(e.target.value)}
+                                onChange={(e) => {
+                                    setLocation(e.target.value);
+                                    isDirtyRef.current = true;
+                                }}
                                 className="bg-transparent text-sm font-semibold text-gray-900 dark:text-white outline-none placeholder-gray-500 w-full"
                                 placeholder="where are you going?"
+                                onFocus={() => isDirtyRef.current = true}
                             />
                         </div>
                     </div>
@@ -65,7 +97,7 @@ export default function SearchBar() {
                         onClick={() => checkInRef.current?.showPicker()}
                         className="col-span-1 relative flex items-center rounded-xl bg-white/40 px-3 py-2.5 md:px-4 md:py-3 hover:bg-white/60 dark:bg-white/5 dark:hover:bg-white/10 transition-all cursor-pointer group"
                     >
-                        <CalendarCheckIcon size={20} className="text-gray-900 dark:text-gray-100 group-hover:text-orange-500 transition-colors mr-2 md:mr-3 md:w-6 md:h-6" weight="bold" />
+                        <CalendarCheck size={20} className="text-gray-900 dark:text-gray-100 group-hover:text-orange-500 transition-colors mr-2 md:mr-3 md:w-6 md:h-6" weight="bold" />
                         <div className="flex flex-col overflow-hidden">
                             <span className="text-[10px] font-bold text-gray-800 dark:text-gray-300 uppercase tracking-widest truncate">Check In</span>
                             <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">
@@ -85,7 +117,7 @@ export default function SearchBar() {
                         onClick={() => checkOutRef.current?.showPicker()}
                         className="col-span-1 relative flex items-center rounded-xl bg-white/40 px-3 py-2.5 md:px-4 md:py-3 hover:bg-white/60 dark:bg-white/5 dark:hover:bg-white/10 transition-all cursor-pointer group"
                     >
-                        <CalendarCheckIcon size={20} className="text-gray-900 dark:text-gray-100 group-hover:text-orange-500 transition-colors mr-2 md:mr-3 md:w-6 md:h-6" weight="bold" />
+                        <CalendarCheck size={20} className="text-gray-900 dark:text-gray-100 group-hover:text-orange-500 transition-colors mr-2 md:mr-3 md:w-6 md:h-6" weight="bold" />
                         <div className="flex flex-col overflow-hidden">
                             <span className="text-[10px] font-bold text-gray-800 dark:text-gray-300 uppercase tracking-widest truncate">Check Out</span>
                             <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">
@@ -106,7 +138,7 @@ export default function SearchBar() {
                             onClick={() => setShowGuestMenu(!showGuestMenu)}
                             className="relative flex items-center rounded-xl bg-white/40 px-3 py-2.5 md:px-4 md:py-3 hover:bg-white/60 dark:bg-white/5 dark:hover:bg-white/10 transition-all cursor-pointer group"
                         >
-                            <UsersIcon size={20} className="text-gray-900 dark:text-gray-100 group-hover:text-orange-500 transition-colors mr-3 md:w-6 md:h-6" weight="bold" />
+                            <Users size={20} className="text-gray-900 dark:text-gray-100 group-hover:text-orange-500 transition-colors mr-3 md:w-6 md:h-6" weight="bold" />
                             <div className="flex flex-col">
                                 <span className="text-[10px] font-bold text-gray-800 dark:text-gray-300 uppercase tracking-widest">Guests</span>
                                 <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">
@@ -133,8 +165,10 @@ export default function SearchBar() {
                     </div>
 
                     {/* Search Button */}
-                    <button className="col-span-2 md:col-span-1 flex h-full w-full items-center justify-center rounded-xl bg-orange-600 px-6 py-3 md:py-4 font-bold text-white shadow-[0_10px_20px_-5px_rgba(234,88,12,0.4)] transition-all hover:bg-orange-700 hover:scale-[1.02] active:scale-95 md:w-auto min-w-[64px]">
-                        <MagnifyingGlassIcon size={24} className="md:w-[26px] md:h-[26px]" weight="bold" />
+                    <button
+                        onClick={handleSearch}
+                        className="col-span-2 md:col-span-1 flex h-full w-full items-center justify-center rounded-xl bg-orange-600 px-6 py-3 md:py-4 font-bold text-white shadow-[0_10px_20px_-5px_rgba(234,88,12,0.4)] transition-all hover:bg-orange-700 hover:scale-[1.02] active:scale-95 md:w-auto min-w-[64px]">
+                        <MagnifyingGlass size={24} className="md:w-[26px] md:h-[26px]" weight="bold" />
                         <span className="ml-2 md:hidden font-bold uppercase tracking-wider text-sm">Search</span>
                     </button>
                 </div>
@@ -152,14 +186,14 @@ const GuestCounter = ({ label, count, onUpdate }: { label: string; count: number
                 className="p-1 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white transition-colors"
                 disabled={count === 0}
             >
-                <MinusIcon size={14} weight="bold" />
+                <Minus size={14} weight="bold" />
             </button>
             <span className="text-sm font-bold text-gray-900 dark:text-white min-w-[16px] text-center">{count}</span>
             <button
                 onClick={(e) => { e.stopPropagation(); onUpdate(1); }}
                 className="p-1 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white transition-colors"
             >
-                <PlusIcon size={14} weight="bold" />
+                <Plus size={14} weight="bold" />
             </button>
         </div>
     </div>

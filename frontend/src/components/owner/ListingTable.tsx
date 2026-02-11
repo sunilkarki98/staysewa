@@ -4,14 +4,13 @@ import { EyeIcon, PencilSimpleIcon, TrashIcon, StarIcon, MapPinIcon } from "@pho
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+
 import { Stay } from "@/types/stay";
 import EditListingDrawer from "./EditListingDrawer";
 import { useStays } from "@/hooks/useStays";
 
 export default function ListingTable() {
     const { stays, loading, deleteStay } = useStays();
-    const router = useRouter();
     const [searchTerm, setSearchTerm] = useState("");
     const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -138,7 +137,7 @@ export default function ListingTable() {
                         ) : (
                             <tr>
                                 <td colSpan={6} className="p-8 text-center text-stone-500">
-                                    No listings found matching "{searchTerm}"
+                                    No listings found matching &quot;{searchTerm}&quot;
                                 </td>
                             </tr>
                         )}

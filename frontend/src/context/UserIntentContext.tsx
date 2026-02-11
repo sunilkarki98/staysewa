@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import type { StayCategory } from "../types/stay";
 
@@ -17,19 +17,19 @@ export function UserIntentProvider({ children }: { children: ReactNode }) {
     const pathname = usePathname();
 
     // Determine initial category from pathname
-    const getInitialCategory = (): CategoryFilter => {
-        if (pathname.startsWith("/flats")) return "flats";
-        if (pathname.startsWith("/homestays")) return "homestays";
-        if (pathname.startsWith("/hostels")) return "hostels";
+    const getInitialCategory = useCallback((): CategoryFilter => {
+        if (pathname.startsWith("/flats")) return "apartment";
+        if (pathname.startsWith("/homestays")) return "homestay";
+        if (pathname.startsWith("/hostels")) return "hostel";
         return "all"; // Default to all (e.g. for /dashboard or /explore)
-    };
+    }, [pathname]);
 
     const [category, setCategory] = useState<CategoryFilter>(getInitialCategory());
 
     // Sync category with URL changes
     useEffect(() => {
         setCategory(getInitialCategory());
-    }, [pathname]);
+    }, [getInitialCategory]);
 
     return (
         <UserIntentContext.Provider value={{ category, setCategory }}>

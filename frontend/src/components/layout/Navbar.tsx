@@ -8,13 +8,12 @@ import ThemeToggle from "../theme/ThemeToggle";
 import { ProfileMenu } from "../auth/ProfileMenu";
 import { NotificationBell } from "../notifications/NotificationBell";
 import { NotificationPanel } from "../notifications/NotificationPanel";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
     const pathname = usePathname();
     const [showNotifications, setShowNotifications] = useState(false);
-
-    // TEMP: replace later with real auth
-    const isAuthenticated = false;
+    const { isAuthenticated } = useAuth();
 
     const navLinks = [
         { href: "/", label: "Home" },

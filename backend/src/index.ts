@@ -1,6 +1,6 @@
 import app from '@/app';
 import { env } from '@/config/env';
-import { db } from '@/db/index';
+
 
 const bootstrap = async () => {
     try {

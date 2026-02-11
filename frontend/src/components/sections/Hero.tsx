@@ -4,11 +4,16 @@ import SearchBar from "./SearchBar";
 import { motion } from "framer-motion";
 import Image from "next/image";
 
+import { useLocation } from "@/context/LocationContext";
+
 interface HeroProps {
     location?: string;
 }
 
-export default function Hero({ location = "Kathmandu" }: HeroProps) {
+export default function Hero({ location: propLocation }: HeroProps) {
+    const { city } = useLocation();
+    const location = propLocation || city;
+
     return (
         <section className="relative h-[600px] flex items-center justify-center overflow-visible">
             <div className="absolute inset-0 z-0 overflow-hidden">

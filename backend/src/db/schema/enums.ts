@@ -3,6 +3,7 @@ import { pgEnum } from 'drizzle-orm/pg-core';
 // ─── User & Auth ────────────────────────────────────────────
 export const userRoleEnum = pgEnum('user_role', ['customer', 'owner', 'admin']);
 export const verificationStatusEnum = pgEnum('verification_status', ['pending', 'verified', 'rejected']);
+export const idTypeEnum = pgEnum('id_type', ['citizenship', 'national_id_card', 'passport', 'national_id']);
 
 // ─── Stay ───────────────────────────────────────────────────
 export const stayTypeEnum = pgEnum('stay_type', ['hotel', 'homestay', 'apartment', 'room', 'hostel']);

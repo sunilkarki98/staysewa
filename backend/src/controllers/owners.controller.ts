@@ -10,7 +10,7 @@ export const OwnersController = {
     /**
      * Get all owners
      */
-    getAllOwners: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    getAllOwners: catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
         const owners = await OwnersService.getAll();
         res.status(200).json({
             status: 'success',
