@@ -1,4 +1,4 @@
-import { pgTable, text, uuid, timestamp, boolean, integer, numeric, jsonb, time, date, uniqueIndex } from 'drizzle-orm/pg-core';
+import { pgTable, text, uuid, timestamp, boolean, integer, numeric, jsonb, time, date, uniqueIndex, index } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { users } from '@/db/schema/users';
 import { stayTypeEnum, stayIntentEnum, stayStatusEnum, unitTypeEnum, availabilityStatusEnum, mediaTypeEnum, cancellationTypeEnum, priceRuleTypeEnum, adjustmentTypeEnum } from '@/db/schema/enums';
@@ -38,7 +38,9 @@ export const stays = pgTable('stays', {
 
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
-});
+}, (table) => ({
+    ownerIdIdx: index('stay_owner_id_idx').on(table.ownerId),
+}));
 
 // ─── Stay Units (Rooms/Beds) ────────────────────────────────
 export const stayUnits = pgTable('stay_units', {
@@ -53,7 +55,9 @@ export const stayUnits = pgTable('stay_units', {
     isActive: boolean('is_active').default(true),
 
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-});
+}, (table) => ({
+    stayIdIdx: index('stay_unit_stay_id_idx').on(table.stayId),
+}));
 
 // ─── Availability Calendar (Per Unit Per Day) ───────────────
 export const availability = pgTable('availability', {

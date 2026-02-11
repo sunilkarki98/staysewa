@@ -1,4 +1,4 @@
-import { pgTable, text, uuid, timestamp, boolean, integer, jsonb, date } from 'drizzle-orm/pg-core';
+import { pgTable, text, uuid, timestamp, boolean, integer, jsonb, date, index } from 'drizzle-orm/pg-core';
 import { users } from '@/db/schema/users';
 import { stays, stayUnits } from '@/db/schema/stays';
 import { bookingStatusEnum, paymentStatusEnum, paymentMethodEnum, paymentTxnStatusEnum, cancelledByEnum } from '@/db/schema/enums';
@@ -46,7 +46,11 @@ export const bookings = pgTable('bookings', {
 
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
-});
+}, (table) => ({
+    stayIdIdx: index('booking_stay_id_idx').on(table.stayId),
+    customerIdIdx: index('booking_customer_id_idx').on(table.customerId),
+    ownerIdIdx: index('booking_owner_id_idx').on(table.ownerId),
+}));
 
 // ─── Payments ───────────────────────────────────────────────
 export const payments = pgTable('payments', {

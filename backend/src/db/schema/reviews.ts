@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, integer, check } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, uuid, integer, check, index } from 'drizzle-orm/pg-core';
 import { sql, relations } from 'drizzle-orm';
 import { users } from './users';
 import { stays } from './stays';
@@ -14,5 +14,7 @@ export const reviews = pgTable('reviews', {
     updatedAt: timestamp('updated_at').defaultNow(),
     createdAt: timestamp('created_at').defaultNow(),
 }, (table) => ({
-    ratingCheck: check('rating_check', sql`${table.rating} >= 1 AND ${table.rating} <= 5`)
+    ratingCheck: check('rating_check', sql`${table.rating} >= 1 AND ${table.rating} <= 5`),
+    stayIdIdx: index('review_stay_id_idx').on(table.stayId),
+    userIdIdx: index('review_user_id_idx').on(table.userId),
 }));

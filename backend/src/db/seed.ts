@@ -76,9 +76,15 @@ const seed = async () => {
         }).returning();
         console.log('Created Unit:', unit!.id);
 
-        // 6. Create Booking
-        const checkIn = '2023-10-01';
-        const checkOut = '2023-10-05';
+        // 6. Create Booking (Dynamic Dates)
+        const today = new Date();
+        const checkInDate = new Date(today);
+        checkInDate.setDate(today.getDate() + 1); // Tomorrow
+        const checkOutDate = new Date(checkInDate);
+        checkOutDate.setDate(checkInDate.getDate() + 4); // 4 nights later
+
+        // Format to YYYY-MM-DD for date type
+        const formatDate = (d: Date) => d.toISOString().split('T')[0];
 
         await db.insert(bookings).values({
             bookingNumber: 'STY-SEED-001',
@@ -89,8 +95,8 @@ const seed = async () => {
             guestName: customerUser!.fullName,
             guestEmail: customerUser!.email,
             guestPhone: customerUser!.phone,
-            checkIn: checkIn,
-            checkOut: checkOut,
+            checkIn: formatDate(checkInDate),
+            checkOut: formatDate(checkOutDate),
             nights: 4,
             baseAmount: 6000,
             totalAmount: 6000,
