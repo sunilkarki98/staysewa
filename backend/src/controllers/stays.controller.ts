@@ -3,6 +3,7 @@ import { StaysService } from '@/services/stay.service';
 import { catchAsync } from '@/utils/catchAsync';
 import { AppError } from '@/utils/AppError';
 import { redis } from '@/config/redis';
+import { logger } from '@/utils/logger';
 
 /**
  * Stays Controller - Modular SaaS pattern
@@ -15,20 +16,26 @@ export const StaysController = {
      * Get all stays
      */
     getAllStays: catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
-        // Cache Key based on query params (e.g., page, limit, filters)
-        // For now, since we just have a basic getAll, we use a simple key. 
-        // In real world, we'd hash req.query.
+        logger.debug('API: Fetching all stays - start');
+
         const cacheKey = 'stays:all';
 
         if (redis) {
-            const cachedStays = await redis.get(cacheKey);
-            if (cachedStays) {
-                const stays = JSON.parse(cachedStays);
-                return res.status(200).json({
-                    status: 'success',
-                    results: stays.length,
-                    data: { stays },
-                });
+            try {
+                logger.debug('API: Checking Redis cache...');
+                const cachedStays = await redis.get(cacheKey);
+                if (cachedStays) {
+                    logger.debug('API: Cache hit! Returning stays.');
+                    const stays = JSON.parse(cachedStays);
+                    return res.status(200).json({
+                        status: 'success',
+                        results: stays.length,
+                        data: { stays },
+                    });
+                }
+                logger.debug('API: Cache miss.');
+            } catch (err) {
+                logger.error(err, 'API: Redis error during fetch');
             }
         }
 
@@ -43,13 +50,19 @@ export const StaysController = {
             checkOut: req.query.checkOut as string,
         };
 
+        logger.debug({ filters }, 'API: Fetching from Database...');
+
         const stays = await StaysService.search(filters);
 
+        logger.debug({ count: stays.length }, 'API: Database fetch complete.');
+
         if (redis) {
-            // Cache for 5 minutes (Note: we should really include query params in key now)
-            // e.g., `stays:${JSON.stringify(filters)}`
-            // For now, disabling cache for search to ensure correctness or using dynamic key
-            await redis.set(cacheKey, JSON.stringify(stays), 'EX', 300);
+            try {
+                await redis.set(cacheKey, JSON.stringify(stays), 'EX', 300);
+                logger.debug('API: Results cached in Redis.');
+            } catch (err) {
+                logger.error(err, 'API: Redis set error');
+            }
         }
 
         res.status(200).json({
