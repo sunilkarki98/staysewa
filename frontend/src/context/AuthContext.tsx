@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { User } from "../types/user";
 import { supabase } from "../lib/supabase";
 import { useRouter } from "next/navigation";
+import { env } from "@/env";
 
 
 interface AuthContextType {
@@ -19,7 +20,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(() => {
-        if (process.env.NEXT_PUBLIC_AUTH_REQUIRED === 'false') {
+        if (!env.NEXT_PUBLIC_AUTH_REQUIRED) {
             return {
                 id: "dev-user-123",
                 email: "dev@staysewa.com",
@@ -30,12 +31,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         return null;
     });
-    const [isLoading, setIsLoading] = useState(() => process.env.NEXT_PUBLIC_AUTH_REQUIRED !== 'false');
+    const [isLoading, setIsLoading] = useState(() => env.NEXT_PUBLIC_AUTH_REQUIRED);
     const router = useRouter();
 
     useEffect(() => {
         // 0. Stop if Dev Mode (already handled in state init)
-        if (process.env.NEXT_PUBLIC_AUTH_REQUIRED === 'false') return;
+        if (!env.NEXT_PUBLIC_AUTH_REQUIRED) return;
 
         // 1. Check active session
         const checkSession = async () => {
@@ -70,6 +71,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // 2. Listen for changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             if (session?.user) {
+                // Sync session to cookie for Middleware visibility
+                document.cookie = `jwt=${session.access_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+
                 setUser({
                     id: session.user.id,
                     email: session.user.email || "",
@@ -78,6 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     avatar: session.user.user_metadata.avatar_url,
                 });
             } else {
+                // Clear cookie on logout
+                document.cookie = "jwt=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
                 setUser(null);
             }
             setIsLoading(false);

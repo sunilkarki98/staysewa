@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { env } from "@/env";
 
 export function middleware(request: NextRequest) {
     // 0. Check for Dev Switch
-    if (process.env.NEXT_PUBLIC_AUTH_REQUIRED === 'false') {
+    if (!env.NEXT_PUBLIC_AUTH_REQUIRED) {
         return NextResponse.next();
     }
 
