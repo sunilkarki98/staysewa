@@ -1,6 +1,6 @@
 // ─── Backend-aligned enums ──────────────────────────────────
 export type PropertyCategory = 'hotel' | 'resort' | 'homestay' | 'apartment' | 'room' | 'hostel';
-export type PropertyStatus = 'draft' | 'published' | 'archived';
+export type PropertyStatus = 'draft' | 'pending' | 'active' | 'published' | 'archived' | 'rejected';
 export type UnitType = 'private_room' | 'shared_room' | 'entire_place' | 'bed' | 'single_room' | 'double_room' | '1BHK' | '2BHK' | '3BHK' | 'villa';
 
 // ─── Property Unit (Room/Bed) ───────────────────────────────────

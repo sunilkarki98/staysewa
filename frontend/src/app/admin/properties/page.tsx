@@ -40,8 +40,8 @@ export default function AdminPropertiesPage() {
 
     const filteredProperties = properties.filter(p => {
         if (filter === "all") return true;
-        if (filter === "verified") return p.status === "active" as any;
-        if (filter === "pending") return p.status === "pending" as any;
+        if (filter === "verified") return p.status === "active";
+        if (filter === "pending") return p.status === "pending";
         return true;
     });
 
@@ -120,9 +120,9 @@ export default function AdminPropertiesPage() {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${p.status === "active" as any
+                                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${p.status === "active"
                                             ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                            : p.status === "pending" as any
+                                            : p.status === "pending"
                                                 ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
                                                 : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                                             }`}>
@@ -134,7 +134,7 @@ export default function AdminPropertiesPage() {
                                             <Link href={`/properties/${p.id}`} target="_blank" className="p-1.5 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded transition-colors">
                                                 <Eye size={18} />
                                             </Link>
-                                            {p.status === "pending" as any ? (
+                                            {p.status === "pending" ? (
                                                 <button onClick={() => handleVerify(p.id, true)} className="p-1.5 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded transition-colors">
                                                     <CheckCircle size={18} />
                                                 </button>
