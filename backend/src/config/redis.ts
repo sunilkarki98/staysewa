@@ -8,9 +8,9 @@ let redis: Redis | null = null;
 
 if (redisUrl) {
     redis = new Redis(redisUrl, {
-        maxRetriesPerRequest: 3,
+        maxRetriesPerRequest: null, // Critical for production: don't stop trying
         retryStrategy(times) {
-            const delay = Math.min(times * 50, 2000);
+            const delay = Math.min(times * 100, 5000); // Back off more gracefully
             return delay;
         },
     });

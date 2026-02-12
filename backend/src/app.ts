@@ -24,7 +24,9 @@ app.use(helmet());
 app.use(limiter);
 
 // Support multiple CORS origins from comma-separated string
-const allowedOrigins = env.CORS_ORIGIN ? env.CORS_ORIGIN.split(',') : ['http://localhost:3000'];
+const allowedOrigins = env.CORS_ORIGIN
+    ? env.CORS_ORIGIN.split(',').map(o => o.trim())
+    : ['http://localhost:3000'];
 app.use(cors({
     origin: (origin, callback) => {
         if (!origin || allowedOrigins.includes(origin)) {
