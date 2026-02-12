@@ -11,8 +11,7 @@ interface AuthContextType {
     isAuthenticated: boolean;
     isLoading: boolean;
     loginWithGoogle: () => Promise<void>;
-    loginWithPhone: (phone: string) => Promise<void>;
-    verifyOtp: (phone: string, token: string) => Promise<void>;
+    loginWithEmail: (email: string) => Promise<void>;
     logout: () => Promise<void>;
 }
 
@@ -97,21 +96,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) throw error;
     };
 
-    const loginWithPhone = async (phone: string) => {
+    const loginWithEmail = async (email: string) => {
         const { error } = await supabase.auth.signInWithOtp({
-            phone: `+977${phone}`, // Assuming Nepal for now based on context
+            email,
+            options: {
+                emailRedirectTo: `${window.location.origin}/auth/callback`,
+            },
         });
         if (error) throw error;
-    };
-
-    const verifyOtp = async (phone: string, token: string) => {
-        const { error } = await supabase.auth.verifyOtp({
-            phone: `+977${phone}`,
-            token,
-            type: 'sms',
-        });
-        if (error) throw error;
-        router.push("/");
     };
 
     const logout = async () => {
@@ -126,8 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 isAuthenticated: !!user,
                 isLoading,
                 loginWithGoogle,
-                loginWithPhone,
-                verifyOtp,
+                loginWithEmail,
                 logout,
             }}
         >

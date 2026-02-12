@@ -1,12 +1,13 @@
 CREATE TYPE "public"."adjustment_type" AS ENUM('fixed', 'percent');--> statement-breakpoint
 CREATE TYPE "public"."availability_status" AS ENUM('available', 'blocked', 'booked');--> statement-breakpoint
-CREATE TYPE "public"."booking_status" AS ENUM('pending', 'confirmed', 'checked_in', 'completed', 'cancelled', 'no_show');--> statement-breakpoint
+CREATE TYPE "public"."booking_status" AS ENUM('initiated', 'reserved', 'confirmed', 'checked_in', 'completed', 'cancelled', 'expired', 'no_show', 'pending');--> statement-breakpoint
 CREATE TYPE "public"."cancellation_type" AS ENUM('flexible', 'moderate', 'strict', 'non_refundable');--> statement-breakpoint
 CREATE TYPE "public"."cancelled_by" AS ENUM('customer', 'owner', 'admin', 'system');--> statement-breakpoint
+CREATE TYPE "public"."id_type" AS ENUM('citizenship', 'national_id_card', 'passport', 'national_id');--> statement-breakpoint
 CREATE TYPE "public"."media_type" AS ENUM('image', 'video');--> statement-breakpoint
 CREATE TYPE "public"."notification_channel" AS ENUM('in_app', 'email', 'sms', 'push');--> statement-breakpoint
 CREATE TYPE "public"."payment_method" AS ENUM('khalti', 'esewa', 'bank_transfer', 'cash', 'wallet');--> statement-breakpoint
-CREATE TYPE "public"."payment_status" AS ENUM('unpaid', 'partial', 'paid', 'refunded');--> statement-breakpoint
+CREATE TYPE "public"."payment_status" AS ENUM('not_required', 'pending', 'success', 'failed', 'refunded', 'unpaid', 'paid');--> statement-breakpoint
 CREATE TYPE "public"."payment_txn_status" AS ENUM('initiated', 'pending', 'completed', 'failed', 'refunded');--> statement-breakpoint
 CREATE TYPE "public"."payout_status" AS ENUM('pending', 'processing', 'completed', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."price_rule_type" AS ENUM('seasonal', 'weekend', 'holiday', 'long_stay', 'last_minute');--> statement-breakpoint
@@ -52,8 +53,10 @@ CREATE TABLE "bookings" (
 	"discount" integer DEFAULT 0,
 	"total_amount" integer NOT NULL,
 	"currency" text DEFAULT 'NPR',
-	"status" "booking_status" DEFAULT 'pending' NOT NULL,
-	"payment_status" "payment_status" DEFAULT 'unpaid' NOT NULL,
+	"status" "booking_status" DEFAULT 'initiated' NOT NULL,
+	"payment_status" "payment_status" DEFAULT 'not_required' NOT NULL,
+	"expires_at" timestamp with time zone,
+	"metadata" jsonb,
 	"special_requests" text,
 	"cancellation_reason" text,
 	"cancelled_by" "cancelled_by",
@@ -80,31 +83,15 @@ CREATE TABLE "payments" (
 	"created_at" timestamp with time zone DEFAULT now()
 );
 --> statement-breakpoint
-CREATE TABLE "reviews" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"booking_id" uuid NOT NULL,
-	"stay_id" uuid NOT NULL,
-	"reviewer_id" uuid NOT NULL,
-	"rating" integer NOT NULL,
-	"cleanliness" integer,
-	"location" integer,
-	"value" integer,
-	"communication" integer,
-	"comment" text,
-	"owner_reply" text,
-	"owner_replied_at" timestamp with time zone,
-	"is_visible" boolean DEFAULT true,
-	"created_at" timestamp with time zone DEFAULT now(),
-	CONSTRAINT "reviews_booking_id_unique" UNIQUE("booking_id")
-);
---> statement-breakpoint
 CREATE TABLE "customer_profiles" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
 	"date_of_birth" date,
 	"nationality" text DEFAULT 'Nepali',
-	"id_type" text,
+	"id_type" "id_type",
 	"id_number" text,
+	"id_front_url" text,
+	"id_back_url" text,
 	"emergency_contact" text,
 	"preferences" jsonb DEFAULT '{}'::jsonb,
 	"created_at" timestamp with time zone DEFAULT now(),
@@ -114,9 +101,13 @@ CREATE TABLE "customer_profiles" (
 CREATE TABLE "owner_profiles" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
+	"nationality" text DEFAULT 'Nepali',
 	"business_name" text,
 	"pan_number" text,
-	"citizenship_number" text,
+	"id_type" "id_type",
+	"id_number" text,
+	"id_front_url" text,
+	"id_back_url" text,
 	"bank_name" text,
 	"bank_account" text,
 	"address" text,
@@ -141,6 +132,7 @@ CREATE TABLE "users" (
 	"full_name" text NOT NULL,
 	"avatar_url" text,
 	"role" "user_role" DEFAULT 'customer' NOT NULL,
+	"password" text,
 	"email_verified" boolean DEFAULT false,
 	"phone_verified" boolean DEFAULT false,
 	"is_active" boolean DEFAULT true,
@@ -245,6 +237,19 @@ CREATE TABLE "stays" (
 	CONSTRAINT "stays_slug_unique" UNIQUE("slug")
 );
 --> statement-breakpoint
+CREATE TABLE "reviews" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"booking_id" uuid NOT NULL,
+	"stay_id" uuid NOT NULL,
+	"user_id" uuid NOT NULL,
+	"rating" integer NOT NULL,
+	"comment" text,
+	"updated_at" timestamp DEFAULT now(),
+	"created_at" timestamp DEFAULT now(),
+	CONSTRAINT "reviews_booking_id_unique" UNIQUE("booking_id"),
+	CONSTRAINT "rating_check" CHECK ("reviews"."rating" >= 1 AND "reviews"."rating" <= 5)
+);
+--> statement-breakpoint
 CREATE TABLE "messages" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"conversation_id" uuid NOT NULL,
@@ -302,9 +307,6 @@ ALTER TABLE "bookings" ADD CONSTRAINT "bookings_customer_id_users_id_fk" FOREIGN
 ALTER TABLE "bookings" ADD CONSTRAINT "bookings_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "payments" ADD CONSTRAINT "payments_booking_id_bookings_id_fk" FOREIGN KEY ("booking_id") REFERENCES "public"."bookings"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "payments" ADD CONSTRAINT "payments_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "reviews" ADD CONSTRAINT "reviews_booking_id_bookings_id_fk" FOREIGN KEY ("booking_id") REFERENCES "public"."bookings"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "reviews" ADD CONSTRAINT "reviews_stay_id_stays_id_fk" FOREIGN KEY ("stay_id") REFERENCES "public"."stays"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "reviews" ADD CONSTRAINT "reviews_reviewer_id_users_id_fk" FOREIGN KEY ("reviewer_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "customer_profiles" ADD CONSTRAINT "customer_profiles_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "owner_profiles" ADD CONSTRAINT "owner_profiles_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -316,6 +318,9 @@ ALTER TABLE "stay_media" ADD CONSTRAINT "stay_media_stay_id_stays_id_fk" FOREIGN
 ALTER TABLE "stay_media" ADD CONSTRAINT "stay_media_unit_id_stay_units_id_fk" FOREIGN KEY ("unit_id") REFERENCES "public"."stay_units"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "stay_units" ADD CONSTRAINT "stay_units_stay_id_stays_id_fk" FOREIGN KEY ("stay_id") REFERENCES "public"."stays"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "stays" ADD CONSTRAINT "stays_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "reviews" ADD CONSTRAINT "reviews_booking_id_bookings_id_fk" FOREIGN KEY ("booking_id") REFERENCES "public"."bookings"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "reviews" ADD CONSTRAINT "reviews_stay_id_stays_id_fk" FOREIGN KEY ("stay_id") REFERENCES "public"."stays"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "reviews" ADD CONSTRAINT "reviews_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "messages" ADD CONSTRAINT "messages_sender_id_users_id_fk" FOREIGN KEY ("sender_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "messages" ADD CONSTRAINT "messages_receiver_id_users_id_fk" FOREIGN KEY ("receiver_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "messages" ADD CONSTRAINT "messages_booking_id_bookings_id_fk" FOREIGN KEY ("booking_id") REFERENCES "public"."bookings"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -324,4 +329,21 @@ ALTER TABLE "support_messages" ADD CONSTRAINT "support_messages_ticket_id_suppor
 ALTER TABLE "support_messages" ADD CONSTRAINT "support_messages_sender_id_users_id_fk" FOREIGN KEY ("sender_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "support_tickets" ADD CONSTRAINT "support_tickets_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "support_tickets" ADD CONSTRAINT "support_tickets_booking_id_bookings_id_fk" FOREIGN KEY ("booking_id") REFERENCES "public"."bookings"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "support_tickets" ADD CONSTRAINT "support_tickets_assigned_to_users_id_fk" FOREIGN KEY ("assigned_to") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "support_tickets" ADD CONSTRAINT "support_tickets_assigned_to_users_id_fk" FOREIGN KEY ("assigned_to") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "booking_stay_id_idx" ON "bookings" USING btree ("stay_id");--> statement-breakpoint
+CREATE INDEX "booking_customer_id_idx" ON "bookings" USING btree ("customer_id");--> statement-breakpoint
+CREATE INDEX "booking_owner_id_idx" ON "bookings" USING btree ("owner_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "availability_unit_date_idx" ON "availability" USING btree ("unit_id","date");--> statement-breakpoint
+CREATE INDEX "stay_unit_stay_id_idx" ON "stay_units" USING btree ("stay_id");--> statement-breakpoint
+CREATE INDEX "stay_owner_id_idx" ON "stays" USING btree ("owner_id");--> statement-breakpoint
+CREATE INDEX "review_stay_id_idx" ON "reviews" USING btree ("stay_id");--> statement-breakpoint
+CREATE INDEX "review_user_id_idx" ON "reviews" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "message_conversation_id_idx" ON "messages" USING btree ("conversation_id");--> statement-breakpoint
+CREATE INDEX "message_sender_id_idx" ON "messages" USING btree ("sender_id");--> statement-breakpoint
+CREATE INDEX "message_receiver_id_idx" ON "messages" USING btree ("receiver_id");--> statement-breakpoint
+CREATE INDEX "message_booking_id_idx" ON "messages" USING btree ("booking_id");--> statement-breakpoint
+CREATE INDEX "notification_user_id_idx" ON "notifications" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "support_message_ticket_id_idx" ON "support_messages" USING btree ("ticket_id");--> statement-breakpoint
+CREATE INDEX "support_ticket_user_id_idx" ON "support_tickets" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "support_ticket_booking_id_idx" ON "support_tickets" USING btree ("booking_id");--> statement-breakpoint
+CREATE INDEX "support_ticket_assigned_to_idx" ON "support_tickets" USING btree ("assigned_to");

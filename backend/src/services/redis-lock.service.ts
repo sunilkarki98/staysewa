@@ -11,7 +11,11 @@ export const RedisLockService = {
      */
     async acquireLock(key: string, ttlMs: number = 5000): Promise<string | null> {
         if (!redis) {
-            logger.warn('Redis not configured, skipping lock acquisition (unsafe for production concurrency)');
+            if (process.env.NODE_ENV === 'production') {
+                logger.error('CRITICAL: Redis unavailable — refusing lock to prevent overbooking');
+                return null; // Fail closed in production
+            }
+            logger.warn('Redis not configured (dev mode) — skipping lock');
             return 'mock-token';
         }
 

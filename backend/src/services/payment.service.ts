@@ -11,17 +11,20 @@ export const PaymentService = {
     /**
      * Initiate a Khalti payment
      */
-    async initiateKhalti(bookingId: string, amount: number) {
+    async initiateKhalti(bookingId: string) {
         const booking = await db.query.bookings.findFirst({
             where: eq(bookings.id, bookingId),
         });
 
         if (!booking) throw new AppError('Booking not found', 404);
 
+        // Server-side truth: totalAmount is already stored in paisa per schema convention
+        const amount = booking.totalAmount;
+
         const payload = {
             return_url: `${env.CORS_ORIGIN}/payment/verify`,
             website_url: env.CORS_ORIGIN,
-            amount: amount * 100, // Khalti expects paisa
+            amount: amount, // Already in paisa — no conversion needed
             purchase_order_id: booking.id,
             purchase_order_name: `Booking ${booking.bookingNumber}`,
         };

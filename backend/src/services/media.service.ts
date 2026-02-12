@@ -8,6 +8,38 @@ import { eq, and, isNull } from 'drizzle-orm';
  */
 export const MediaService = {
     /**
+     * Upload file to Supabase Storage
+     */
+    async uploadToSupabase(
+        file: Express.Multer.File,
+        folder: string = 'stays',
+        bucket: string = 'stay-media'
+    ): Promise<string> {
+        const { supabase } = await import('@/lib/supabase'); // Dynamic import to avoid circular dependency if any
+
+        const fileExt = file.originalname.split('.').pop();
+        const fileName = `${Date.now()}-${Math.round(Math.random() * 1E9)}.${fileExt}`;
+        const filePath = `${folder}/${fileName}`;
+
+        const { error } = await supabase.storage
+            .from(bucket)
+            .upload(filePath, file.buffer, {
+                contentType: file.mimetype,
+                upsert: false
+            });
+
+        if (error) {
+            throw new Error(`Supabase upload failed: ${error.message}`);
+        }
+
+        const { data } = supabase.storage
+            .from(bucket)
+            .getPublicUrl(filePath);
+
+        return data.publicUrl;
+    },
+
+    /**
      * Add a new media asset
      */
     async addMedia(data: typeof stayMedia.$inferInsert) {

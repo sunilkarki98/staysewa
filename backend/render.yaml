@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: staysewa-backend
+    runtime: docker
+    dockerContext: .
+    dockerfilePath: Dockerfile
+    preDeployCommand: npm run migrate:prod
+    plan: free # Change to starter/pro for production
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: DATABASE_URL
+        fromConfig: true # Pull from your Render secret or paste raw
+      - key: SUPABASE_URL
+        fromConfig: true
+      - key: SUPABASE_SERVICE_KEY
+        fromConfig: true
+      - key: SUPABASE_JWT_SECRET
+        fromConfig: true
+      - key: REDIS_URL
+        fromConfig: true
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: "http://localhost:3000,https://staysewa.vercel.app"
+    healthCheckPath: /health

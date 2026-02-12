@@ -45,7 +45,7 @@ export const stays = pgTable('stays', {
 // ─── Stay Units (Rooms/Beds) ────────────────────────────────
 export const stayUnits = pgTable('stay_units', {
     id: uuid('id').defaultRandom().primaryKey(),
-    stayId: uuid('stay_id').references(() => stays.id).notNull(),
+    stayId: uuid('stay_id').references(() => stays.id, { onDelete: 'cascade' }).notNull(),
     name: text('name').notNull(), // "Deluxe Room"
     type: unitTypeEnum('type').notNull(),
     maxOccupancy: integer('max_occupancy').default(2).notNull(),
@@ -62,7 +62,7 @@ export const stayUnits = pgTable('stay_units', {
 // ─── Availability Calendar (Per Unit Per Day) ───────────────
 export const availability = pgTable('availability', {
     id: uuid('id').defaultRandom().primaryKey(),
-    unitId: uuid('unit_id').references(() => stayUnits.id).notNull(),
+    unitId: uuid('unit_id').references(() => stayUnits.id, { onDelete: 'cascade' }).notNull(),
     date: date('date', { mode: 'string' }).notNull(),
     availableCount: integer('available_count').notNull(),
     priceOverride: integer('price_override'), // Seasonal daily price
@@ -76,8 +76,8 @@ export const availability = pgTable('availability', {
 // ─── Stay Media (Photos/Videos) ─────────────────────────────
 export const stayMedia = pgTable('stay_media', {
     id: uuid('id').defaultRandom().primaryKey(),
-    stayId: uuid('stay_id').references(() => stays.id).notNull(),
-    unitId: uuid('unit_id').references(() => stayUnits.id), // Optional: link photo to specific unit
+    stayId: uuid('stay_id').references(() => stays.id, { onDelete: 'cascade' }).notNull(),
+    unitId: uuid('unit_id').references(() => stayUnits.id, { onDelete: 'cascade' }), // Optional: link photo to specific unit
     url: text('url').notNull(),
     thumbnailUrl: text('thumbnail_url'),
     type: mediaTypeEnum('type').default('image'),
@@ -85,12 +85,14 @@ export const stayMedia = pgTable('stay_media', {
     sortOrder: integer('sort_order').default(0),
     isCover: boolean('is_cover').default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-});
+}, (table) => ({
+    stayIdIdx: index('stay_media_stay_id_idx').on(table.stayId),
+}));
 
 // ─── Cancellation Policies ──────────────────────────────────
 export const cancellationPolicies = pgTable('cancellation_policies', {
     id: uuid('id').defaultRandom().primaryKey(),
-    stayId: uuid('stay_id').references(() => stays.id).unique(),
+    stayId: uuid('stay_id').references(() => stays.id, { onDelete: 'cascade' }).unique(),
     type: cancellationTypeEnum('type').default('moderate'),
     freeCancelHours: integer('free_cancel_hours').default(48),
     refundPercentBefore: integer('refund_percent_before').default(100),
@@ -101,8 +103,8 @@ export const cancellationPolicies = pgTable('cancellation_policies', {
 // ─── Price Rules (Seasonal / Weekend) ───────────────────────
 export const priceRules = pgTable('price_rules', {
     id: uuid('id').defaultRandom().primaryKey(),
-    stayId: uuid('stay_id').references(() => stays.id).notNull(),
-    unitId: uuid('unit_id').references(() => stayUnits.id), // Optional: apply to specific unit
+    stayId: uuid('stay_id').references(() => stays.id, { onDelete: 'cascade' }).notNull(),
+    unitId: uuid('unit_id').references(() => stayUnits.id, { onDelete: 'cascade' }), // Optional: apply to specific unit
     name: text('name').notNull(),
     type: priceRuleTypeEnum('type').notNull(),
     adjustmentType: adjustmentTypeEnum('adjustment_type').notNull(),

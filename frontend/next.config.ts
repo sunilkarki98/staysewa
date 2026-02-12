@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "i.pravatar.cc",
       },
+      {
+        protocol: "https",
+        hostname: "azdawgxfpeypxeqvuejh.supabase.co",
+      },
     ],
   },
   // Forcing root to current directory to avoid scanning up to home

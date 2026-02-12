@@ -81,17 +81,35 @@ export const BookingsController = {
     }),
 
     /**
-     * Update booking status
+     * Update booking status (with authorization)
      */
     updateBookingStatus: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         const { id } = req.params;
-        const { status } = req.body;
+        const { status, cancellationReason } = req.body;
 
         if (!status) {
             return next(new AppError('Status is required', 400));
         }
 
-        const updatedBooking = await BookingsService.transitionStatus(id as string, status);
+        // Authorization: verify the user owns this booking or is admin
+        const user = (req as any).user;
+        if (user) {
+            const booking = await BookingsService.getById(id as string);
+            if (!booking) return next(new AppError('Booking not found', 404));
+
+            const isOwner = booking.ownerId === user.id;
+            const isCustomer = booking.customerId === user.id;
+            const isAdmin = user.role === 'admin';
+
+            if (!isOwner && !isCustomer && !isAdmin) {
+                return next(new AppError('Not authorized to modify this booking', 403));
+            }
+        }
+
+        const updatedBooking = await BookingsService.transitionStatus(id as string, status, {
+            cancelledBy: user?.role || 'system',
+            cancellationReason,
+        });
 
         if (!updatedBooking) {
             return next(new AppError('No booking found with that ID', 404));

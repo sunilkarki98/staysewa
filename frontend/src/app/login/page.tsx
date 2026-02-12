@@ -1,21 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { GoogleLogo, Phone, ArrowRight } from "@phosphor-icons/react";
+import { GoogleLogo, ArrowRight } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
-    const { loginWithGoogle, loginWithPhone, verifyOtp } = useAuth();
-    const [phoneNumber, setPhoneNumber] = useState("");
-    const [showOtp, setShowOtp] = useState(false);
-    const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+    const { loginWithGoogle, loginWithEmail } = useAuth();
+    const [email, setEmail] = useState("");
+    const [isMagicLinkSent, setIsMagicLinkSent] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
     const handleGoogleSignIn = async () => {
         try {
             setLoading(true);
+            setError("");
             await loginWithGoogle();
         } catch (err: any) {
             setError(err.message);
@@ -23,46 +23,19 @@ export default function LoginPage() {
         }
     };
 
-    const handleSendOtp = async () => {
-        if (phoneNumber.length >= 10) {
-            try {
-                setLoading(true);
-                setError("");
-                await loginWithPhone(phoneNumber);
-                setShowOtp(true);
-            } catch (err: any) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        }
-    };
+    const handleEmailSignIn = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!email) return;
 
-    const handleOtpChange = (index: number, value: string) => {
-        if (value.length <= 1 && /^\d*$/.test(value)) {
-            const newOtp = [...otp];
-            newOtp[index] = value;
-            setOtp(newOtp);
-
-            // Auto-focus next input
-            if (value && index < 5) {
-                const nextInput = document.getElementById(`otp-${index + 1}`);
-                nextInput?.focus();
-            }
-        }
-    };
-
-    const handleVerifyOtp = async () => {
-        const otpValue = otp.join("");
-        if (otpValue.length === 6) {
-            try {
-                setLoading(true);
-                setError("");
-                await verifyOtp(phoneNumber, otpValue);
-            } catch (err: any) {
-                setError(err.message);
-                setLoading(false);
-            }
+        try {
+            setLoading(true);
+            setError("");
+            await loginWithEmail(email);
+            setIsMagicLinkSent(true);
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -84,21 +57,40 @@ export default function LoginPage() {
                             <span className="text-2xl font-bold text-white">S</span>
                         </div>
                         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                            Welcome to StaySewa
+                            Welcome back
                         </h1>
                         <p className="text-gray-500 dark:text-gray-400 mt-2">
-                            Sign in to book your perfect stay
+                            Sign in to your StaySewa account
                         </p>
                     </div>
 
                     {error && (
-                        <div className="mb-6 p-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 rounded-lg text-center">
+                        <div className="mb-6 p-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 rounded-lg text-center font-medium">
                             {error}
                         </div>
                     )}
 
-                    {!showOtp ? (
-                        <>
+                    {isMagicLinkSent ? (
+                        <div className="text-center space-y-6 py-4">
+                            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-50 dark:bg-blue-900/20 text-blue-500 rounded-full">
+                                <ArrowRight size={32} />
+                            </div>
+                            <div className="space-y-2">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Check your email</h3>
+                                <p className="text-gray-500 dark:text-gray-400">
+                                    We sent a magic link to <span className="font-medium text-gray-900 dark:text-white">{email}</span>.
+                                    Click the link to sign in instantly.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setIsMagicLinkSent(false)}
+                                className="text-sm text-blue-500 hover:text-blue-600 font-medium transition"
+                            >
+                                ← Try another email
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="space-y-6">
                             {/* Google Sign In */}
                             <button
                                 onClick={handleGoogleSignIn}
@@ -117,26 +109,26 @@ export default function LoginPage() {
                             </button>
 
                             {/* Divider */}
-                            <div className="flex items-center gap-4 my-6">
+                            <div className="flex items-center gap-4">
                                 <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
-                                <span className="text-sm text-gray-400 dark:text-gray-500">or</span>
+                                <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">or</span>
                                 <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
                             </div>
 
-                            {/* Phone Input */}
-                            <div className="space-y-4">
-                                <div className="relative">
-                                    <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 text-gray-500 dark:text-gray-400">
-                                        <Phone size={20} />
-                                        <span className="text-sm font-medium">+977</span>
-                                        <div className="w-px h-5 bg-gray-300 dark:bg-gray-600" />
-                                    </div>
+                            {/* Email Input Flow */}
+                            <form onSubmit={handleEmailSignIn} className="space-y-4">
+                                <div className="space-y-2">
+                                    <label htmlFor="email" className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-1">
+                                        Email address
+                                    </label>
                                     <input
-                                        type="tel"
-                                        placeholder="98XXXXXXXX"
-                                        value={phoneNumber}
-                                        onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                                        className="w-full pl-28 pr-4 py-3.5 
+                                        id="email"
+                                        type="email"
+                                        required
+                                        placeholder="name@example.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="w-full px-4 py-3.5 
                                             bg-gray-50 dark:bg-gray-800 
                                             border border-gray-200 dark:border-gray-700 
                                             rounded-xl text-gray-900 dark:text-white
@@ -147,112 +139,42 @@ export default function LoginPage() {
                                 </div>
 
                                 <button
-                                    onClick={handleSendOtp}
-                                    disabled={phoneNumber.length < 10 || loading}
+                                    type="submit"
+                                    disabled={!email || loading}
                                     className="w-full flex items-center justify-center gap-2 px-4 py-3.5 
                                         bg-gradient-to-r from-blue-500 to-indigo-600 
                                         text-white font-semibold rounded-xl
                                         shadow-lg shadow-blue-500/30
                                         transition-all duration-200
-                                        hover:shadow-xl hover:shadow-blue-500/40 hover:scale-[1.02]
+                                        hover:shadow-xl hover:shadow-blue-500/40 hover:scale-[1.01]
                                         active:scale-[0.98]
-                                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-lg"
+                                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                                 >
-                                    {loading ? "Sending..." : "Send OTP"}
+                                    {loading ? "Sending link..." : "Continue with Email"}
                                     {!loading && <ArrowRight size={18} weight="bold" />}
                                 </button>
-                            </div>
-                        </>
-                    ) : (
-                        /* OTP Verification */
-                        <div className="space-y-6">
-                            <div className="text-center">
-                                <p className="text-gray-600 dark:text-gray-400">
-                                    Enter the 6-digit code sent to
-                                </p>
-                                <p className="font-semibold text-gray-900 dark:text-white">
-                                    +977 {phoneNumber}
-                                </p>
-                            </div>
-
-                            {/* OTP Input */}
-                            <div className="flex justify-center gap-2">
-                                {otp.map((digit, index) => (
-                                    <input
-                                        key={index}
-                                        id={`otp-${index}`}
-                                        type="text"
-                                        inputMode="numeric"
-                                        maxLength={1}
-                                        value={digit}
-                                        onChange={(e) => handleOtpChange(index, e.target.value)}
-                                        onKeyDown={(e) => {
-                                            if (e.key === "Backspace" && !digit && index > 0) {
-                                                const prevInput = document.getElementById(`otp-${index - 1}`);
-                                                prevInput?.focus();
-                                            }
-                                        }}
-                                        className="w-12 h-14 text-center text-xl font-bold
-                                            bg-gray-50 dark:bg-gray-800 
-                                            border border-gray-200 dark:border-gray-700 
-                                            rounded-xl text-gray-900 dark:text-white
-                                            focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500
-                                            transition-all"
-                                    />
-                                ))}
-                            </div>
-
-                            <button
-                                onClick={handleVerifyOtp}
-                                disabled={otp.some((d) => !d) || loading}
-                                className="w-full flex items-center justify-center gap-2 px-4 py-3.5 
-                                    bg-gradient-to-r from-blue-500 to-indigo-600 
-                                    text-white font-semibold rounded-xl
-                                    shadow-lg shadow-blue-500/30
-                                    transition-all duration-200
-                                    hover:shadow-xl hover:shadow-blue-500/40 hover:scale-[1.02]
-                                    active:scale-[0.98]
-                                    disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                            >
-                                {loading ? "Verifying..." : "Verify & Continue"}
-                                {!loading && <ArrowRight size={18} weight="bold" />}
-                            </button>
-
-                            <div className="text-center">
-                                <button
-                                    onClick={() => setShowOtp(false)}
-                                    className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-500 transition"
-                                >
-                                    ← Change phone number
-                                </button>
-                            </div>
-
-                            <div className="text-center">
-                                <button className="text-sm text-blue-500 hover:text-blue-600 font-medium transition">
-                                    Resend OTP
-                                </button>
-                            </div>
+                            </form>
                         </div>
                     )}
 
                     {/* Terms */}
-                    <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-8">
+                    <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-8 leading-relaxed">
                         By continuing, you agree to our{" "}
-                        <Link href="/terms" className="text-blue-500 hover:underline">
+                        <Link href="/terms" className="text-blue-600 dark:text-blue-400 hover:underline">
                             Terms of Service
                         </Link>{" "}
                         and{" "}
-                        <Link href="/privacy" className="text-blue-500 hover:underline">
+                        <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline">
                             Privacy Policy
                         </Link>
                     </p>
                 </div>
 
                 {/* Owner/Admin Links */}
-                <div className="mt-6 text-center space-y-2">
+                <div className="mt-8 text-center">
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Want to list your property?{" "}
-                        <Link href="/become-host" className="text-blue-500 hover:text-blue-600 font-medium">
+                        Interested in hosting?{" "}
+                        <Link href="/become-host" className="text-blue-600 dark:text-blue-400 font-semibold hover:underline">
                             Owner Portal →
                         </Link>
                     </p>

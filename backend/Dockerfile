@@ -12,8 +12,10 @@ COPY package.json tsconfig.json tsup.config.ts ./
 # Install all dependencies
 RUN npm install
 
-# Copy source code
+# Copy source code and config
 COPY src ./src
+COPY drizzle.config.ts ./
+COPY drizzle ./drizzle
 
 # Build the application
 RUN npm run build
@@ -32,6 +34,9 @@ COPY --from=builder /app/dist ./dist
 
 # Install production dependencies only
 RUN npm install --omit=dev && npm cache clean --force
+
+COPY --from=builder /app/drizzle ./drizzle
+COPY --from=builder /app/drizzle.config.ts ./
 
 USER nodejs
 

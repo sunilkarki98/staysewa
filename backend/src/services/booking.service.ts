@@ -52,7 +52,9 @@ export const BookingsService = {
                 totalAmount: bookings.totalAmount,
                 createdAt: bookings.createdAt,
                 stayName: stays.name,
-                specialRequests: bookings.id, // Placeholder or add column if needed
+                specialRequests: bookings.specialRequests,
+                ownerId: bookings.ownerId,
+                customerId: bookings.customerId,
             })
             .from(bookings)
             .leftJoin(stays, eq(bookings.stayId, stays.id))
@@ -64,7 +66,7 @@ export const BookingsService = {
         // 1. Concurrency Control: Redis Lock (Strict Mutex)
         // We lock the *Unit* to ensure sequential availability checks.
         // TTL 10s is enough for the DB transaction.
-        const lockKey = `booking_lock:${data.unitId || data.stayId}`;
+        const lockKey = `booking_lock:${data.unitId || data.stayId}:${data.checkIn}:${data.checkOut}`;
         const lockToken = await RedisLockService.acquireLock(lockKey, 10000);
 
         if (!lockToken) {
@@ -102,30 +104,31 @@ export const BookingsService = {
                 data.totalAmount = unitPrice * nights;
 
                 // 4. Availability Check (Database Source of Truth)
-                // We check against RESERVED and CONFIRMED bookings.
-                const overlappingStatus = ['reserved', 'confirmed', 'checked_in', 'completed']; // details: enums.ts
-
+                // Uses SELECT ... FOR UPDATE to lock matching rows and prevent
+                // concurrent bookings from passing the overlap check simultaneously.
                 if (data.unitId) {
-                    const existing = await tx.query.bookings.findFirst({
-                        where: and(
-                            eq(bookings.unitId, data.unitId),
-                            // Check if status is in the blocking list
-                            // Note: We use 'ne' cancelled/expired/initiated usually, or 'inArray'
-                            // Simpler: Check if it overlaps AND is a blocking status
-                            sql`${bookings.status} IN ('reserved', 'confirmed', 'checked_in', 'completed')`,
-                            lt(bookings.checkIn, data.checkOut!),
-                            gt(bookings.checkOut, data.checkIn!)
-                        ),
-                    });
+                    const overlapping = await tx.execute(sql`
+                        SELECT id FROM bookings
+                        WHERE unit_id = ${data.unitId}
+                          AND status IN ('reserved', 'confirmed', 'checked_in', 'completed')
+                          AND check_in < ${data.checkOut}
+                          AND check_out > ${data.checkIn}
+                        FOR UPDATE
+                        LIMIT 1
+                    `);
 
-                    if (existing) {
-                        throw new AppError('The unit is already booked for the selected dates', 400);
+                    if (overlapping.length > 0) {
+                        throw new AppError('The unit is already booked for the selected dates', 409);
                     }
                 }
 
-                // 5. Generate Booking Number
+                // 5. Generate Booking Number (DB sequence for guaranteed uniqueness)
                 if (!data.bookingNumber) {
-                    data.bookingNumber = `STY-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`;
+                    const [{ seq }] = await tx.execute(sql`
+                        SELECT nextval(pg_get_serial_sequence('bookings', 'id'))::text AS seq
+                    `) as any;
+                    const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+                    data.bookingNumber = `STY-${datePart}-${String(seq).slice(-6).padStart(6, '0')}`;
                 }
 
                 // 6. Set Defaults for "Pay Later" / "Pay Now" Flow
@@ -147,7 +150,11 @@ export const BookingsService = {
         }
     },
 
-    async transitionStatus(id: string, targetStatus: typeof bookings.status.enumValues[number]) {
+    async transitionStatus(
+        id: string,
+        targetStatus: typeof bookings.status.enumValues[number],
+        options?: { cancelledBy?: string; cancellationReason?: string }
+    ) {
         return await db.transaction(async (tx) => {
             const booking = await tx.query.bookings.findFirst({
                 where: eq(bookings.id, id),
@@ -173,17 +180,32 @@ export const BookingsService = {
                 throw new AppError(`Invalid status transition from ${currentStatus} to ${targetStatus}`, 400);
             }
 
-            // Logic for specific transitions
-            // e.g., if cancelling, release inventory (implicitly done by status change)
+            // Build update payload
+            const updateFields: Record<string, unknown> = {
+                status: targetStatus,
+                updatedAt: new Date(),
+            };
+
+            if (targetStatus === 'confirmed') {
+                updateFields.confirmedAt = new Date();
+            }
+
+            // Cancellation-specific side effects
+            if (targetStatus === 'cancelled') {
+                updateFields.cancelledAt = new Date();
+                updateFields.cancelledBy = (options?.cancelledBy as any) || 'system';
+                updateFields.cancellationReason = options?.cancellationReason || null;
+
+                // If payment was already completed, flag for refund
+                if (booking.paymentStatus === 'paid' || booking.paymentStatus === 'success') {
+                    updateFields.paymentStatus = 'refunded';
+                    // TODO: Trigger actual gateway refund via PaymentService
+                }
+            }
 
             const result = await tx
                 .update(bookings)
-                .set({
-                    status: targetStatus,
-                    updatedAt: new Date(),
-                    ...(targetStatus === 'confirmed' ? { confirmedAt: new Date() } : {}),
-                    ...(targetStatus === 'cancelled' ? { cancelledAt: new Date() } : {}),
-                })
+                .set(updateFields as any)
                 .where(eq(bookings.id, id))
                 .returning();
 

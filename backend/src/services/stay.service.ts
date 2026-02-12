@@ -23,9 +23,10 @@ export const StaysService = {
         const conditions = [];
 
         if (location && location !== 'all') {
-            // Search across address fields
+            // Sanitize LIKE metacharacters to prevent search injection
+            const sanitized = location.toLowerCase().replace(/[%_]/g, '\\$&');
             conditions.push(
-                sql`lower(${stays.city}) LIKE ${`%${location.toLowerCase()}%`} OR lower(${stays.addressLine}) LIKE ${`%${location.toLowerCase()}%`} OR lower(${stays.district}) LIKE ${`%${location.toLowerCase()}%`}`
+                sql`lower(${stays.city}) LIKE ${`%${sanitized}%`} OR lower(${stays.addressLine}) LIKE ${`%${sanitized}%`} OR lower(${stays.district}) LIKE ${`%${sanitized}%`}`
             );
         }
 
@@ -127,7 +128,12 @@ export const StaysService = {
     },
 
     async delete(id: string) {
-        const result = await db.delete(stays).where(eq(stays.id, id)).returning();
+        // Soft delete: archive instead of destroying financial history
+        const result = await db
+            .update(stays)
+            .set({ status: 'archived', updatedAt: new Date() })
+            .where(eq(stays.id, id))
+            .returning();
         return result[0];
     },
 };

@@ -10,7 +10,7 @@ vi.mock('@/services/booking.service', () => ({
         getAll: vi.fn(),
         getById: vi.fn(),
         create: vi.fn(),
-        updateStatus: vi.fn(),
+        transitionStatus: vi.fn(),
     },
 }));
 
@@ -103,7 +103,7 @@ describe('BookingsController', () => {
         it('should return 404 if booking not found', async () => {
             req.params = { id: 'book_1' };
             req.body = { status: 'confirmed' };
-            (BookingsService.updateStatus as any).mockResolvedValue(null);
+            (BookingsService.transitionStatus as any).mockResolvedValue(null);
 
             await BookingsController.updateBookingStatus(req as Request, res as Response, next);
 
@@ -115,7 +115,7 @@ describe('BookingsController', () => {
             req.params = { id: 'book_1' };
             req.body = { status: 'confirmed' };
             const mockBooking = { id: 'book_1', status: 'confirmed' };
-            (BookingsService.updateStatus as any).mockResolvedValue(mockBooking);
+            (BookingsService.transitionStatus as any).mockResolvedValue(mockBooking);
 
             await BookingsController.updateBookingStatus(req as Request, res as Response, next);
 

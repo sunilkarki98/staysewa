@@ -1,4 +1,5 @@
-import { pgTable, text, uuid, timestamp, boolean, integer, jsonb, date, index } from 'drizzle-orm/pg-core';
+import { pgTable, text, uuid, timestamp, boolean, integer, jsonb, date, index, check } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { users } from '@/db/schema/users';
 import { stays, stayUnits } from '@/db/schema/stays';
 import { bookingStatusEnum, paymentStatusEnum, paymentMethodEnum, paymentTxnStatusEnum, cancelledByEnum } from '@/db/schema/enums';
@@ -50,6 +51,17 @@ export const bookings = pgTable('bookings', {
     stayIdIdx: index('booking_stay_id_idx').on(table.stayId),
     customerIdIdx: index('booking_customer_id_idx').on(table.customerId),
     ownerIdIdx: index('booking_owner_id_idx').on(table.ownerId),
+    // M1: Composite index for overlap queries (C1 performance)
+    overlapIdx: index('booking_overlap_idx').on(table.unitId, table.status, table.checkIn, table.checkOut),
+    // M1: Index for expiration job (H2)
+    expiryIdx: index('booking_status_expiry_idx').on(table.status, table.expiresAt),
+    // CHECK constraints to prevent invalid financial data
+    totalPositive: check('total_amount_positive', sql`${table.totalAmount} > 0`),
+    nightsPositive: check('nights_positive', sql`${table.nights} >= 1`),
+    dateOrder: check('date_order_check', sql`${table.checkOut} > ${table.checkIn}`),
+    taxesNonNeg: check('taxes_non_negative', sql`${table.taxes} >= 0`),
+    feeNonNeg: check('service_fee_non_negative', sql`${table.serviceFee} >= 0`),
+    discountNonNeg: check('discount_non_negative', sql`${table.discount} >= 0`),
 }));
 
 // ─── Payments ───────────────────────────────────────────────
@@ -67,6 +79,9 @@ export const payments = pgTable('payments', {
     refundReason: text('refund_reason'),
     paidAt: timestamp('paid_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-});
+}, (table) => ({
+    bookingIdIdx: index('payment_booking_id_idx').on(table.bookingId),
+    gatewayTxnIdx: index('payment_gateway_txn_idx').on(table.gatewayTxnId),
+}));
 
 

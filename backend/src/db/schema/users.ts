@@ -1,4 +1,4 @@
-import { pgTable, text, uuid, timestamp, boolean, integer, date, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, text, uuid, timestamp, boolean, integer, date, jsonb, index } from 'drizzle-orm/pg-core';
 import { userRoleEnum, verificationStatusEnum, idTypeEnum } from '@/db/schema/enums';
 
 // ─── Users (Unified Auth) ───────────────────────────────────
@@ -59,4 +59,6 @@ export const sessions = pgTable('sessions', {
     token: text('token').notNull(),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-});
+}, (table) => ({
+    tokenIdx: index('session_token_idx').on(table.token),
+}));

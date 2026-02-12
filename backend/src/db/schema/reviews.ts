@@ -11,8 +11,8 @@ export const reviews = pgTable('reviews', {
     userId: uuid('user_id').references(() => users.id).notNull(),
     rating: integer('rating').notNull(),
     comment: text('comment'),
-    updatedAt: timestamp('updated_at').defaultNow(),
-    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 }, (table) => ({
     ratingCheck: check('rating_check', sql`${table.rating} >= 1 AND ${table.rating} <= 5`),
     stayIdIdx: index('review_stay_id_idx').on(table.stayId),

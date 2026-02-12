@@ -7,8 +7,9 @@ export const PaymentController = {
      * Initiate payment
      */
     initiate: catchAsync(async (req: Request, res: Response) => {
-        const { bookingId, amount } = req.body;
-        const result = await PaymentService.initiateKhalti(bookingId, amount);
+        const { bookingId } = req.body;
+        // Amount is ALWAYS derived server-side from the booking record (C4 fix)
+        const result = await PaymentService.initiateKhalti(bookingId);
 
         res.status(200).json({
             status: 'success',

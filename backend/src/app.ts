@@ -22,7 +22,19 @@ const limiter = rateLimit({
 // Global Middlewares
 app.use(helmet());
 app.use(limiter);
-app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
+
+// Support multiple CORS origins from comma-separated string
+const allowedOrigins = env.CORS_ORIGIN ? env.CORS_ORIGIN.split(',') : ['http://localhost:3000'];
+app.use(cors({
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
 app.use(express.json());
 app.use(cookieParser());
 app.use('/uploads', express.static('uploads'));

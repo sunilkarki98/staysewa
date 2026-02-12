@@ -5,64 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1770714707230,
-      "tag": "0000_worried_firelord",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1770718014823,
-      "tag": "0001_whole_warpath",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1770720326896,
-      "tag": "0002_acoustic_the_order",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1770720472343,
-      "tag": "0003_tranquil_the_hood",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1770796088061,
-      "tag": "0004_complete_screwball",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1770800367707,
-      "tag": "0005_colossal_sersi",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1770804504887,
-      "tag": "0006_gray_fallen_one",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1770821909924,
-      "tag": "0007_whole_punisher",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1770821967049,
-      "tag": "0008_zippy_smasher",
+      "when": 1770824924253,
+      "tag": "0000_lean_hannibal_king",
       "breakpoints": true
     }
   ]

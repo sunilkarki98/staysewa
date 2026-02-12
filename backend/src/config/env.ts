@@ -21,4 +21,6 @@ export const env = {
     REDIS_URL: getEnv('REDIS_URL', false),
     JWT_COOKIE_EXPIRES_IN: getEnv('JWT_COOKIE_EXPIRES_IN', false) || '30',
     SUPABASE_JWT_SECRET: getEnv('SUPABASE_JWT_SECRET', false),
+    SUPABASE_URL: getEnv('SUPABASE_URL', false),
+    SUPABASE_SERVICE_KEY: getEnv('SUPABASE_SERVICE_KEY', false),
 };

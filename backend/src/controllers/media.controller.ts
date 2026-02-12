@@ -15,10 +15,10 @@ export const MediaController = {
         let { url } = req.body;
 
         if (req.file) {
-            // Construct URL for the uploaded file
-            // Assuming the server is reachable via the host header
-            // For production, this should likely be an Env Var e.g. ASSET_URL
-            url = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            // Upload to Supabase Storage
+            // Folder structure: stays/{stayId} or stays/{stayId}/rooms/{unitId}
+            const folder = unitId ? `stays/${stayId}/rooms/${unitId}` : `stays/${stayId}`;
+            url = await MediaService.uploadToSupabase(req.file, folder, 'stay-media');
         }
 
         if (!stayId || !url) {

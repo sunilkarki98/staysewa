@@ -11,9 +11,12 @@ if (!connectionString) {
     throw new Error("DATABASE_URL is not set");
 }
 
-// Disable prefetch as it is not supported for "Transaction" pool mode
+// Connection pool tuned for Supabase Transaction mode
 export const client = postgres(connectionString, {
-    prepare: false,
-    ssl: 'require'
+    prepare: false,       // Required for Supabase Transaction pool mode
+    ssl: 'require',
+    max: 10,              // Max connections (adjust based on Supabase plan)
+    idle_timeout: 20,     // Close idle connections after 20s
+    max_lifetime: 60 * 5, // Recycle connections every 5 minutes
 });
 export const db = drizzle(client, { schema });
