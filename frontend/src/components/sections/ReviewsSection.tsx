@@ -11,30 +11,30 @@ interface Review {
     user: {
         name: string;
     };
-    createdAt: string;
+    created_at: string;
 }
 
 interface Stats {
-    averageRating: string;
+    average_rating: string | number;
     count: number;
 }
 
-export default function ReviewsSection({ stayId }: { stayId: string }) {
+export default function ReviewsSection({ propertyId }: { propertyId: string }) {
     const [reviews, setReviews] = useState<Review[]>([]);
-    const [stats, setStats] = useState<Stats>({ averageRating: "0", count: 0 });
+    const [stats, setStats] = useState<Stats>({ average_rating: "0", count: 0 });
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchReviews();
-    }, [stayId]);
+    }, [propertyId]);
 
     const fetchReviews = async () => {
         try {
-            const data = await ReviewsService.getByStay(stayId);
-            // @ts-ignore
-            setReviews(data.reviews);
-            // @ts-ignore
-            setStats(data.stats);
+            const response = await ReviewsService.getByProperty(propertyId);
+            if (response) {
+                setReviews(response.reviews as Review[]);
+                setStats(response.stats as Stats);
+            }
         } catch (error) {
             console.error("Failed to fetch reviews", error);
         } finally {
@@ -50,7 +50,7 @@ export default function ReviewsSection({ stayId }: { stayId: string }) {
         return (
             <div className="py-8 border-t border-gray-100 dark:border-gray-800">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Reviews</h3>
-                <p className="text-gray-500 dark:text-gray-400">No reviews yet. Be the first to stay!</p>
+                <p className="text-gray-500 dark:text-gray-400">No reviews yet. Be the first to guest here!</p>
             </div>
         );
     }
@@ -61,7 +61,7 @@ export default function ReviewsSection({ stayId }: { stayId: string }) {
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">Reviews</h3>
                 <div className="flex items-center gap-1 text-sm font-bold text-gray-900 dark:text-white">
                     <Star weight="fill" className="text-yellow-400" />
-                    <span>{stats.averageRating}</span>
+                    <span>{stats.average_rating}</span>
                     <span className="text-gray-400 font-normal">({stats.count} reviews)</span>
                 </div>
             </div>
@@ -76,7 +76,7 @@ export default function ReviewsSection({ stayId }: { stayId: string }) {
                             <div>
                                 <p className="font-bold text-gray-900 dark:text-white">{review.user?.name || "Anonymous Guest"}</p>
                                 <p className="text-xs text-gray-500">
-                                    {new Date(review.createdAt).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}
+                                    {new Date(review.created_at).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' })}
                                 </p>
                             </div>
                         </div>

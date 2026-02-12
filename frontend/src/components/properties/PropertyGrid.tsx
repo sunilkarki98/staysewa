@@ -29,21 +29,30 @@ export default function PropertyGrid({
     const { city } = useLocation();
     const category = explicitCategory || contextCategory;
 
-    const properties = useMemo(() => {
+    const filteredProperties = useMemo(() => {
         let filtered = category === "all"
             ? rawProperties
             : rawProperties.filter((p) => p.type === category);
 
-        // Location filtering
+        // Location filtering (client-side backup)
         if (locationFilter && locationFilter !== "all") {
-            filtered = filtered.filter((p) => p.address_line.includes(locationFilter) || p.city.includes(locationFilter));
+            const loc = locationFilter.toLowerCase();
+            filtered = filtered.filter((p) =>
+                p.city.toLowerCase().includes(loc) ||
+                p.district.toLowerCase().includes(loc) ||
+                p.address_line?.toLowerCase().includes(loc)
+            );
         }
 
-        // Search filtering
+        // Search filtering (client-side)
         if (searchQuery.trim()) {
             const q = searchQuery.toLowerCase();
             filtered = filtered.filter(
-                (p) => p.city.toLowerCase().includes(q) || p.name.toLowerCase().includes(q) || p.address_line.toLowerCase().includes(q)
+                (p) =>
+                    p.city.toLowerCase().includes(q) ||
+                    p.name.toLowerCase().includes(q) ||
+                    p.district.toLowerCase().includes(q) ||
+                    p.address_line?.toLowerCase().includes(q)
             );
         }
 
@@ -69,7 +78,7 @@ export default function PropertyGrid({
                 {getHeaderText()}
             </h2>
 
-            {properties.length === 0 ? (
+            {filteredProperties.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                     <p className="text-lg font-medium text-stone-900 dark:text-white mb-2">
                         No properties found
@@ -80,16 +89,16 @@ export default function PropertyGrid({
                 </div>
             ) : (
                 <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {properties.map((p) => {
+                    {filteredProperties.map((p) => {
                         const images = p.media?.map(m => m.url) || [];
-                        const location = `${p.city}, ${p.address_line}`;
+                        const locationStr = `${p.city}${p.district ? `, ${p.district}` : ""}`;
 
                         return isCustomerView ? (
                             <CustomerPropertyCard
                                 key={p.id}
                                 {...p}
                                 images={images}
-                                location={location}
+                                location={locationStr}
                                 price={p.base_price}
                                 rating={p.avg_rating}
                             />
@@ -98,7 +107,7 @@ export default function PropertyGrid({
                                 key={p.id}
                                 {...p}
                                 images={images}
-                                location={location}
+                                location={locationStr}
                                 price={p.base_price}
                                 rating={p.avg_rating}
                             />

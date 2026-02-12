@@ -2,9 +2,9 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { usePathname } from "next/navigation";
-import type { StayCategory } from "../types/stay";
+import type { PropertyCategory } from "../types/property";
 
-type CategoryFilter = StayCategory | "all";
+type CategoryFilter = PropertyCategory | "all";
 
 type UserIntentContextType = {
     category: CategoryFilter;

@@ -15,73 +15,54 @@ import {
     Bathtub,
     Toilet
 } from "@phosphor-icons/react";
-import { StaysService } from "@/services/domain";
+import { PropertyService } from "@/services/domain";
 import { BookingsService } from "@/services/domain";
-import StayListingSection from "@/components/sections/StayListingSection"; // Reusing for 'Related Stays' if needed
 import ReviewsSection from "@/components/sections/ReviewsSection";
 import { useAuth } from "@/context/AuthContext";
-import type { Stay } from "@/types/stay";
+import type { Property } from "@/types/property";
 import { getAmenityIcon, formatAmenityLabel } from "@/helpers/amenity-icons";
 
 // Create a type for the extended response from backend (including relations)
-// In a real app, this should be in types/stay.ts
-type StayWithRelations = Stay & {
-    stayUnits?: Array<{
-        id: string;
-        name: string;
-        type: string;
-        maxOccupancy: number;
-        basePrice: number;
-        amenities: string[];
-        quantity: number;
-    }>;
-    stayMedia?: Array<{
-        id: string;
-        url: string;
-        type: string;
-        caption?: string;
-    }>;
-};
+type PropertyWithRelations = Property;
 
-export default function StayDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+export default function PropertyDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const { user } = useAuth();
     // Date State
-    const [checkIn, setCheckIn] = useState<string>(new Date().toISOString().split('T')[0]);
-    const [checkOut, setCheckOut] = useState<string>(new Date(Date.now() + 86400000).toISOString().split('T')[0]);
+    const [check_in, setCheckIn] = useState<string>(new Date().toISOString().split('T')[0]);
+    const [check_out, setCheckOut] = useState<string>(new Date(Date.now() + 86400000).toISOString().split('T')[0]);
 
     // Data State
-    const [stay, setStay] = useState<StayWithRelations | null>(null);
+    const [property, setProperty] = useState<PropertyWithRelations | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [bookingStatus, setBookingStatus] = useState<"idle" | "booking" | "success" | "error">("idle");
     const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
 
-    // Fetch Stay
+    // Fetch Property
     useEffect(() => {
-        const fetchStay = async () => {
+        const fetchProperty = async () => {
             try {
-                // Cast the response to our extended type since domain service return type might be strict
-                const data = await StaysService.getById(id);
-                const stayData = data as unknown as StayWithRelations;
-                setStay(stayData);
+                const data = await PropertyService.getById(id);
+                const propertyData = data as unknown as PropertyWithRelations;
+                setProperty(propertyData);
 
                 // Pre-select first available unit if any
-                if (stayData.stayUnits && stayData.stayUnits.length > 0) {
-                    setSelectedUnitId(stayData.stayUnits[0].id);
+                if (propertyData.units && propertyData.units.length > 0) {
+                    setSelectedUnitId(propertyData.units[0].id || null);
                 }
             } catch (err: unknown) {
-                const message = err instanceof Error ? err.message : "Failed to load stay details";
+                const message = err instanceof Error ? err.message : "Failed to load property details";
                 setError(message);
             } finally {
                 setLoading(false);
             }
         };
-        fetchStay();
+        fetchProperty();
     }, [id]);
 
     const handleBook = async () => {
-        if (stay?.type !== "apartment" && !selectedUnitId) {
+        if (property?.type !== "apartment" && !selectedUnitId) {
             alert("Please select a room option to proceed.");
             return;
         }
@@ -94,15 +75,15 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
         setBookingStatus("booking");
         try {
             await BookingsService.create({
-                stayId: id,
-                unitId: selectedUnitId || undefined,
-                checkIn: checkIn,
-                checkOut: checkOut,
-                guestName: user.name || "Guest",
-                guestEmail: user.email || "",
-                guestPhone: user.phone || "",
-                totalAmount: Math.floor(basePrice * validDuration * 1.05),
-                specialRequests: "Booking via new property page",
+                property_id: id,
+                unit_id: selectedUnitId || undefined,
+                check_in: check_in,
+                check_out: check_out,
+                guest_name: user.name || "Guest",
+                guest_email: user.email || "",
+                guest_phone: user.phone || "",
+                total_amount: Math.floor(base_price * validDuration * 1.05),
+                special_requests: "Booking via new property page",
             });
             setBookingStatus("success");
         } catch {
@@ -112,40 +93,28 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
     };
 
     // Derived State
-    const selectedUnit = stay?.stayUnits?.find(u => u.id === selectedUnitId);
+    const selectedUnit = property?.units?.find(u => u.id === selectedUnitId);
 
     // Price Calculation
-    // Base unit price or stay price
-    const basePrice = selectedUnit ? selectedUnit.basePrice : (stay?.price || 0);
+    // Base unit price or property price
+    const base_price = selectedUnit ? selectedUnit.base_price : (property?.base_price || 0);
 
     // Calculate Duration
-    const start = new Date(checkIn);
-    const end = new Date(checkOut);
+    const start = new Date(check_in);
+    const end = new Date(check_out);
     const diffTime = Math.abs(end.getTime() - start.getTime());
     const durationDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     // Ensure at least 1 night/month
     const validDuration = durationDays > 0 ? durationDays : 0;
 
-    // Total Price
-    // Assuming basePrice is per night (or per month if apartment, need logic)
-    // If type is 'apartment', usually per month? But for now let's assume 'night' standard for simple math
-    // unless 'month' logic is explicit. 'priceLabel' used 'month' for apartment.
-    const isMonthly = stay?.type === 'apartment';
-    const totalAmount = validDuration * basePrice; // Logic gap: if monthly, need to divide by 30? 
-    // For now, let's treat basePrice as "Per Night" equivalent even for apartments OR displayed as "Per Month" but calculated simply.
-    // Actually, usually booking systems standardize on ONE unit (night vs day). 
-    // If 'apartment' price is 20,000 / month, then daily is ~666. 
-    // Let's assume the stored price is PER NIGHT for calculation simplicity in this fix, 
-    // or if it IS per month, we need to adjust.
-    // Given the task is a "Audit/Fix", I will calculate simply based on nights for now to enable functionality.
-
-    const displayPrice = basePrice;
+    const isMonthly = property?.type === 'apartment';
+    const displayPrice = base_price;
 
     // Handlers
     const handleCheckInChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCheckIn(e.target.value);
         // Auto-adjust checkout if invalid
-        if (new Date(e.target.value) >= new Date(checkOut)) {
+        if (new Date(e.target.value) >= new Date(check_out)) {
             setCheckOut(new Date(new Date(e.target.value).getTime() + 86400000).toISOString().split('T')[0]);
         }
     };
@@ -179,21 +148,13 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
     }
 
     // Error state
-    if (error || !stay) {
+    if (error || !property) {
         return notFound();
     }
 
     // Processing Images
-    // Combine stay images (legacy array) and new media relation
-    let allImages = stay.images || [];
-    if (stay.stayMedia && stay.stayMedia.length > 0) {
-        // Prefer media objects
-        const mediaUrls = stay.stayMedia.map(m => m.url);
-        // Deduplicate if legacy images are same
-        allImages = Array.from(new Set([...mediaUrls, ...allImages]));
-    }
+    let allImages = (property.media?.map(m => m.url)) || [];
 
-    // Ensure we have at least placeholders if empty
     if (allImages.length === 0) allImages = ["/placeholder-house.webp"];
 
     const mainImage = allImages[0];
@@ -208,7 +169,7 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
                     className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-muted hover:text-primary dark:text-gray-400 dark:hover:text-primary transition-colors"
                 >
                     <CaretLeft size={18} />
-                    Back to Dashboard
+                    Back to Explore
                 </Link>
 
                 {/* Main Content Grid */}
@@ -222,29 +183,29 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
                             <div className="col-span-4 row-span-2 md:col-span-2 relative bg-gray-100 dark:bg-gray-800 group cursor-pointer">
                                 <Image
                                     src={mainImage}
-                                    alt={stay.name}
+                                    alt={property.name}
                                     fill
                                     className="object-cover transition duration-300 group-hover:scale-105"
                                     priority
                                 />
-                                <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/80 px-3 py-1 rounded-full text-xs font-bold text-text dark:text-white shadow-sm backdrop-blur-md">
-                                    {stay.type}
+                                <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/80 px-3 py-1 rounded-full text-xs font-bold text-text dark:text-white shadow-sm backdrop-blur-md capitalize">
+                                    {property.type}
                                 </div>
                             </div>
 
-                            {/* Sub Images (Hidden on mobile mostly, or grid) */}
+                            {/* Sub Images */}
                             {subImages.map((img, idx) => (
                                 <div key={idx} className="hidden md:block relative bg-gray-100 dark:bg-gray-800 group cursor-pointer">
                                     <Image
                                         src={img}
-                                        alt={`${stay.name} - ${idx + 2}`}
+                                        alt={`${property.name} - ${idx + 2}`}
                                         fill
                                         className="object-cover transition duration-300 group-hover:scale-105"
                                     />
                                 </div>
                             ))}
 
-                            {/* Placeholder for "See all photos" if generic or overflow */}
+                            {/* Placeholder for "See all photos" */}
                             {subImages.length < 4 && Array.from({ length: 4 - subImages.length }).map((_, i) => (
                                 <div key={`placeholder-${i}`} className="hidden md:flex items-center justify-center bg-stone-100 dark:bg-stone-900 text-stone-300">
                                     <Images size={24} />
@@ -258,64 +219,64 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
                             <div className="flex items-start justify-between gap-4">
                                 <div>
                                     <h1 className="text-3xl font-bold text-text dark:text-white">
-                                        {stay.name}
+                                        {property.name}
                                     </h1>
                                     <div className="mt-2 flex items-center gap-2 text-muted dark:text-gray-400">
                                         <MapPin size={18} weight="fill" />
-                                        <span>{stay.location}</span>
+                                        <span>{property.city}, {property.district}</span>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-1 rounded-lg bg-yellow-100 px-3 py-1.5 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-500">
                                     <Star size={20} weight="fill" />
-                                    <span className="font-bold">{stay.rating}</span>
+                                    <span className="font-bold">{property.avg_rating}</span>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Key Stats (New) */}
-                        {(stay.maxGuests || stay.bedrooms || stay.bathrooms) && (
+                        {/* Key Stats */}
+                        {(property.max_guests || property.bedrooms || property.bathrooms) && (
                             <div className="mt-6 flex flex-wrap gap-4 lg:gap-8 py-4 border-y border-stone-100 dark:border-stone-800">
-                                {stay.maxGuests && stay.maxGuests > 0 && (
+                                {property.max_guests && property.max_guests > 0 && (
                                     <div className="flex items-center gap-2">
                                         <Users size={24} className="text-stone-400" />
                                         <div>
                                             <span className="block text-sm font-bold text-stone-900 dark:text-white">
-                                                {stay.maxGuests} Guests
+                                                {property.max_guests} Guests
                                             </span>
                                         </div>
                                     </div>
                                 )}
-                                {stay.bedrooms !== undefined && stay.bedrooms >= 0 && !['hotel', 'hostel', 'resort'].includes(stay.type) && (
+                                {property.bedrooms !== undefined && property.bedrooms >= 0 && !['hotel', 'hostel', 'resort'].includes(property.type) && (
                                     <div className="flex items-center gap-2">
                                         <Bed size={24} className="text-stone-400" />
                                         <div>
                                             <span className="block text-sm font-bold text-stone-900 dark:text-white">
-                                                {stay.bedrooms === 0 ? "Studio" : `${stay.bedrooms} Bedroom${stay.bedrooms > 1 ? "s" : ""}`}
+                                                {property.bedrooms === 0 ? "Studio" : `${property.bedrooms} Bedroom${property.bedrooms > 1 ? "s" : ""}`}
                                             </span>
                                         </div>
                                     </div>
                                 )}
-                                {stay.bathrooms !== undefined && stay.bathrooms > 0 && !['hotel', 'hostel', 'resort'].includes(stay.type) && (
+                                {property.bathrooms !== undefined && property.bathrooms > 0 && !['hotel', 'hostel', 'resort'].includes(property.type) && (
                                     <div className="flex items-center gap-2">
                                         <Bathtub size={24} className="text-stone-400" />
                                         <div>
                                             <span className="block text-sm font-bold text-stone-900 dark:text-white">
-                                                {stay.bathrooms} Bathroom{stay.bathrooms > 1 ? "s" : ""}
+                                                {property.bathrooms} Bathroom{property.bathrooms > 1 ? "s" : ""}
                                             </span>
                                         </div>
                                     </div>
                                 )}
                             </div>
                         )}
-                        {/* Available Rooms / Units Section (New) - Only for Hostels/Homestays */}
-                        {stay.type !== "apartment" && stay.stayUnits && stay.stayUnits.length > 0 && (
+                        {/* Available Rooms / Units Section */}
+                        {property.type !== "apartment" && property.units && property.units.length > 0 && (
                             <section>
                                 <h3 className="mb-4 text-xl font-bold text-text dark:text-white flex items-center gap-2">
                                     <Bed size={24} className="text-primary" />
                                     Available Options
                                 </h3>
                                 <div className="grid gap-4 sm:grid-cols-2">
-                                    {stay.stayUnits.map((unit) => (
+                                    {property.units.map((unit) => (
                                         <div
                                             key={unit.id}
                                             onClick={() => setSelectedUnitId(unit.id || "")}
@@ -330,13 +291,13 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
                                             </div>
                                             <div className="flex items-center gap-4 text-sm text-stone-500 dark:text-stone-400 mb-3">
                                                 <span className="flex items-center gap-1">
-                                                    <Users size={16} /> Max {unit.maxOccupancy}
+                                                    <Users size={16} /> Max {unit.max_occupancy}
                                                 </span>
                                                 <span className="font-semibold text-stone-900 dark:text-stone-200">
-                                                    NPR {unit.basePrice.toLocaleString()}
+                                                    NPR {unit.base_price.toLocaleString()}
                                                 </span>
                                             </div>
-                                            {/* Unit Amenities (limit 3) */}
+                                            {/* Unit Amenities */}
                                             {unit.amenities && unit.amenities.length > 0 && (
                                                 <div className="flex flex-wrap gap-2">
                                                     {unit.amenities.slice(0, 3).map(am => (
@@ -358,9 +319,9 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
                             <h3 className="mb-6 text-xl font-bold text-text dark:text-white">
                                 What this place offers
                             </h3>
-                            {stay.amenities && stay.amenities.length > 0 ? (
+                            {property.amenities && property.amenities.length > 0 ? (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    {stay.amenities.map((amenity) => {
+                                    {property.amenities.map((amenity) => {
                                         const Icon = getAmenityIcon(amenity);
                                         return (
                                             <div key={amenity} className="flex items-center gap-4 p-3 rounded-lg hover:bg-neutral dark:hover:bg-gray-800 transition-colors">
@@ -382,11 +343,10 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
                         {/* Dynamic Description */}
                         <div className="rounded-xl border border-border dark:border-gray-800 bg-white dark:bg-gray-900 p-6">
                             <h3 className="mb-4 text-lg font-bold text-text dark:text-white">
-                                About this stay
+                                About this property
                             </h3>
-                            {/* Render description or fallback to "unprovided" state, not generic placeholder */}
                             <p className="text-muted dark:text-gray-400 leading-relaxed whitespace-pre-wrap">
-                                {stay.description || "The host hasn't provided a description for this property yet."}
+                                {property.description || "The host hasn't provided a description for this property yet."}
                             </p>
                         </div>
                     </div>
@@ -396,7 +356,7 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
                         <div className="sticky top-24 rounded-2xl border border-border dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-lg">
                             <div className="mb-6">
                                 <span className="text-sm font-medium text-stone-500 block mb-1">
-                                    {stay.type === "apartment" ? "Price" : (selectedUnitId ? "Selected Option" : "Starting Price")}
+                                    {property.type === "apartment" ? "Price" : (selectedUnitId ? "Selected Option" : "Starting Price")}
                                 </span>
                                 <div className="flex items-end gap-2">
                                     <span className="text-3xl font-bold text-primary">
@@ -414,7 +374,7 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
                                     <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Check-In</label>
                                     <input
                                         type="date"
-                                        value={checkIn}
+                                        value={check_in}
                                         min={new Date().toISOString().split('T')[0]}
                                         onChange={handleCheckInChange}
                                         className="w-full bg-transparent text-sm font-medium text-stone-900 dark:text-white focus:outline-none"
@@ -424,8 +384,8 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
                                     <label className="block text-xs font-bold text-stone-500 uppercase mb-1">Check-Out</label>
                                     <input
                                         type="date"
-                                        value={checkOut}
-                                        min={checkIn}
+                                        value={check_out}
+                                        min={check_in}
                                         onChange={handleCheckOutChange}
                                         className="w-full bg-transparent text-sm font-medium text-stone-900 dark:text-white focus:outline-none"
                                     />
@@ -436,15 +396,15 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
                             <div className="mb-6 p-4 bg-stone-50 dark:bg-gray-800/50 rounded-xl space-y-2">
                                 <div className="flex justify-between text-sm">
                                     <span className="text-stone-600 dark:text-stone-400">NPR {displayPrice.toLocaleString()} x {validDuration} nights</span>
-                                    <span className="font-medium text-stone-900 dark:text-white">NPR {(basePrice * validDuration).toLocaleString()}</span>
+                                    <span className="font-medium text-stone-900 dark:text-white">NPR {(base_price * validDuration).toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-stone-600 dark:text-stone-400">Service Fee (5%)</span>
-                                    <span className="font-medium text-stone-900 dark:text-white">NPR {(basePrice * validDuration * 0.05).toLocaleString()}</span>
+                                    <span className="font-medium text-stone-900 dark:text-white">NPR {(base_price * validDuration * 0.05).toLocaleString()}</span>
                                 </div>
                                 <div className="pt-2 border-t border-stone-200 dark:border-gray-700 flex justify-between font-bold text-base">
                                     <span className="text-stone-900 dark:text-white">Total</span>
-                                    <span className="text-primary">NPR {(basePrice * validDuration * 1.05).toLocaleString()}</span>
+                                    <span className="text-primary">NPR {(base_price * validDuration * 1.05).toLocaleString()}</span>
                                 </div>
                             </div>
 
@@ -460,7 +420,7 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
                                         }`}
                                 >
                                     {bookingStatus === "idle" && (
-                                        stay.type === "apartment"
+                                        property.type === "apartment"
                                             ? "Request to Book"
                                             : (selectedUnitId ? "Book This Option" : "Book Now")
                                     )}
@@ -468,13 +428,13 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
                                     {bookingStatus === "success" && (
                                         <>
                                             <CheckCircle size={20} weight="bold" />
-                                            {stay.type === "apartment" ? "Request Sent!" : "Booked!"}
+                                            {property.type === "apartment" ? "Request Sent!" : "Booked!"}
                                         </>
                                     )}
                                     {bookingStatus === "error" && "Booking Failed — Try Again"}
                                 </button>
                                 <p className="text-center text-xs text-muted dark:text-gray-500">
-                                    {stay.type === "apartment"
+                                    {property.type === "apartment"
                                         ? "The owner will review your request."
                                         : "You won't be charged yet"
                                     }

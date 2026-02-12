@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPinIcon, StarIcon } from "@phosphor-icons/react";
+import { MapPin, Star } from "@phosphor-icons/react";
 import type { PropertyCategory } from "../../types/property";
 import ImageCarousel from "../ui/ImageCarousel";
 import Link from "next/link";
@@ -34,14 +34,14 @@ export default function CustomerPropertyCard({
                 {/* Type Badge */}
                 <div className="absolute top-3 left-3 z-10">
                     <span className="inline-flex items-center rounded-lg bg-white/90 dark:bg-black/80 backdrop-blur-sm px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white shadow-sm">
-                        {type.slice(0, -1)}
+                        {type}
                     </span>
                 </div>
 
                 {/* Rating Badge */}
                 <div className="absolute top-3 right-3 z-10">
                     <div className="flex items-center gap-1 rounded-lg bg-surface/90 dark:bg-black/80 backdrop-blur-sm px-2 py-1 shadow-sm">
-                        <StarIcon weight="fill" className="text-secondary" size={14} />
+                        <Star weight="fill" className="text-secondary" size={14} />
                         <span className="text-xs font-bold text-gray-900 dark:text-white">{rating}</span>
                     </div>
                 </div>
@@ -57,7 +57,7 @@ export default function CustomerPropertyCard({
                             </h3>
                         </Link>
                         <div className="flex items-center gap-1.5 mt-1 text-muted dark:text-gray-400">
-                            <MapPinIcon size={14} weight="fill" />
+                            <MapPin size={14} weight="fill" />
                             <span className="text-xs font-medium truncate">{location}</span>
                         </div>
                     </div>

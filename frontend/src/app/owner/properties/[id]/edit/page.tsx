@@ -1,24 +1,22 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeftIcon, ImageIcon, FloppyDisk } from "@phosphor-icons/react";
 import Link from "next/link";
 import Image from "next/image";
-import { StaysService } from "@/services/domain";
-import type { StayCategory, StayIntent } from "@/types/stay";
+import { PropertyService } from "@/services/domain";
+import type { PropertyCategory } from "@/types/property";
 
-type ListingFormData = {
+type PropertyFormData = {
     name: string;
-    type: StayCategory;
-    intent: StayIntent;
-    location: string;
-    address: string;
-    price: string;
+    type: PropertyCategory;
+    city: string;
+    district: string;
+    address_line: string;
+    base_price: string; // Stored as string in form for input handling
     description: string;
     amenities: string[];
     rules: string;
-    maxGuests: string;
+    max_guests: string;
     bedrooms: string;
     bathrooms: string;
     images: string[];
@@ -29,22 +27,22 @@ const AMENITY_OPTIONS = [
     "TV", "Garden", "Balcony", "Security", "CCTV", "Power Backup",
 ];
 
-export default function EditListingPage() {
+export default function EditPropertyPage() {
     const params = useParams();
     const router = useRouter();
-    const listingId = params.id as string;
+    const propertyId = params.id as string;
 
-    const [formData, setFormData] = useState<ListingFormData>({
+    const [formData, setFormData] = useState<PropertyFormData>({
         name: "",
         type: "homestay",
-        intent: "short_stay",
-        location: "",
-        address: "",
-        price: "",
+        city: "",
+        district: "",
+        address_line: "",
+        base_price: "",
         description: "",
         amenities: [],
         rules: "",
-        maxGuests: "",
+        max_guests: "",
         bedrooms: "1",
         bathrooms: "1",
         images: [],
@@ -55,25 +53,25 @@ export default function EditListingPage() {
     const [notFound, setNotFound] = useState(false);
     const [isLoadingData, setIsLoadingData] = useState(true);
 
-    // Fetch listing from API
+    // Fetch property from API
     useEffect(() => {
-        const fetchListing = async () => {
+        const fetchProperty = async () => {
             try {
-                const listing = await StaysService.getById(listingId);
+                const property = await PropertyService.getById(propertyId);
                 setFormData({
-                    name: listing.name,
-                    type: listing.type,
-                    intent: listing.intent,
-                    location: listing.location,
-                    address: "",
-                    price: listing.price.toString(),
-                    description: listing.description || `A wonderful ${listing.type.slice(0, -1)} located in ${listing.location}.`,
-                    amenities: listing.amenities || ["WiFi", "Hot Water"],
-                    rules: listing.rules?.join("\n") || "",
-                    maxGuests: "4",
-                    bedrooms: listing.type === "hostel" ? "1" : "2",
-                    bathrooms: "1",
-                    images: listing.images,
+                    name: property.name,
+                    type: property.type,
+                    city: property.city,
+                    district: property.district,
+                    address_line: property.address_line,
+                    base_price: (property.base_price / 100).toString(), // Convert Paisa to Rupees
+                    description: property.description || "",
+                    amenities: property.amenities || [],
+                    rules: property.rules?.join("\n") || "",
+                    max_guests: (property.max_guests || 4).toString(),
+                    bedrooms: (property.bedrooms || 1).toString(),
+                    bathrooms: (property.bathrooms || 1).toString(),
+                    images: property.media?.map(m => m.url) || [],
                 });
             } catch {
                 setNotFound(true);
@@ -81,10 +79,10 @@ export default function EditListingPage() {
                 setIsLoadingData(false);
             }
         };
-        fetchListing();
-    }, [listingId]);
+        fetchProperty();
+    }, [propertyId]);
 
-    const handleChange = (field: keyof ListingFormData, value: string) => {
+    const handleChange = (field: keyof PropertyFormData, value: string) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
@@ -101,19 +99,23 @@ export default function EditListingPage() {
         e.preventDefault();
         setIsSaving(true);
         try {
-            await StaysService.update(listingId, {
+            await PropertyService.update(propertyId, {
                 name: formData.name,
                 type: formData.type,
-                intent: formData.intent,
-                location: formData.location,
-                price: Number(formData.price),
+                city: formData.city,
+                district: formData.district,
+                address_line: formData.address_line,
+                base_price: Number(formData.base_price), // Service handles Paisa conversion
                 description: formData.description,
                 amenities: formData.amenities,
                 rules: formData.rules.split("\n").filter(Boolean),
+                max_guests: Number(formData.max_guests),
+                bedrooms: Number(formData.bedrooms),
+                bathrooms: Number(formData.bathrooms),
             });
             setSaved(true);
         } catch (err) {
-            console.error("Failed to update listing:", err);
+            console.error("Failed to update property:", err);
         } finally {
             setIsSaving(false);
         }
@@ -138,16 +140,16 @@ export default function EditListingPage() {
                     </svg>
                 </div>
                 <h2 className="text-2xl font-bold text-stone-900 dark:text-white mb-2">
-                    Listing Not Found
+                    Property Not Found
                 </h2>
                 <p className="text-stone-500 dark:text-stone-400 mb-6">
-                    The listing you&apos;re trying to edit doesn&apos;t exist.
+                    The property you&apos;re trying to edit doesn&apos;t exist.
                 </p>
                 <Link
-                    href="/owner/listings"
+                    href="/owner/properties"
                     className="px-5 py-2.5 text-sm font-semibold text-white bg-primary rounded-xl hover:bg-primary/90 transition shadow-sm"
                 >
-                    Back to Listings
+                    Back to Properties
                 </Link>
             </div>
         );
@@ -165,14 +167,14 @@ export default function EditListingPage() {
                     Changes Saved!
                 </h2>
                 <p className="text-stone-500 dark:text-stone-400 mb-6 max-w-md">
-                    Your listing &quot;{formData.name}&quot; has been updated successfully.
+                    Your property &quot;{formData.name}&quot; has been updated successfully.
                 </p>
                 <div className="flex gap-3">
                     <Link
-                        href="/owner/listings"
+                        href="/owner/properties"
                         className="px-5 py-2.5 text-sm font-semibold text-white bg-primary rounded-xl hover:bg-primary/90 transition shadow-sm"
                     >
-                        View My Listings
+                        View My Properties
                     </Link>
                     <button
                         onClick={() => setSaved(false)}
@@ -190,14 +192,14 @@ export default function EditListingPage() {
             {/* Header */}
             <div className="flex items-center gap-4 mb-8">
                 <Link
-                    href="/owner/listings"
+                    href="/owner/properties"
                     className="p-2 text-stone-500 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-colors"
                 >
                     <ArrowLeftIcon size={20} weight="bold" />
                 </Link>
                 <div>
                     <h1 className="text-2xl font-bold text-stone-900 dark:text-white">
-                        Edit Listing
+                        Edit Property
                     </h1>
                     <p className="text-stone-500 text-sm mt-0.5">
                         Update details for &quot;{formData.name}&quot;
@@ -217,7 +219,7 @@ export default function EditListingPage() {
                                 <div key={idx} className="relative aspect-video rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800">
                                     <Image
                                         src={img}
-                                        alt={`Listing photo ${idx + 1}`}
+                                        alt={`Property photo ${idx + 1}`}
                                         fill
                                         className="object-cover"
                                     />
@@ -260,7 +262,7 @@ export default function EditListingPage() {
                             </label>
                             <select
                                 value={formData.type}
-                                onChange={(e) => handleChange("type", e.target.value)}
+                                onChange={(e) => handleChange("type", e.target.value as any)}
                                 className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
                             >
                                 <option value="homestay">Homestay</option>
@@ -268,36 +270,23 @@ export default function EditListingPage() {
                                 <option value="hotel">Hotel</option>
                                 <option value="apartment">Apartment</option>
                                 <option value="room">Room</option>
+                                <option value="resort">Resort</option>
                             </select>
                         </div>
 
                         <div>
                             <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                                Stay Intent *
+                                Description *
                             </label>
-                            <select
-                                value={formData.intent}
-                                onChange={(e) => handleChange("intent", e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
-                            >
-                                <option value="short_stay">Short Stay (per night)</option>
-                                <option value="long_stay">Long Stay (per month)</option>
-                            </select>
+                            <textarea
+                                required
+                                value={formData.description}
+                                onChange={(e) => handleChange("description", e.target.value)}
+                                placeholder="Describe your property..."
+                                rows={4}
+                                className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition resize-none"
+                            />
                         </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                            Description *
-                        </label>
-                        <textarea
-                            required
-                            value={formData.description}
-                            onChange={(e) => handleChange("description", e.target.value)}
-                            placeholder="Describe your property..."
-                            rows={4}
-                            className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition resize-none"
-                        />
                     </div>
                 </section>
 
@@ -310,29 +299,43 @@ export default function EditListingPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                                Area / Neighborhood *
+                                City *
                             </label>
                             <input
                                 type="text"
                                 required
-                                value={formData.location}
-                                onChange={(e) => handleChange("location", e.target.value)}
-                                placeholder="e.g. Thamel, Kathmandu"
+                                value={formData.city}
+                                onChange={(e) => handleChange("city", e.target.value)}
+                                placeholder="e.g. Kathmandu"
                                 className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
                             />
                         </div>
                         <div>
                             <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                                Full Address
+                                District *
                             </label>
                             <input
                                 type="text"
-                                value={formData.address}
-                                onChange={(e) => handleChange("address", e.target.value)}
-                                placeholder="Street address (optional)"
+                                required
+                                value={formData.district}
+                                onChange={(e) => handleChange("district", e.target.value)}
+                                placeholder="e.g. Kathmandu"
                                 className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
                             />
                         </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
+                            Full Address
+                        </label>
+                        <input
+                            type="text"
+                            value={formData.address_line}
+                            onChange={(e) => handleChange("address_line", e.target.value)}
+                            placeholder="Street address (optional)"
+                            className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+                        />
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -344,8 +347,8 @@ export default function EditListingPage() {
                                 type="number"
                                 required
                                 min="0"
-                                value={formData.price}
-                                onChange={(e) => handleChange("price", e.target.value)}
+                                value={formData.base_price}
+                                onChange={(e) => handleChange("base_price", e.target.value)}
                                 placeholder="e.g. 1500"
                                 className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
                             />
@@ -359,8 +362,8 @@ export default function EditListingPage() {
                                 onChange={(e) => handleChange("bedrooms", e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
                             >
-                                {[1, 2, 3, 4, 5, 6].map((n) => (
-                                    <option key={n} value={n}>{n}</option>
+                                {[0, 1, 2, 3, 4, 5, 6].map((n) => (
+                                    <option key={n} value={n}>{n === 0 ? "Studio / Shared" : n}</option>
                                 ))}
                             </select>
                         </div>
@@ -373,7 +376,7 @@ export default function EditListingPage() {
                                 onChange={(e) => handleChange("bathrooms", e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
                             >
-                                {[1, 2, 3, 4].map((n) => (
+                                {[0, 1, 2, 3, 4].map((n) => (
                                     <option key={n} value={n}>{n}</option>
                                 ))}
                             </select>
@@ -387,8 +390,8 @@ export default function EditListingPage() {
                         <input
                             type="number"
                             min="1"
-                            value={formData.maxGuests}
-                            onChange={(e) => handleChange("maxGuests", e.target.value)}
+                            value={formData.max_guests}
+                            onChange={(e) => handleChange("max_guests", e.target.value)}
                             placeholder="e.g. 4"
                             className="w-full sm:w-32 px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
                         />
@@ -437,7 +440,7 @@ export default function EditListingPage() {
                 {/* Submit */}
                 <div className="flex items-center justify-between pt-2 pb-8">
                     <Link
-                        href="/owner/listings"
+                        href="/owner/properties"
                         className="px-5 py-2.5 text-sm font-semibold text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-white transition"
                     >
                         Cancel

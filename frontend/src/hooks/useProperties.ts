@@ -4,13 +4,14 @@ import type { Property } from "../types/property";
 import type { ApiError } from "../api/types";
 
 export type PropertyFilters = {
-    location?: string;
-    minPrice?: number;
-    maxPrice?: number;
-    category?: string;
+    city?: string;
+    district?: string;
+    min_price?: number;
+    max_price?: number;
+    type?: string;
     guests?: number;
-    checkIn?: string;
-    checkOut?: string;
+    check_in?: string;
+    check_out?: string;
 };
 
 export function useProperties(filters?: PropertyFilters) {

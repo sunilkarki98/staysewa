@@ -7,7 +7,7 @@ interface BackendResponse<T> {
 }
 
 export const ReviewsService = {
-    create: async (data: { bookingId: string; rating: number; comment: string }) => {
+    create: async (data: { booking_id: string; rating: number; comment: string }) => {
         const response = await apiClient.post<BackendResponse<{ review: unknown }>>(
             API_CONFIG.ENDPOINTS.REVIEWS.CREATE,
             data
@@ -15,9 +15,9 @@ export const ReviewsService = {
         return response.data;
     },
 
-    getByStay: async (stayId: string) => {
+    getByProperty: async (propertyId: string) => {
         const response = await apiClient.get<BackendResponse<{ reviews: unknown[], stats: unknown }>>(
-            API_CONFIG.ENDPOINTS.REVIEWS.BY_STAY(stayId)
+            API_CONFIG.ENDPOINTS.REVIEWS.BY_PROPERTY(propertyId)
         );
         return response.data;
     }

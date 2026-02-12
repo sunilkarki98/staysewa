@@ -21,9 +21,9 @@ export const MediaService = {
         );
     },
 
-    getByStay: async (stayId: string) => {
+    getByProperty: async (propertyId: string) => {
         const response = await apiClient.get<BackendResponse<{ media: unknown[] }>>(
-            API_CONFIG.ENDPOINTS.MEDIA.BY_STAY(stayId)
+            API_CONFIG.ENDPOINTS.MEDIA.BY_PROPERTY(propertyId)
         );
         return response.data.media;
     },

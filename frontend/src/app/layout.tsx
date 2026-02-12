@@ -3,8 +3,8 @@ import { ReactNode } from "react";
 
 
 export const metadata = {
-  title: "My Stays App",
-  description: "Booking app for hostels and flats",
+  title: "StaySewa | Find Your Perfect Property in Kathmandu",
+  description: "The premium booking platform for hostels, apartments, and homestays in Kathmandu. Secure, verified, and reliable.",
 };
 
 // Inline script to apply theme before React hydrates (prevents flash)
