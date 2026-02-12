@@ -23,17 +23,28 @@ const limiter = rateLimit({
 app.use(helmet());
 app.use(limiter);
 
-// Support multiple CORS origins from comma-separated string
+// Support multiple CORS origins and Vercel preview deployments
 const allowedOrigins = env.CORS_ORIGIN
     ? env.CORS_ORIGIN.split(',').map(o => o.trim())
     : ['http://localhost:3000'];
+
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
+        // 1. Allow if no origin (e.g. mobile apps, curl)
+        if (!origin) return callback(null, true);
+
+        // 2. Allow if in explicit whitelist
+        if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+            return callback(null, true);
         }
+
+        // 3. Allow Vercel preview deployments
+        if (origin.endsWith('.vercel.app')) {
+            return callback(null, true);
+        }
+
+        // 4. Fallback: Reject
+        callback(new Error('Not allowed by CORS'));
     },
     credentials: true
 }));
