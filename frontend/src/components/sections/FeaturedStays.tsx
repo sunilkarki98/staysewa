@@ -4,9 +4,9 @@ import { useState, useRef } from "react";
 import StayCard from "../stays/StayCard";
 import type { StayCategory } from "../../types/stay";
 import { CaretLeft, CaretRight } from "@phosphor-icons/react";
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStays } from "../../hooks/useStays";
+import Button from "../ui/Button";
 
 type Tab = "all" | StayCategory;
 
@@ -179,13 +179,13 @@ export default function FeaturedStays({ compact = false }: FeaturedStaysProps) {
                                     <CaretLeft size={24} weight="bold" />
                                 </button>
 
-                                <Link
+                                <Button
                                     href={getLink()}
-                                    className="px-8 py-3 text-sm font-bold text-primary-foreground bg-primary dark:bg-primary/90 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                                    rightIcon={<CaretRight size={18} weight="bold" />}
+                                    className="px-8 py-3 text-sm font-bold text-primary-foreground bg-primary dark:bg-primary/90 rounded-full shadow-lg hover:scale-105 active:scale-95 transition-all"
                                 >
-                                    <span>View All {activeTab === "all" ? "Stays" : activeTab}</span>
-                                    <CaretRight size={18} weight="bold" />
-                                </Link>
+                                    View All {activeTab === "all" ? "Stays" : activeTab}
+                                </Button>
 
                                 <button
                                     onClick={() => scroll('right')}

@@ -45,6 +45,16 @@ export function ProfileMenu() {
                         <User size={16} className="inline mr-2" /> Profile
                     </Link>
 
+                    {user?.role !== "owner" && (
+                        <Link
+                            href="/my-bookings"
+                            className="block px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-900"
+                            onClick={() => setOpen(false)}
+                        >
+                            <User size={16} className="inline mr-2" /> My Bookings
+                        </Link>
+                    )}
+
                     {user?.role === "owner" && (
                         <Link
                             href="/owner"

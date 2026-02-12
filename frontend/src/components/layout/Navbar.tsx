@@ -13,13 +13,17 @@ import { useAuth } from "@/context/AuthContext";
 export default function Navbar() {
     const pathname = usePathname();
     const [showNotifications, setShowNotifications] = useState(false);
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, user } = useAuth();
 
     const navLinks = [
         { href: "/", label: "Home" },
         { href: "/about", label: "About" },
         { href: "/contact", label: "Contact" },
     ];
+
+    if (isAuthenticated && user?.role !== 'owner' && user?.role !== 'admin') {
+        navLinks.splice(1, 0, { href: "/explore", label: "Explore" });
+    }
 
     const isLandingPage = pathname === "/";
 
@@ -70,7 +74,7 @@ export default function Navbar() {
                         <div className="flex items-center gap-4">
                             {isAuthenticated && (
                                 <NotificationBell
-                                    count={1}
+                                    count={0}
                                     onClick={() => setShowNotifications(true)}
                                 />
                             )}
@@ -91,7 +95,7 @@ export default function Navbar() {
                                         href="/login"
                                         className="rounded-full bg-gradient-to-r from-primary to-orange-700 px-6 py-2.5 text-base font-semibold text-primary-foreground shadow-md shadow-primary/25 hover:shadow-lg hover:shadow-primary/40 transition-all hover:scale-105"
                                     >
-                                        Sign Up
+                                        Get Started
                                     </Link>
                                 </div>
                             )}

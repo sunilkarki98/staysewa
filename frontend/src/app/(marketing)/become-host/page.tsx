@@ -53,7 +53,7 @@ export default function BecomeHostPage() {
                 options: {
                     data: {
                         full_name: formData.fullName,
-                        phone: formData.mobile, // Optional: verify if this maps correctly
+                        // phone: formData.mobile, // COMMENTED OUT: Caused "Invalid API key" if SMS provider is not configured
                         role: 'owner', // CRITICAL: This sets the role
                     },
                 },
@@ -75,7 +75,7 @@ export default function BecomeHostPage() {
                 } else {
                     // Email confirmation required
                     alert("Registration successful! Please check your email to confirm your account.");
-                    router.push("/login");
+                    router.push("/owner-login");
                 }
             }
         } catch (err: any) {
@@ -225,7 +225,7 @@ export default function BecomeHostPage() {
 
                         <div className="mt-6 text-center text-sm text-stone-500 dark:text-stone-400">
                             Already have an owner account?{" "}
-                            <Link href="/login" className="text-primary font-semibold hover:underline">
+                            <Link href="/owner-login" className="text-primary font-semibold hover:underline">
                                 Login here
                             </Link>
                         </div>

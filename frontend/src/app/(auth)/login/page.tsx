@@ -170,15 +170,15 @@ export default function LoginPage() {
                     </p>
                 </div>
 
-                {/* Owner/Admin Links */}
-                <div className="mt-8 text-center">
+                {/* Owner/Admin Links - REMOVED for separation */}
+                {/* <div className="mt-8 text-center">
                     <p className="text-sm text-gray-500 dark:text-gray-400">
                         Interested in hosting?{" "}
                         <Link href="/become-host" className="text-blue-600 dark:text-blue-400 font-semibold hover:underline">
                             Owner Portal →
                         </Link>
                     </p>
-                </div>
+                </div> */}
             </div>
         </div>
     );

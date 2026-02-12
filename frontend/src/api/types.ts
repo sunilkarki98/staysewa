@@ -20,3 +20,9 @@ export interface PaginatedResponse<T> {
         totalPages: number;
     };
 }
+
+export interface BackendResponse<T> {
+    status: string;
+    data: T;
+    results?: number;
+}

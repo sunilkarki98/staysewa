@@ -13,6 +13,7 @@ interface AuthContextType {
     isLoading: boolean;
     loginWithGoogle: () => Promise<void>;
     loginWithEmail: (email: string) => Promise<void>;
+    loginWithPassword: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
 }
 
@@ -125,6 +126,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 isLoading,
                 loginWithGoogle,
                 loginWithEmail,
+                loginWithPassword: async (email, password) => {
+                    const { error } = await supabase.auth.signInWithPassword({
+                        email,
+                        password,
+                    });
+                    if (error) throw error;
+                },
                 logout,
             }}
         >

@@ -202,7 +202,7 @@ export default function StayDetailsPage({ params }: { params: Promise<{ id: stri
             <div className="mx-auto max-w-6xl px-4">
                 {/* Back Button */}
                 <Link
-                    href="/dashboard"
+                    href="/explore"
                     className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-muted hover:text-primary dark:text-gray-400 dark:hover:text-primary transition-colors"
                 >
                     <CaretLeft size={18} />

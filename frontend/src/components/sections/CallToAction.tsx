@@ -2,13 +2,13 @@
 
 import { motion } from "framer-motion";
 import { Backpack, House, MapPin } from "@phosphor-icons/react";
-import Link from "next/link";
 import Image from "next/image";
 import { useUserIntent } from "../../context/UserIntentContext";
 import { useLocation } from "@/context/LocationContext";
+import Button from "../ui/Button";
 
 export default function CallToAction() {
-    const { category } = useUserIntent(); // ✅ destructured
+    const { category } = useUserIntent();
     const { city } = useLocation();
     const location = city;
 
@@ -41,24 +41,22 @@ export default function CallToAction() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                        <Link
+                        <Button
                             href="/search"
-                            className="px-8 py-4 bg-gradient-to-r from-primary to-orange-700 text-white text-lg font-bold rounded-full shadow-lg hover:scale-105 active:scale-95 transition-transform w-full sm:w-auto text-center"
+                            size="lg"
+                            className="bg-gradient-to-r from-primary to-orange-700 text-white shadow-lg hover:scale-105 active:scale-95 transition-transform w-full sm:w-auto px-8 py-4 rounded-full"
                         >
                             Find a Stay
-                        </Link>
+                        </Button>
 
-                        <Link
+                        <Button
                             href={category === "apartment" ? "/hostels" : "/flats"}
-                            className="group inline-flex items-center gap-3 rounded-full bg-black/40 border border-white/20 px-8 py-4 text-base font-bold text-white backdrop-blur-md transition-all hover:bg-black/60 hover:scale-105 active:scale-95 shadow-lg"
+                            size="lg"
+                            leftIcon={category === "apartment" ? <Backpack size={20} weight="bold" /> : <House size={20} weight="bold" />}
+                            className="group gap-3 rounded-full bg-black/40 border border-white/20 px-8 py-4 text-white backdrop-blur-md transition-all hover:bg-black/60 hover:scale-105 active:scale-95 shadow-lg"
                         >
-                            {category === "apartment" ? (
-                                <Backpack size={20} weight="bold" />
-                            ) : (
-                                <House size={20} weight="bold" />
-                            )}
                             {category === "apartment" ? "Explore Hostels" : "Browse Apartments"}
-                        </Link>
+                        </Button>
                     </div>
                 </motion.div>
             </div>

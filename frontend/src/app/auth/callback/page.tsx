@@ -10,13 +10,30 @@ export default function AuthCallbackPage() {
     useEffect(() => {
         const handleAuthCallback = async () => {
             // Supabase client handles the #access_token from the URL automatically
-            const { error } = await supabase.auth.getSession();
+            const { data: { session }, error } = await supabase.auth.getSession();
 
             if (error) {
                 console.error("Auth callback error:", error.message);
                 router.push("/login?error=auth_callback_failed");
+            } else if (session?.user) {
+                // Check role and redirect
+                const role = session.user.user_metadata?.role || session.user.app_metadata?.role || "guest";
+
+                switch (role) {
+                    case "owner":
+                        router.push("/owner");
+                        break;
+                    case "admin":
+                        router.push("/admin");
+                        break;
+                    case "customer":
+                        router.push("/explore");
+                        break;
+                    default:
+                        router.push("/explore");
+                }
             } else {
-                router.push("/");
+                router.push("/login");
             }
         };
 

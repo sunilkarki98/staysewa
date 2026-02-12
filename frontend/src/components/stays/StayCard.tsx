@@ -3,21 +3,19 @@
 import { MapPinIcon, StarIcon } from "@phosphor-icons/react";
 import type { StayCategory, StayIntent } from "../../types/stay";
 import ImageCarousel from "../ui/ImageCarousel";
-import Link from "next/link";
-
+import { Card } from "../ui/Card";
+import Button from "../ui/Button";
 
 type StayCardProps = {
     id: string;
     name: string;
-    images: string[]; // Changed from single image to array
+    images: string[];
     location: string;
     price: number;
     rating: number;
     type: StayCategory;
     intent: StayIntent;
 };
-
-
 
 export default function StayCard({
     id,
@@ -29,7 +27,7 @@ export default function StayCard({
     type,
 }: StayCardProps) {
     return (
-        <div className="group relative overflow-hidden rounded-2xl border border-border dark:border-gray-800 bg-white dark:bg-gray-900 transition-all hover:shadow-xl hover:-translate-y-1">
+        <Card hoverEffect className="group relative border-border dark:border-gray-800 bg-white dark:bg-gray-900 h-full">
             {/* Image Carousel */}
             <div className="relative h-64 w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                 <ImageCarousel images={images} alt={name} />
@@ -37,11 +35,11 @@ export default function StayCard({
                 {/* Type Badge */}
                 <div className="absolute top-3 left-3 z-10">
                     <span className="inline-flex items-center rounded-lg bg-white/90 dark:bg-black/80 backdrop-blur-sm px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white shadow-sm">
-                        {type.slice(0, -1)} {/* Remove 's' from type */}
+                        {type.slice(0, -1)}
                     </span>
                 </div>
 
-                {/* Rating Badge - Prominent */}
+                {/* Rating Badge */}
                 <div className="absolute top-3 right-3 z-10 flex flex-col items-end gap-2">
                     <div className="flex items-center gap-1 rounded-lg bg-surface/90 dark:bg-black/80 backdrop-blur-sm px-2 py-1 shadow-sm">
                         <StarIcon weight="fill" className="text-secondary" size={14} />
@@ -73,21 +71,25 @@ export default function StayCard({
                         </span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Link
+                        <Button
                             href="/login"
-                            className="px-3 py-1.5 text-xs font-semibold text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors shadow-sm"
+                            variant="primary"
+                            size="sm"
+                            className="bg-primary text-white"
                         >
                             Book Now
-                        </Link>
-                        <Link
+                        </Button>
+                        <Button
                             href={`/stays/${id}`}
-                            className="px-3 py-1.5 text-xs font-semibold text-primary border border-primary/30 rounded-lg hover:bg-primary/5 transition-colors"
+                            variant="outline"
+                            size="sm"
+                            className="border-primary/30 text-primary hover:bg-primary/5"
                         >
                             See More
-                        </Link>
+                        </Button>
                     </div>
                 </div>
             </div>
-        </div>
+        </Card>
     );
 }

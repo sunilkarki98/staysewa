@@ -10,6 +10,7 @@ import {
 } from "@phosphor-icons/react";
 import Container from "./Container";
 import { useLocation } from "@/context/LocationContext";
+import { usePathname } from "next/navigation";
 
 const Footer = () => {
     const { city } = useLocation();
@@ -54,6 +55,8 @@ const Footer = () => {
                         <h3 className="text-base font-bold text-stone-900 dark:text-white mb-5">Company</h3>
                         <ul className="space-y-3">
                             <FooterLink href="/about">About Us</FooterLink>
+                            <FooterLink href="/owner-login">Owner Portal</FooterLink>
+                            <FooterLink href="/become-host">Become a Host</FooterLink>
                             <FooterLink href="/blog">Travel Blog</FooterLink>
                             <FooterLink href="/careers">Careers</FooterLink>
                             <FooterLink href="/contact">Contact</FooterLink>
