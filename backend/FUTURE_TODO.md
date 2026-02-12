@@ -38,3 +38,4 @@ The `availability` table exists in the schema but is unused. Integrate it when y
 - [x] ~~Add index on `stayMedia.stayId` and `sessions.token`~~
 - [x] ~~Sanitize `%` and `_` in search LIKE queries (`stay.service.ts`)~~
 - [x] ~~Add `CHECK` constraints for non-negative `taxes`, `serviceFee`, `discount`~~
+must do this
