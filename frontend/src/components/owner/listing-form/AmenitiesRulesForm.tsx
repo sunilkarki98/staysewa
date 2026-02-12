@@ -3,8 +3,8 @@
 export interface AmenitiesRulesData {
     amenities: string[];
     rules: string;
-    checkInTime: string;
-    checkOutTime: string;
+    check_in_time: string;
+    check_out_time: string;
 }
 
 interface AmenitiesRulesFormProps {
@@ -71,8 +71,8 @@ export default function AmenitiesRulesForm({ data, onChange }: AmenitiesRulesFor
                                         type="button"
                                         onClick={() => toggleAmenity(amenity)}
                                         className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${selected
-                                                ? "bg-primary/10 border-primary text-primary dark:bg-primary/20"
-                                                : "bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:border-stone-300 dark:hover:border-stone-600"
+                                            ? "bg-primary/10 border-primary text-primary dark:bg-primary/20"
+                                            : "bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:border-stone-300 dark:hover:border-stone-600"
                                             }`}
                                     >
                                         {amenity}
@@ -97,8 +97,8 @@ export default function AmenitiesRulesForm({ data, onChange }: AmenitiesRulesFor
                         </label>
                         <input
                             type="time"
-                            value={data.checkInTime}
-                            onChange={(e) => update("checkInTime", e.target.value)}
+                            value={data.check_in_time}
+                            onChange={(e) => update("check_in_time", e.target.value)}
                             className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
                         />
                     </div>
@@ -108,8 +108,8 @@ export default function AmenitiesRulesForm({ data, onChange }: AmenitiesRulesFor
                         </label>
                         <input
                             type="time"
-                            value={data.checkOutTime}
-                            onChange={(e) => update("checkOutTime", e.target.value)}
+                            value={data.check_out_time}
+                            onChange={(e) => update("check_out_time", e.target.value)}
                             className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
                         />
                     </div>

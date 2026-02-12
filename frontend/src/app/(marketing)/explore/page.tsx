@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import StayListingSection from "@/components/sections/StayListingSection";
+import PropertyListingSection from "@/components/sections/PropertyListingSection";
 import Container from "@/components/layout/Container";
 
 export const metadata: Metadata = {
-    title: "Explore All Stays | StaySewa",
-    description: "Browse all hostels, flats, and homestays in Kathmandu. Find your perfect stay with StaySewa.",
+    title: "Explore All Properties | StaySewa",
+    description: "Browse all hostels, flats, and homestays in Kathmandu. Find your perfect property with StaySewa.",
 };
 
 export default function ExplorePage() {
@@ -13,18 +13,18 @@ export default function ExplorePage() {
         <main className="min-h-screen pt-24 pb-16 bg-neutral dark:bg-black">
             <Container>
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-text dark:text-white mb-2">Explore Stays</h1>
+                    <h1 className="text-3xl font-bold text-text dark:text-white mb-2">Explore Properties</h1>
                     <p className="text-muted text-lg">Find your perfect home away from home in Kathmandu.</p>
                 </div>
-                <Suspense fallback={<StayListingSkeleton />}>
-                    <StayListingSection />
+                <Suspense fallback={<PropertyListingSkeleton />}>
+                    <PropertyListingSection />
                 </Suspense>
             </Container>
         </main>
     );
 }
 
-function StayListingSkeleton() {
+function PropertyListingSkeleton() {
     return (
         <div className="space-y-6">
             <div className="h-14 bg-stone-200 dark:bg-stone-800 rounded-xl animate-pulse" />

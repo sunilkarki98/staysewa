@@ -1,5 +1,3 @@
-"use client";
-
 import {
     Buildings,
     House,
@@ -8,16 +6,16 @@ import {
     Users,
     IconProps
 } from "@phosphor-icons/react";
-import type { StayCategory } from "@/types/stay";
+import type { PropertyCategory } from "@/types/property";
 import type { ComponentType } from "react";
 
 interface PropertyTypeSelectorProps {
-    selected: StayCategory | null;
-    onSelect: (type: StayCategory) => void;
+    selected: PropertyCategory | null;
+    onSelect: (type: PropertyCategory) => void;
 }
 
 type PropertyOption = {
-    type: StayCategory;
+    type: PropertyCategory;
     title: string;
     description: string;
     icon: ComponentType<IconProps>;
@@ -31,6 +29,13 @@ const PROPERTY_OPTIONS: PropertyOption[] = [
         description: "Multiple rooms with dedicated service, reception, and amenities for guests.",
         icon: Buildings,
         tags: ["Rooms", "Service Staff", "Reception"],
+    },
+    {
+        type: "resort",
+        title: "Resort",
+        description: "A full-service lodging facility, often with pool, spa, and recreational activities.",
+        icon: Buildings, // Using Buildings for now, or maybe something else if available?
+        tags: ["Luxury", "Activities", "Full Service"],
     },
     {
         type: "hostel",

@@ -4,19 +4,18 @@ import { catchAsync } from '@/utils/catchAsync';
 
 export const ReviewsController = {
     createReview: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const { bookingId, rating, comment } = req.body;
+        const { booking_id, overall_rating, comment } = req.body;
 
-        // Assume user is attached by auth middleware
         const userId = req.user?.id;
         if (!userId) {
             return res.status(401).json({ status: 'fail', message: 'Unauthorized' });
         }
 
         const review = await ReviewsService.create({
-            bookingId,
-            rating,
+            booking_id,
+            overall_rating,
             comment,
-            userId
+            reviewer_id: userId
         });
 
         res.status(201).json({
@@ -25,12 +24,11 @@ export const ReviewsController = {
         });
     }),
 
-    getStayReviews: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const { stayId } = req.params;
-        // Ensure stayId is a string
-        const id = Array.isArray(stayId) ? stayId[0] : stayId;
+    getPropertyReviews: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        const { property_id } = req.params;
+        const id = Array.isArray(property_id) ? property_id[0] : property_id;
 
-        const reviews = await ReviewsService.getByStay(id);
+        const reviews = await ReviewsService.getByProperty(id);
         const stats = await ReviewsService.getStats(id);
 
         res.status(200).json({

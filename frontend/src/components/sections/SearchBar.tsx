@@ -30,7 +30,7 @@ export default function SearchBar() {
         const guestCount = totalGuests;
         if (guestCount > 0) params.set("guests", guestCount.toString());
 
-        router.push(`/hostels?${params.toString()}`);
+        router.push(`/properties?${params.toString()}`);
     };
 
     const [checkIn, setCheckIn] = useState("");

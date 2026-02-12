@@ -1,6 +1,6 @@
 
 // Re-export services to maintain backward compatibility
-export * from "./stays.service";
+export * from "./property.service";
 export * from "./bookings.service";
 export * from "./stats.service";
 export * from "./payments.service";

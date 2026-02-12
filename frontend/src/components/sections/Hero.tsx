@@ -34,7 +34,7 @@ export default function Hero({ location: propLocation }: HeroProps) {
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight drop-shadow-lg leading-tight"
                 >
-                    Find Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Stay</span> <br className="hidden sm:block" /> in {location}
+                    Find Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Property</span> <br className="hidden sm:block" /> in {location}
                 </motion.h1>
 
                 <motion.p
@@ -43,7 +43,7 @@ export default function Hero({ location: propLocation }: HeroProps) {
                     transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
                     className="mt-4 md:mt-6 text-base sm:text-xl md:text-2xl text-gray-100 font-medium max-w-2xl mx-auto drop-shadow-md"
                 >
-                    Affordable Hostels & Comfortable Flats for Short-Term Travelers.
+                    Verified Hostels, Flats, and Homestays in Nepal.
                 </motion.p>
             </div>
 

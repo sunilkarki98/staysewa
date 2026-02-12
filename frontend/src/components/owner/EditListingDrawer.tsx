@@ -1,17 +1,17 @@
 import { X, MapPin, CurrencyInr, CheckCircle } from "@phosphor-icons/react";
 import React, { useEffect, useState } from "react";
-import { Stay } from "../../types/stay";
+import { Property, PROPERTY_TYPE_LABELS } from "../../types/property";
 
 type EditListingDrawerProps = {
     isOpen: boolean;
     onClose: () => void;
-    listing: Stay | null;
-    onSave: (updatedListing: Stay) => void;
+    listing: Property | null;
+    onSave: (updatedListing: Property) => void;
 };
 
 export default function EditListingDrawer({ isOpen, onClose, listing, onSave }: EditListingDrawerProps) {
     const [isVisible, setIsVisible] = useState(false);
-    const [formData, setFormData] = useState<Stay | null>(null);
+    const [formData, setFormData] = useState<Property | null>(null);
 
     useEffect(() => {
         if (isOpen) {
@@ -32,7 +32,7 @@ export default function EditListingDrawer({ isOpen, onClose, listing, onSave }: 
         }
     }, [listing]);
 
-    const handleChange = (field: keyof Stay, value: string | number | string[]) => {
+    const handleChange = (field: keyof Property, value: any) => {
         if (!formData) return;
         setFormData({ ...formData, [field]: value });
     };
@@ -65,7 +65,7 @@ export default function EditListingDrawer({ isOpen, onClose, listing, onSave }: 
                 <div className="sticky top-0 z-10 px-6 py-4 bg-white/80 dark:bg-stone-900/80 backdrop-blur-md border-b border-stone-100 dark:border-stone-800 flex items-center justify-between">
                     <div>
                         <h2 className="text-lg font-bold text-stone-900 dark:text-white">
-                            Edit Listing
+                            Edit Property
                         </h2>
                         <span className="text-xs font-mono text-stone-500">
                             ID: {listing?.id}
@@ -96,66 +96,63 @@ export default function EditListingDrawer({ isOpen, onClose, listing, onSave }: 
                             />
                         </div>
 
-                        {/* Type & Intent */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                                    Type
-                                </label>
-                                <select
-                                    value={formData.type}
-                                    onChange={(e) => handleChange("type", e.target.value)}
-                                    className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
-                                >
-                                    <option value="homestay">Homestay</option>
-                                    <option value="hostel">Hostel</option>
-                                    <option value="hotel">Hotel</option>
-                                    <option value="apartment">Apartment</option>
-                                    <option value="room">Room</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                                    Intent
-                                </label>
-                                <select
-                                    value={formData.intent}
-                                    onChange={(e) => handleChange("intent", e.target.value)}
-                                    className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
-                                >
-                                    <option value="short_stay">Short Stay</option>
-                                    <option value="long_stay">Long Stay</option>
-                                </select>
-                            </div>
+                        {/* Type */}
+                        <div>
+                            <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
+                                Category
+                            </label>
+                            <select
+                                value={formData.type}
+                                onChange={(e) => handleChange("type", e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+                            >
+                                {Object.entries(PROPERTY_TYPE_LABELS).map(([val, lab]) => (
+                                    <option key={val} value={val}>{lab}</option>
+                                ))}
+                            </select>
                         </div>
 
                         {/* Location */}
-                        <div>
-                            <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5 flex items-center gap-2">
-                                <MapPin size={16} />
-                                Location
-                            </label>
-                            <input
-                                type="text"
-                                required
-                                value={formData.location}
-                                onChange={(e) => handleChange("location", e.target.value)}
-                                className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
-                            />
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5 flex items-center gap-2">
+                                    <MapPin size={16} />
+                                    City
+                                </label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={formData.city}
+                                    onChange={(e) => handleChange("city", e.target.value)}
+                                    className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
+                                    District
+                                </label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={formData.district}
+                                    onChange={(e) => handleChange("district", e.target.value)}
+                                    className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+                                />
+                            </div>
                         </div>
 
                         {/* Price */}
                         <div>
                             <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5 flex items-center gap-2">
                                 <CurrencyInr size={16} />
-                                Price (NPR) / {formData.intent === 'short_stay' ? "Night" : "Month"}
+                                Base Price (NPR)
                             </label>
                             <input
                                 type="number"
                                 required
                                 min="0"
-                                value={formData.price}
-                                onChange={(e) => handleChange("price", Number(e.target.value))}
+                                value={formData.base_price / 100}
+                                onChange={(e) => handleChange("base_price", Number(e.target.value) * 100)}
                                 className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
                             />
                         </div>

@@ -1,5 +1,5 @@
 import { db } from '@/db/index';
-import { bookings, stays, stayUnits } from '@/db/schema/index';
+import { bookings, properties, propertyUnits } from '@/db/schema/index';
 import { eq, desc, and, lt, gt, ne, sql } from 'drizzle-orm';
 import { AppError } from '@/utils/AppError';
 import { RedisLockService } from './redis-lock.service';
@@ -8,13 +8,13 @@ export const BookingsService = {
     /**
      * Check if a unit is already booked for a given date range
      */
-    async findOverlap(unitId: string, checkIn: string, checkOut: string) {
+    async findOverlap(unit_id: string, check_in: string, check_out: string) {
         return await db.query.bookings.findFirst({
             where: and(
-                eq(bookings.unitId, unitId),
+                eq(bookings.unit_id, unit_id),
                 ne(bookings.status, 'cancelled'),
-                lt(bookings.checkIn, checkOut),
-                gt(bookings.checkOut, checkIn)
+                lt(bookings.check_in, check_out),
+                gt(bookings.check_out, check_in)
             ),
         });
     },
@@ -23,50 +23,48 @@ export const BookingsService = {
         return await db
             .select({
                 id: bookings.id,
-                guestName: bookings.guestName,
-                guestEmail: bookings.guestEmail,
-                guestPhone: bookings.guestPhone,
-                checkIn: bookings.checkIn,
-                checkOut: bookings.checkOut,
+                guest_name: bookings.guest_name,
+                guest_email: bookings.guest_email,
+                guest_phone: bookings.guest_phone,
+                check_in: bookings.check_in,
+                check_out: bookings.check_out,
                 status: bookings.status,
-                totalAmount: bookings.totalAmount,
-                createdAt: bookings.createdAt,
-                stayName: stays.name, // Fetch property name
+                total_amount: bookings.total_amount,
+                created_at: bookings.created_at,
+                property_id: bookings.property_id,
+                property_name: properties.name,
             })
             .from(bookings)
-            .leftJoin(stays, eq(bookings.stayId, stays.id))
-            .orderBy(desc(bookings.createdAt));
+            .leftJoin(properties, eq(bookings.property_id, properties.id))
+            .orderBy(desc(bookings.created_at));
     },
 
     async getById(id: string) {
         const result = await db
             .select({
-                // Select all booking fields + stayName
                 id: bookings.id,
-                guestName: bookings.guestName,
-                guestEmail: bookings.guestEmail,
-                guestPhone: bookings.guestPhone,
-                checkIn: bookings.checkIn,
-                checkOut: bookings.checkOut,
+                guest_name: bookings.guest_name,
+                guest_email: bookings.guest_email,
+                guest_phone: bookings.guest_phone,
+                check_in: bookings.check_in,
+                check_out: bookings.check_out,
                 status: bookings.status,
-                totalAmount: bookings.totalAmount,
-                createdAt: bookings.createdAt,
-                stayName: stays.name,
-                specialRequests: bookings.specialRequests,
-                ownerId: bookings.ownerId,
-                customerId: bookings.customerId,
+                total_amount: bookings.total_amount,
+                created_at: bookings.created_at,
+                property_name: properties.name,
+                special_requests: bookings.special_requests,
+                owner_id: bookings.owner_id,
+                customer_id: bookings.customer_id,
             })
             .from(bookings)
-            .leftJoin(stays, eq(bookings.stayId, stays.id))
+            .leftJoin(properties, eq(bookings.property_id, properties.id))
             .where(eq(bookings.id, id));
         return result[0] || null;
     },
 
     async create(data: typeof bookings.$inferInsert) {
-        // 1. Concurrency Control: Redis Lock (Strict Mutex)
-        // We lock the *Unit* to ensure sequential availability checks.
-        // TTL 10s is enough for the DB transaction.
-        const lockKey = `booking_lock:${data.unitId || data.stayId}:${data.checkIn}:${data.checkOut}`;
+        // 1. Concurrency Control: Redis Lock
+        const lockKey = `booking_lock:${data.unit_id || data.property_id}:${data.check_in}:${data.check_out}`;
         const lockToken = await RedisLockService.acquireLock(lockKey, 10000);
 
         if (!lockToken) {
@@ -77,42 +75,40 @@ export const BookingsService = {
             return await db.transaction(async (tx) => {
                 // 2. Validate Unit and Get Price
                 let unitPrice = 0;
-                if (data.unitId) {
-                    const unit = await tx.query.stayUnits.findFirst({
-                        where: eq(stayUnits.id, data.unitId),
+                if (data.unit_id) {
+                    const unit = await tx.query.propertyUnits.findFirst({
+                        where: eq(propertyUnits.id, data.unit_id),
                     });
                     if (!unit) throw new AppError('Unit not found', 404);
-                    if (unit.stayId !== data.stayId) throw new AppError('Unit does not belong to this stay', 400);
+                    if (unit.property_id !== data.property_id) throw new AppError('Unit does not belong to this property', 400);
 
-                    unitPrice = unit.basePrice;
+                    unitPrice = unit.base_price;
                 } else {
-                    const stay = await tx.query.stays.findFirst({
-                        where: eq(stays.id, data.stayId!),
+                    const property = await tx.query.properties.findFirst({
+                        where: eq(properties.id, data.property_id!),
                     });
-                    if (!stay) throw new AppError('Stay not found', 404);
-                    unitPrice = stay.basePrice;
+                    if (!property) throw new AppError('Property not found', 404);
+                    unitPrice = property.base_price;
                 }
 
                 // 3. Calculate Total Amount & Duration
-                const checkInDate = new Date(data.checkIn!);
-                const checkOutDate = new Date(data.checkOut!);
+                const checkInDate = new Date(data.check_in!);
+                const checkOutDate = new Date(data.check_out!);
                 const nights = Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24));
 
                 if (nights < 1) throw new AppError('Invalid duration', 400);
 
-                // Override totalAmount
-                data.totalAmount = unitPrice * nights;
+                // Override total_amount
+                data.total_amount = unitPrice * nights;
 
-                // 4. Availability Check (Database Source of Truth)
-                // Uses SELECT ... FOR UPDATE to lock matching rows and prevent
-                // concurrent bookings from passing the overlap check simultaneously.
-                if (data.unitId) {
+                // 4. Availability Check
+                if (data.unit_id) {
                     const overlapping = await tx.execute(sql`
                         SELECT id FROM bookings
-                        WHERE unit_id = ${data.unitId}
+                        WHERE unit_id = ${data.unit_id}
                           AND status IN ('reserved', 'confirmed', 'checked_in', 'completed')
-                          AND check_in < ${data.checkOut}
-                          AND check_out > ${data.checkIn}
+                          AND check_in < ${data.check_out}
+                          AND check_out > ${data.check_in}
                         FOR UPDATE
                         LIMIT 1
                     `);
@@ -122,30 +118,28 @@ export const BookingsService = {
                     }
                 }
 
-                // 5. Generate Booking Number (DB sequence for guaranteed uniqueness)
-                if (!data.bookingNumber) {
-                    const [{ seq }] = await tx.execute(sql`
-                        SELECT nextval(pg_get_serial_sequence('bookings', 'id'))::text AS seq
-                    `) as any;
+                // 5. Generate Booking Number
+                if (!data.booking_number) {
+                    // Note: In a fresh DB, we might need a custom sequence or just use UUID for now 
+                    // if the sequence based on 'id' SERIAL doesn't exist because we use UUID.
+                    // But we'll try to keep the logic or use a simpler one.
                     const datePart = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-                    data.bookingNumber = `STY-${datePart}-${String(seq).slice(-6).padStart(6, '0')}`;
+                    const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+                    data.booking_number = `BK-${datePart}-${randomPart}`;
                 }
 
-                // 6. Set Defaults for "Pay Later" / "Pay Now" Flow
-                // Requirement: Booking = RESERVED, Payment = NOT_REQUIRED (initially) or PENDING
+                // 6. Set Defaults
                 data.status = 'reserved';
-                data.paymentStatus = 'pending'; // Default to pending expectation
+                data.payment_status = 'pending';
 
-                // Requirement: Auto-expires after X hours (e.g., 1 hour for payment)
                 const expiryTime = new Date();
                 expiryTime.setHours(expiryTime.getHours() + 1);
-                data.expiresAt = expiryTime;
+                data.expires_at = expiryTime;
 
                 const result = await tx.insert(bookings).values(data).returning();
                 return result[0];
             });
         } finally {
-            // 7. Always release the lock
             await RedisLockService.releaseLock(lockKey, lockToken);
         }
     },
@@ -153,7 +147,7 @@ export const BookingsService = {
     async transitionStatus(
         id: string,
         targetStatus: typeof bookings.status.enumValues[number],
-        options?: { cancelledBy?: string; cancellationReason?: string }
+        options?: { cancelled_by?: string; cancellation_reason?: string }
     ) {
         return await db.transaction(async (tx) => {
             const booking = await tx.query.bookings.findFirst({
@@ -164,7 +158,6 @@ export const BookingsService = {
 
             const currentStatus = booking.status;
 
-            // State Machine Validation
             const validTransitions: Record<string, string[]> = {
                 'initiated': ['reserved', 'cancelled'],
                 'reserved': ['confirmed', 'cancelled', 'expired'],
@@ -180,32 +173,28 @@ export const BookingsService = {
                 throw new AppError(`Invalid status transition from ${currentStatus} to ${targetStatus}`, 400);
             }
 
-            // Build update payload
-            const updateFields: Record<string, unknown> = {
+            const updateFields: any = {
                 status: targetStatus,
-                updatedAt: new Date(),
+                updated_at: new Date(),
             };
 
             if (targetStatus === 'confirmed') {
-                updateFields.confirmedAt = new Date();
+                updateFields.confirmed_at = new Date();
             }
 
-            // Cancellation-specific side effects
             if (targetStatus === 'cancelled') {
-                updateFields.cancelledAt = new Date();
-                updateFields.cancelledBy = (options?.cancelledBy as any) || 'system';
-                updateFields.cancellationReason = options?.cancellationReason || null;
+                updateFields.cancelled_at = new Date();
+                updateFields.cancelled_by = options?.cancelled_by || 'system';
+                updateFields.cancellation_reason = options?.cancellation_reason || null;
 
-                // If payment was already completed, flag for refund
-                if (booking.paymentStatus === 'paid' || booking.paymentStatus === 'success') {
-                    updateFields.paymentStatus = 'refunded';
-                    // TODO: Trigger actual gateway refund via PaymentService
+                if (booking.payment_status === 'paid' || booking.payment_status === 'success') {
+                    updateFields.payment_status = 'refunded';
                 }
             }
 
             const result = await tx
                 .update(bookings)
-                .set(updateFields as any)
+                .set(updateFields)
                 .where(eq(bookings.id, id))
                 .returning();
 
@@ -217,40 +206,39 @@ export const BookingsService = {
         return await db
             .select({
                 id: bookings.id,
-                guestName: bookings.guestName,
-                guestEmail: bookings.guestEmail,
-                guestPhone: bookings.guestPhone,
-                checkIn: bookings.checkIn,
-                checkOut: bookings.checkOut,
+                guest_name: bookings.guest_name,
+                guest_email: bookings.guest_email,
+                guest_phone: bookings.guest_phone,
+                check_in: bookings.check_in,
+                check_out: bookings.check_out,
                 status: bookings.status,
-                totalAmount: bookings.totalAmount,
-                createdAt: bookings.createdAt,
-                stayName: stays.name,
+                total_amount: bookings.total_amount,
+                created_at: bookings.created_at,
+                property_id: bookings.property_id,
+                property_name: properties.name,
             })
             .from(bookings)
-            .leftJoin(stays, eq(bookings.stayId, stays.id))
-            .where(eq(bookings.customerId, userId))
-            .orderBy(desc(bookings.createdAt));
+            .leftJoin(properties, eq(bookings.property_id, properties.id))
+            .where(eq(bookings.customer_id, userId))
+            .orderBy(desc(bookings.created_at));
     },
 
     async getBookingsByOwner(ownerId: string) {
-        // Query denormalized ownerId if available, or join stays (safer)
-        // Schema has ownerId on bookings (denormalized). perfect.
         return await db
             .select({
                 id: bookings.id,
-                guestName: bookings.guestName,
-                // ... other fields
-                checkIn: bookings.checkIn,
-                checkOut: bookings.checkOut,
+                guest_name: bookings.guest_name,
+                check_in: bookings.check_in,
+                check_out: bookings.check_out,
                 status: bookings.status,
-                totalAmount: bookings.totalAmount,
-                createdAt: bookings.createdAt,
-                stayName: stays.name,
+                total_amount: bookings.total_amount,
+                created_at: bookings.created_at,
+                property_id: bookings.property_id,
+                property_name: properties.name,
             })
             .from(bookings)
-            .leftJoin(stays, eq(bookings.stayId, stays.id))
-            .where(eq(bookings.ownerId, ownerId))
-            .orderBy(desc(bookings.createdAt));
+            .leftJoin(properties, eq(bookings.property_id, properties.id))
+            .where(eq(bookings.owner_id, ownerId))
+            .orderBy(desc(bookings.created_at));
     },
 };

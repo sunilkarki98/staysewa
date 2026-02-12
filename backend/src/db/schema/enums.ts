@@ -1,61 +1,24 @@
 import { pgEnum } from 'drizzle-orm/pg-core';
 
-// ─── User & Auth ────────────────────────────────────────────
-export const userRoleEnum = pgEnum('user_role', ['customer', 'owner', 'admin']);
-export const verificationStatusEnum = pgEnum('verification_status', ['pending', 'verified', 'rejected']);
-export const idTypeEnum = pgEnum('id_type', ['citizenship', 'national_id_card', 'passport', 'national_id']);
+/* ───── ENUMS ───── */
+export const stayTypeEnum = ['hostel', 'flat', 'hotel', 'resort', 'homestay'] as const;
+export const unitTypeEnum = ['single_room', 'double_room', 'triple_room', '1BHK', '2BHK', '3BHK', 'villa'] as const;
+export const stayStatusEnum = ['draft', 'published', 'archived'] as const;
+export const bookingStatusEnum = ['initiated', 'confirmed', 'cancelled', 'completed'] as const;
+export const paymentStatusEnum = ['pending', 'processing', 'paid', 'failed', 'refunded', 'partially_refunded'] as const;
+export const paymentMethodEnum = ['khalti', 'esewa', 'cash', 'card', 'bank_transfer'] as const;
+export const cancellationTypeEnum = ['flexible', 'moderate', 'strict', 'non_refundable'] as const;
+export const priceRuleTypeEnum = ['seasonal', 'weekend', 'custom', 'holiday'] as const;
+export const adjustmentTypeEnum = ['fixed', 'percentage'] as const;
+export const availabilityStatusEnum = ['available', 'unavailable', 'blocked'] as const;
+export const mediaTypeEnum = ['image', 'video'] as const;
+export const userRoleEnum = ['guest', 'owner', 'admin'] as const;
+export const verificationStatusEnum = ['pending', 'verified', 'rejected'] as const;
+export const payoutStatusEnum = ['pending', 'processing', 'completed', 'failed'] as const;
+export const disputeStatusEnum = ['open', 'investigating', 'resolved', 'closed'] as const;
+export const reviewStatusEnum = ['pending', 'published', 'hidden'] as const;
 
-// ─── Stay ───────────────────────────────────────────────────
-export const stayTypeEnum = pgEnum('stay_type', ['hotel', 'homestay', 'apartment', 'room', 'hostel']);
-export const stayIntentEnum = pgEnum('stay_intent', ['short_stay', 'long_stay', 'both']);
-export const stayStatusEnum = pgEnum('stay_status', ['draft', 'pending_review', 'active', 'suspended', 'archived']);
-export const unitTypeEnum = pgEnum('unit_type', ['private_room', 'shared_room', 'entire_place', 'bed']);
-export const availabilityStatusEnum = pgEnum('availability_status', ['available', 'blocked', 'booked']);
-export const mediaTypeEnum = pgEnum('media_type', ['image', 'video']);
-
-// ─── Booking ────────────────────────────────────────────────
-export const bookingStatusEnum = pgEnum('booking_status', [
-    'initiated', 'reserved', 'confirmed', 'checked_in', 'completed', 'cancelled', 'expired', 'no_show',
-    'pending', // Legacy: kept for existing data
-]);
-export const paymentStatusEnum = pgEnum('payment_status', [
-    'not_required', 'pending', 'success', 'failed', 'refunded', 'unpaid',
-    'paid', // Legacy: kept for existing data
-]);
-export const cancelledByEnum = pgEnum('cancelled_by', ['customer', 'owner', 'admin', 'system']);
-
-// ─── Payment ────────────────────────────────────────────────
-export const paymentMethodEnum = pgEnum('payment_method', [
-    'khalti', 'esewa', 'bank_transfer', 'cash', 'wallet',
-]);
-export const paymentTxnStatusEnum = pgEnum('payment_txn_status', [
-    'initiated', 'pending', 'completed', 'failed', 'refunded',
-]);
-
-// ─── Pricing ────────────────────────────────────────────────
-export const priceRuleTypeEnum = pgEnum('price_rule_type', [
-    'seasonal', 'weekend', 'holiday', 'long_stay', 'last_minute',
-]);
-export const adjustmentTypeEnum = pgEnum('adjustment_type', ['fixed', 'percent']);
-
-// ─── Cancellation ───────────────────────────────────────────
-export const cancellationTypeEnum = pgEnum('cancellation_type', [
-    'flexible', 'moderate', 'strict', 'non_refundable',
-]);
-
-// ─── Payout ─────────────────────────────────────────────────
-export const payoutStatusEnum = pgEnum('payout_status', ['pending', 'processing', 'completed', 'failed']);
-
-// ─── Notification ───────────────────────────────────────────
-export const notificationChannelEnum = pgEnum('notification_channel', [
-    'in_app', 'email', 'sms', 'push',
-]);
-
-// ─── Support ────────────────────────────────────────────────
-export const ticketCategoryEnum = pgEnum('ticket_category', [
-    'booking', 'payment', 'property', 'account', 'other',
-]);
-export const ticketPriorityEnum = pgEnum('ticket_priority', ['low', 'medium', 'high', 'urgent']);
-export const ticketStatusEnum = pgEnum('ticket_status', [
-    'open', 'in_progress', 'waiting_customer', 'resolved', 'closed',
-]);
+// Legacy/Compatibility Enums (Keep if needed for other parts of the app during transition)
+export const userRolePgEnum = pgEnum('user_role', ['guest', 'owner', 'admin']);
+export const verificationStatusPgEnum = pgEnum('verification_status', ['pending', 'verified', 'rejected']);
+export const idTypeEnum = pgEnum('id_type', ['citizenship', 'national_id_card', 'passport']);

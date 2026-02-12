@@ -6,14 +6,14 @@ import { API_CONFIG } from "@/api/config";
 
 interface Booking {
     id: string;
-    bookingNumber: string | null;
-    guestName: string;
+    booking_number: string | null;
+    guest_name: string;
     amount: number;
     status: string;
-    checkIn: string;
-    checkOut: string;
-    createdAt: string;
-    stayName: string | null;
+    check_in: string;
+    check_out: string;
+    created_at: string;
+    property_name: string | null;
 }
 
 interface BookingsResponse {
@@ -90,12 +90,12 @@ export default function AdminBookingsPage() {
                                 data?.bookings.map((b) => (
                                     <tr key={b.id} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
                                         <td className="px-6 py-4 font-mono text-xs text-gray-500 dark:text-gray-400">
-                                            {b.bookingNumber || b.id.slice(0, 8)}
+                                            {b.booking_number || b.id.slice(0, 8)}
                                         </td>
-                                        <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{b.guestName || "N/A"}</td>
-                                        <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{b.stayName || "—"}</td>
-                                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDate(b.checkIn)}</td>
-                                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDate(b.checkOut)}</td>
+                                        <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{b.guest_name || "N/A"}</td>
+                                        <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{b.property_name || "—"}</td>
+                                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDate(b.check_in)}</td>
+                                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{formatDate(b.check_out)}</td>
                                         <td className="px-6 py-4 text-gray-700 dark:text-gray-300">Rs {Number(b.amount || 0).toLocaleString()}</td>
                                         <td className="px-6 py-4">
                                             <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusColor[b.status] || "bg-gray-100 text-gray-700"}`}>

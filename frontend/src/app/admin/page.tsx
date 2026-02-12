@@ -14,16 +14,16 @@ import {
 interface Stats {
     users: number;
     bookings: number;
-    stays: number;
+    properties: number;
     revenue: number;
 }
 
 interface Activity {
     id: string;
-    guestName: string;
+    guest_name: string;
     status: string;
     amount: number;
-    createdAt: string;
+    created_at: string;
 }
 
 export default function AdminDashboardPage() {
@@ -62,7 +62,7 @@ export default function AdminDashboardPage() {
         { label: "Total Revenue", value: `Rs ${(stats?.revenue || 0).toLocaleString()}`, icon: CurrencyDollar, color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20" },
         { label: "Total Users", value: String(stats?.users || 0), icon: Users, color: "text-blue-600 bg-blue-50 dark:bg-blue-900/20" },
         { label: "Total Bookings", value: String(stats?.bookings || 0), icon: CalendarCheck, color: "text-purple-600 bg-purple-50 dark:bg-purple-900/20" },
-        { label: "Active Listings", value: String(stats?.stays || 0), icon: Buildings, color: "text-orange-600 bg-orange-50 dark:bg-orange-900/20" },
+        { label: "Active Properties", value: String(stats?.properties || 0), icon: Buildings, color: "text-orange-600 bg-orange-50 dark:bg-orange-900/20" },
     ];
 
     const statusColor: Record<string, string> = {
@@ -122,7 +122,7 @@ export default function AdminDashboardPage() {
                         <tbody>
                             {activity.map((item) => (
                                 <tr key={item.id} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
-                                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{item.guestName || "N/A"}</td>
+                                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{item.guest_name || "N/A"}</td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusColor[item.status] || "bg-gray-100 text-gray-700"}`}>
                                             {item.status}
@@ -130,7 +130,7 @@ export default function AdminDashboardPage() {
                                     </td>
                                     <td className="px-6 py-4 text-gray-700 dark:text-gray-300">Rs {Number(item.amount || 0).toLocaleString()}</td>
                                     <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
-                                        {new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                                        {new Date(item.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                                     </td>
                                 </tr>
                             ))}

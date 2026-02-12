@@ -1,14 +1,12 @@
-"use client";
-
-import { CheckCircle, MapPin, Clock } from "@phosphor-icons/react";
-import type { StayCategory } from "@/types/stay";
-import { STAY_TYPE_LABELS, STAY_INTENT_LABELS } from "@/types/stay";
+import { CheckCircle, MapPin } from "@phosphor-icons/react";
+import type { PropertyCategory } from "@/types/property";
+import { PROPERTY_TYPE_LABELS } from "@/types/property";
 import type { BasicDetailsData } from "./BasicDetailsForm";
 import type { TypeSpecificData } from "./TypeSpecificForm";
 import type { AmenitiesRulesData } from "./AmenitiesRulesForm";
 
 interface ReviewSubmitProps {
-    propertyType: StayCategory;
+    propertyType: PropertyCategory;
     basicDetails: BasicDetailsData;
     typeSpecific: TypeSpecificData;
     amenitiesRules: AmenitiesRulesData;
@@ -24,7 +22,7 @@ export default function ReviewSubmit({
     isSubmitting,
     onSubmit,
 }: ReviewSubmitProps) {
-    const needsUnits = propertyType === "hotel" || propertyType === "hostel";
+    const needsUnits = ["hotel", "resort", "hostel"].includes(propertyType);
 
     return (
         <div className="space-y-6">
@@ -44,7 +42,7 @@ export default function ReviewSubmit({
                         {basicDetails.name || "Untitled Property"}
                     </h3>
                     <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary">
-                        {STAY_TYPE_LABELS[propertyType]}
+                        {PROPERTY_TYPE_LABELS[propertyType]}
                     </span>
                 </div>
 
@@ -52,10 +50,6 @@ export default function ReviewSubmit({
                     <span className="flex items-center gap-1">
                         <MapPin size={16} />
                         {[basicDetails.city, basicDetails.district].filter(Boolean).join(", ") || "No location set"}
-                    </span>
-                    <span className="flex items-center gap-1">
-                        <Clock size={16} />
-                        {STAY_INTENT_LABELS[basicDetails.intent]}
                     </span>
                 </div>
 
@@ -95,10 +89,10 @@ export default function ReviewSubmit({
                                 </div>
                                 <div className="text-right">
                                     <span className="font-bold text-primary">
-                                        NPR {unit.basePrice.toLocaleString()}
+                                        NPR {unit.base_price.toLocaleString()}
                                     </span>
                                     <span className="text-xs text-stone-400 ml-1">
-                                        × {unit.quantity} · Max {unit.maxOccupancy}
+                                        × {unit.quantity} · Max {unit.max_occupancy}
                                     </span>
                                 </div>
                             </div>
@@ -106,8 +100,8 @@ export default function ReviewSubmit({
                     </div>
                 ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        <InfoCard label="Base Price" value={`NPR ${typeSpecific.simple.basePrice.toLocaleString()}`} />
-                        <InfoCard label="Max Guests" value={String(typeSpecific.simple.maxGuests)} />
+                        <InfoCard label="Base Price" value={`NPR ${typeSpecific.simple.base_price.toLocaleString()}`} />
+                        <InfoCard label="Max Guests" value={String(typeSpecific.simple.max_guests)} />
                         <InfoCard label="Bedrooms" value={String(typeSpecific.simple.bedrooms)} />
                         <InfoCard label="Bathrooms" value={String(typeSpecific.simple.bathrooms)} />
                     </div>
@@ -137,8 +131,8 @@ export default function ReviewSubmit({
                     Check-in & Rules
                 </h3>
                 <div className="flex gap-6 text-sm text-stone-600 dark:text-stone-400">
-                    <span>Check-in: <strong className="text-stone-900 dark:text-white">{amenitiesRules.checkInTime || "14:00"}</strong></span>
-                    <span>Check-out: <strong className="text-stone-900 dark:text-white">{amenitiesRules.checkOutTime || "11:00"}</strong></span>
+                    <span>Check-in: <strong className="text-stone-900 dark:text-white">{amenitiesRules.check_in_time || "14:00"}</strong></span>
+                    <span>Check-out: <strong className="text-stone-900 dark:text-white">{amenitiesRules.check_out_time || "11:00"}</strong></span>
                 </div>
                 {amenitiesRules.rules && (
                     <div className="border-t border-stone-100 dark:border-stone-800 pt-3">

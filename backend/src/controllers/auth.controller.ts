@@ -35,16 +35,16 @@ export const AuthController = {
      * User Signup
      */
     signup: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const { email, password, fullName, role } = req.body;
+        const { email, password, full_name, role } = req.body;
 
-        if (!email || !password || !fullName) {
+        if (!email || !password || !full_name) {
             return next(new AppError('Please provide email, password and full name', 400));
         }
 
         const newUser = await AuthService.signup({
             email,
             password,
-            fullName,
+            full_name,
             role: role || 'customer',
         });
 

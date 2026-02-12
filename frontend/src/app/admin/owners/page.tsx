@@ -17,11 +17,11 @@ interface Owner {
     name: string;
     email: string;
     avatar: string | null;
-    isActive: boolean;
-    createdAt: string;
-    businessName: string | null;
-    verificationStatus: string | null;
-    totalEarnings: number | null;
+    is_active: boolean;
+    created_at: string;
+    business_name: string | null;
+    verification_status: string | null;
+    total_earnings: number | null;
 }
 
 interface OwnersResponse {
@@ -152,19 +152,19 @@ export default function AdminOwnersPage() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{owner.businessName || "—"}</td>
-                                        <td className="px-6 py-4">{verificationBadge(owner.verificationStatus)}</td>
+                                        <td className="px-6 py-4 text-gray-700 dark:text-gray-300">{owner.business_name || "—"}</td>
+                                        <td className="px-6 py-4">{verificationBadge(owner.verification_status)}</td>
                                         <td className="px-6 py-4">
-                                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${owner.isActive ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}>
-                                                {owner.isActive ? "Active" : "Banned"}
+                                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${owner.is_active ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}>
+                                                {owner.is_active ? "Active" : "Banned"}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-gray-700 dark:text-gray-300">
-                                            Rs {((owner.totalEarnings || 0) / 100).toLocaleString()}
+                                            Rs {((owner.total_earnings || 0) / 100).toLocaleString()}
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center justify-end gap-2">
-                                                {owner.verificationStatus !== "verified" && (
+                                                {owner.verification_status !== "verified" && (
                                                     <button
                                                         onClick={() => handleVerify(owner.id)}
                                                         disabled={actionLoading === owner.id}
@@ -175,15 +175,15 @@ export default function AdminOwnersPage() {
                                                     </button>
                                                 )}
                                                 <button
-                                                    onClick={() => handleBan(owner.id, owner.isActive)}
+                                                    onClick={() => handleBan(owner.id, owner.is_active)}
                                                     disabled={actionLoading === owner.id}
-                                                    className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors disabled:opacity-50 ${owner.isActive
-                                                            ? "text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40"
-                                                            : "text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40"
+                                                    className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors disabled:opacity-50 ${owner.is_active
+                                                        ? "text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/40"
+                                                        : "text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40"
                                                         }`}
                                                 >
                                                     <Prohibit size={14} />
-                                                    {owner.isActive ? "Ban" : "Unban"}
+                                                    {owner.is_active ? "Ban" : "Unban"}
                                                 </button>
                                             </div>
                                         </td>

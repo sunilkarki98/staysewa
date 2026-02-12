@@ -14,7 +14,7 @@ router.get('/activity', AdminController.getRecentActivity);
 // Owner Management
 router.get('/owners', AdminController.getAllOwners);
 router.patch('/owners/:id/verify', AdminController.verifyOwner);
-router.patch('/owners/:id/ban', AdminController.banOwner);
+router.patch('/users/:id/ban', AdminController.banUser);
 
 // Booking Audit
 router.get('/bookings', AdminController.getAllBookings);

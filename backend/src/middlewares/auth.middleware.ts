@@ -7,6 +7,7 @@ import { db } from '@/db';
 import { users } from '@/db/schema';
 import { env } from '@/config/env';
 import { redis } from '@/config/redis';
+import { OwnersService } from '@/services/owner.service';
 
 /**
  * Authentication Middleware
@@ -55,15 +56,15 @@ export const protect = catchAsync(async (req: Request, res: Response, next: Next
                 const newUser = await db.insert(users).values({
                     id: userId,
                     email: email,
-                    fullName: decoded.user_metadata?.full_name || 'StaySewa User',
-                    role: decoded.user_metadata?.role || decoded.app_metadata?.role || 'customer',
-                    emailVerified: !!decoded.email,
+                    full_name: decoded.user_metadata?.full_name || 'StaySewa User',
+                    role: (decoded.user_metadata?.role || decoded.app_metadata?.role || 'customer') as any,
+                    email_verified: !!decoded.email,
                     password: null, // Managed by Supabase
                 }).returning();
 
                 currentUser = newUser[0];
             } catch (err: any) {
-                // Handle race condition if two requests come simultaneously
+                // Handle race condition
                 currentUser = await db.query.users.findFirst({
                     where: eq(users.id, userId),
                 });

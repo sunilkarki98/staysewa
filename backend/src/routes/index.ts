@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import staysRouter from '@/routes/stays.routes';
+import propertiesRouter from '@/routes/properties.routes';
 import bookingsRouter from '@/routes/bookings.routes';
 import ownersRouter from '@/routes/owners.routes';
 import customersRouter from '@/routes/customers.routes';
@@ -13,7 +13,7 @@ import ownerDashboardRoutes from '@/routes/owner-dashboard.routes';
 const router = Router();
 
 router.use('/auth', authRouter);
-router.use('/stays', staysRouter);
+router.use('/properties', propertiesRouter);
 router.use('/bookings', bookingsRouter);
 router.use('/owners', ownersRouter);
 router.use('/customers', customersRouter);

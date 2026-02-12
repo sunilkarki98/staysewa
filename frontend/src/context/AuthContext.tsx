@@ -11,7 +11,7 @@ interface AuthContextType {
     user: User | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    loginWithGoogle: () => Promise<void>;
+    loginWithGoogle: (role?: string) => Promise<void>;
     loginWithEmail: (email: string) => Promise<void>;
     loginWithPassword: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
@@ -93,11 +93,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return () => subscription.unsubscribe();
     }, []);
 
-    const loginWithGoogle = async () => {
+    const loginWithGoogle = async (role?: string) => {
         const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
                 redirectTo: `${window.location.origin}/auth/callback`,
+                queryParams: role ? {
+                    role,
+                    access_type: 'offline',
+                    prompt: 'consent',
+                } : undefined,
             },
         });
         if (error) throw error;

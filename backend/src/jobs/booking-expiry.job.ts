@@ -1,6 +1,6 @@
 import { db } from '@/db';
 import { bookings } from '@/db/schema';
-import { and, eq, lt, sql } from 'drizzle-orm';
+import { and, eq, lt } from 'drizzle-orm';
 import { logger } from '@/utils/logger';
 
 export const runBookingExpiryJob = async () => {
@@ -12,12 +12,12 @@ export const runBookingExpiryJob = async () => {
             .update(bookings)
             .set({
                 status: 'expired',
-                updatedAt: new Date()
+                updated_at: now
             })
             .where(
                 and(
                     eq(bookings.status, 'reserved'),
-                    lt(bookings.expiresAt, now)
+                    lt(bookings.expires_at, now)
                 )
             )
             .returning({ id: bookings.id });

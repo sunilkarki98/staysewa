@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 import Link from "next/link";
 import Image from "next/image";
-import { useStays } from "../../hooks/useStays";
+import { useProperties } from "../../hooks/useProperties";
 
 type FeaturedCarouselProps = {
     images: string[];
@@ -85,9 +85,9 @@ function FeaturedCarousel({ images, name, autoScrollInterval = 4000 }: FeaturedC
 import { useLocation } from "@/context/LocationContext";
 
 export default function PopularHostels() {
-    const { stays, loading } = useStays();
+    const { properties, loading } = useProperties();
     const { city } = useLocation();
-    const hostels = stays.filter((s) => s.type === "hostel").slice(0, 4);
+    const hostels = properties.filter((p) => p.type === "hostel").slice(0, 4);
 
     if (loading) {
         return (
@@ -119,34 +119,37 @@ export default function PopularHostels() {
             </h2>
 
             <div className="mx-auto grid gap-4 px-3 sm:grid-cols-2 lg:grid-cols-4 max-w-[1400px]">
-                {hostels.map((h) => (
-                    <div
-                        key={h.id}
-                        className="group bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow"
-                    >
-                        <FeaturedCarousel images={h.images} name={h.name} />
-                        <div className="p-4 ">
-                            <h3 className="font-semibold text-gray-900 dark:text-white text-lg">{h.name}</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">NPR {h.price} / night</p>
+                {hostels.map((h) => {
+                    const images = h.media?.map(m => m.url) || [];
+                    return (
+                        <div
+                            key={h.id}
+                            className="group bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow"
+                        >
+                            <FeaturedCarousel images={images} name={h.name} />
+                            <div className="p-4 ">
+                                <h3 className="font-semibold text-gray-900 dark:text-white text-base truncate">{h.name}</h3>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">NPR {h.base_price.toLocaleString()} / night</p>
 
-                            {/* Action Buttons */}
-                            <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
-                                <Link
-                                    href={`/login?redirect=/book/${h.id}`}
-                                    className="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg shadow-sm hover:shadow-md transition-all hover:scale-105"
-                                >
-                                    Book
-                                </Link>
-                                <Link
-                                    href={`/stays/${h.id}`}
-                                    className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
-                                >
-                                    See More
-                                </Link>
+                                {/* Action Buttons */}
+                                <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
+                                    <Link
+                                        href={`/properties/${h.id}`}
+                                        className="px-4 py-2 text-sm font-semibold text-white bg-primary rounded-lg shadow-sm hover:shadow-md transition-all hover:scale-105"
+                                    >
+                                        Book
+                                    </Link>
+                                    <Link
+                                        href={`/properties/${h.id}`}
+                                        className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+                                    >
+                                        Details
+                                    </Link>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </section>
     );

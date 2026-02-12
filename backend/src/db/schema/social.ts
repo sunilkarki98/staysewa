@@ -1,70 +1,98 @@
-import { pgTable, text, uuid, timestamp, boolean, jsonb, index } from 'drizzle-orm/pg-core';
+import { pgTable, text, uuid, timestamp, boolean, jsonb, index, uniqueIndex } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 import { users } from '@/db/schema/users';
+import { properties } from '@/db/schema/properties';
 import { bookings } from '@/db/schema/bookings';
-import { notificationChannelEnum, ticketCategoryEnum, ticketPriorityEnum, ticketStatusEnum } from '@/db/schema/enums';
 
-// ─── Messages (Owner ↔ Customer) ────────────────────────────
-export const messages = pgTable('messages', {
+/* ───── FAVORITES / WISHLISTS ───── */
+export const favorites = pgTable('favorites', {
     id: uuid('id').defaultRandom().primaryKey(),
-    conversationId: uuid('conversation_id').notNull(), // Groups messages
-    senderId: uuid('sender_id').references(() => users.id).notNull(),
-    receiverId: uuid('receiver_id').references(() => users.id).notNull(),
-    bookingId: uuid('booking_id').references(() => bookings.id), // Context
-    content: text('content').notNull(),
-    isRead: boolean('is_read').default(false),
-    readAt: timestamp('read_at', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+    user_id: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+    property_id: uuid('property_id').references(() => properties.id, { onDelete: 'cascade' }).notNull(),
+    created_at: timestamp('created_at', { withTimezone: true }).defaultNow()
 }, (table) => ({
-    conversationIdIdx: index('message_conversation_id_idx').on(table.conversationId),
-    senderIdIdx: index('message_sender_id_idx').on(table.senderId),
-    receiverIdIdx: index('message_receiver_id_idx').on(table.receiverId),
-    bookingIdIdx: index('message_booking_id_idx').on(table.bookingId),
+    user_property_unique: uniqueIndex('favorites_user_property').on(table.user_id, table.property_id),
+    user_idx: index('favorites_user_idx').on(table.user_id)
 }));
 
-// ─── Notifications ──────────────────────────────────────────
+/* ───── NOTIFICATIONS ───── */
 export const notifications = pgTable('notifications', {
     id: uuid('id').defaultRandom().primaryKey(),
-    userId: uuid('user_id').references(() => users.id).notNull(),
-    type: text('type').notNull(), // booking_confirmed, payment_received
+    user_id: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+
+    type: text('type').notNull(), // booking_confirmed, payment_received, review_received, etc.
     title: text('title').notNull(),
-    body: text('body'),
-    data: jsonb('data').default({}), // Deep-link metadata
-    channel: notificationChannelEnum('channel').default('in_app'),
-    isRead: boolean('is_read').default(false),
-    readAt: timestamp('read_at', { withTimezone: true }),
-    sentAt: timestamp('sent_at', { withTimezone: true }).defaultNow(),
+    message: text('message').notNull(),
+
+    action_url: text('action_url'),
+    metadata: jsonb('metadata'),
+
+    is_read: boolean('is_read').default(false),
+    read_at: timestamp('read_at', { withTimezone: true }),
+
+    created_at: timestamp('created_at', { withTimezone: true }).defaultNow()
 }, (table) => ({
-    userIdIdx: index('notification_user_id_idx').on(table.userId),
+    user_idx: index('notifications_user_idx').on(table.user_id),
+    unread_idx: index('notifications_unread_idx').on(table.user_id, table.is_read),
+    created_idx: index('notifications_created_idx').on(table.created_at)
 }));
 
-// ─── Support Tickets ────────────────────────────────────────
-export const supportTickets = pgTable('support_tickets', {
+/* ───── MESSAGES (Guest-Owner communication) ───── */
+export const conversations = pgTable('conversations', {
     id: uuid('id').defaultRandom().primaryKey(),
-    ticketNumber: text('ticket_number').notNull().unique(), // SUP-20231001-001
-    userId: uuid('user_id').references(() => users.id).notNull(),
-    bookingId: uuid('booking_id').references(() => bookings.id),
-    category: ticketCategoryEnum('category').notNull(),
-    subject: text('subject').notNull(),
-    priority: ticketPriorityEnum('priority').default('medium'),
-    status: ticketStatusEnum('status').default('open'),
-    assignedTo: uuid('assigned_to').references(() => users.id), // Admin
-    resolvedAt: timestamp('resolved_at', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+    property_id: uuid('property_id').references(() => properties.id).notNull(),
+    booking_id: uuid('booking_id').references(() => bookings.id),
+
+    participant_1: uuid('participant_1').references(() => users.id).notNull(),
+    participant_2: uuid('participant_2').references(() => users.id).notNull(),
+
+    last_message_at: timestamp('last_message_at', { withTimezone: true }),
+    last_message_preview: text('last_message_preview'),
+
+    created_at: timestamp('created_at', { withTimezone: true }).defaultNow()
 }, (table) => ({
-    userIdIdx: index('support_ticket_user_id_idx').on(table.userId),
-    bookingIdIdx: index('support_ticket_booking_id_idx').on(table.bookingId),
-    assignedToIdx: index('support_ticket_assigned_to_idx').on(table.assignedTo),
+    participants_unique: uniqueIndex('conv_participants').on(table.participant_1, table.participant_2, table.property_id),
+    participant1_idx: index('conv_participant1_idx').on(table.participant_1),
+    participant2_idx: index('conv_participant2_idx').on(table.participant_2)
 }));
 
-// ─── Support Messages ───────────────────────────────────────
-export const supportMessages = pgTable('support_messages', {
+export const messages = pgTable('messages', {
     id: uuid('id').defaultRandom().primaryKey(),
-    ticketId: uuid('ticket_id').references(() => supportTickets.id).notNull(),
-    senderId: uuid('sender_id').references(() => users.id).notNull(),
-    content: text('content').notNull(),
+    conversation_id: uuid('conversation_id').references(() => conversations.id, { onDelete: 'cascade' }).notNull(),
+    sender_id: uuid('sender_id').references(() => users.id).notNull(),
+
+    message: text('message').notNull(),
     attachments: jsonb('attachments').default([]),
-    isInternal: boolean('is_internal').default(false), // Admin-only notes
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+
+    is_read: boolean('is_read').default(false),
+    read_at: timestamp('read_at', { withTimezone: true }),
+
+    created_at: timestamp('created_at', { withTimezone: true }).defaultNow()
 }, (table) => ({
-    ticketIdIdx: index('support_message_ticket_id_idx').on(table.ticketId),
+    conversation_idx: index('messages_conversation_idx').on(table.conversation_id),
+    sender_idx: index('messages_sender_idx').on(table.sender_id),
+    created_idx: index('messages_created_idx').on(table.created_at)
+}));
+
+/* ───── RELATIONS ───── */
+export const favoritesRelations = relations(favorites, ({ one }) => ({
+    user: one(users, { fields: [favorites.user_id], references: [users.id] }),
+    property: one(properties, { fields: [favorites.property_id], references: [properties.id] })
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+    user: one(users, { fields: [notifications.user_id], references: [users.id] })
+}));
+
+export const conversationsRelations = relations(conversations, ({ one, many }) => ({
+    property: one(properties, { fields: [conversations.property_id], references: [properties.id] }),
+    booking: one(bookings, { fields: [conversations.booking_id], references: [bookings.id] }),
+    participant1: one(users, { fields: [conversations.participant_1], references: [users.id] }),
+    participant2: one(users, { fields: [conversations.participant_2], references: [users.id] }),
+    messages: many(messages)
+}));
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+    conversation: one(conversations, { fields: [messages.conversation_id], references: [conversations.id] }),
+    sender: one(users, { fields: [messages.sender_id], references: [users.id] })
 }));

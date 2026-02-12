@@ -11,28 +11,39 @@ export const MediaController = {
      * Save a new media record (URL based)
      */
     uploadMedia: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const { stayId, unitId, type, caption, isCover } = req.body;
+        const { property_id, unit_id, type, label, is_cover } = req.body;
         let { url } = req.body;
 
         if (req.file) {
             // Upload to Supabase Storage
-            // Folder structure: stays/{stayId} or stays/{stayId}/rooms/{unitId}
-            const folder = unitId ? `stays/${stayId}/rooms/${unitId}` : `stays/${stayId}`;
-            url = await MediaService.uploadToSupabase(req.file, folder, 'stay-media');
+            // Folder structure: properties/{property_id} or properties/{property_id}/units/{unit_id}
+            const folder = unit_id ? `properties/${property_id}/units/${unit_id}` : `properties/${property_id}`;
+            url = await MediaService.uploadToSupabase(req.file, folder, 'property-media');
         }
 
-        if (!stayId || !url) {
-            // Clean up file if validation fails (optional but good practice)
-            return next(new AppError('Stay ID and URL/File are required', 400));
+        if (!url && !req.file) {
+            return next(new AppError('URL or File is required', 400));
+        }
+
+        // If no property_id, just return the uploaded URL (for "Add Listing" wizard)
+        if (!property_id) {
+            return res.status(201).json({
+                status: 'success',
+                data: {
+                    url,
+                    message: 'File uploaded successfully (not saved to DB yet)',
+                    media: { url },
+                },
+            });
         }
 
         const media = await MediaService.addMedia({
-            stayId,
-            unitId: unitId || null,
+            property_id,
+            unit_id: unit_id || null,
             url,
             type: type || 'image',
-            caption,
-            isCover: isCover === 'true' || isCover === true, // Form data might imply string "true"
+            label: label || null,
+            is_cover: is_cover === 'true' || is_cover === true,
         });
 
         res.status(201).json({
@@ -42,18 +53,18 @@ export const MediaController = {
     }),
 
     /**
-     * Get media for a stay
+     * Get media for a property
      */
-    getStayMedia: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const { stayId } = req.params;
+    getPropertyMedia: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+        const { property_id } = req.params;
         const { propertyOnly } = req.query;
 
-        if (!stayId) {
-            return next(new AppError('Stay ID is required', 400));
+        if (!property_id) {
+            return next(new AppError('Property ID is required', 400));
         }
 
-        const media = await MediaService.getMediaByStay(
-            stayId as string,
+        const media = await MediaService.getMediaByProperty(
+            property_id as string,
             propertyOnly === 'true'
         );
 
@@ -68,13 +79,13 @@ export const MediaController = {
      * Get media for a specific unit (room)
      */
     getUnitMedia: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const { unitId } = req.params;
+        const { unit_id } = req.params;
 
-        if (!unitId) {
+        if (!unit_id) {
             return next(new AppError('Unit ID is required', 400));
         }
 
-        const media = await MediaService.getMediaByUnit(unitId as string);
+        const media = await MediaService.getMediaByUnit(unit_id as string);
 
         res.status(200).json({
             status: 'success',
@@ -88,13 +99,13 @@ export const MediaController = {
      */
     setCover: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         const { id } = req.params;
-        const { stayId, unitId } = req.body;
+        const { property_id, unit_id } = req.body;
 
-        if (!stayId) {
-            return next(new AppError('Stay ID is required in body', 400));
+        if (!property_id) {
+            return next(new AppError('Property ID is required in body', 400));
         }
 
-        const media = await MediaService.setCover(id as string, stayId as string, unitId as string);
+        const media = await MediaService.setCover(id as string, property_id as string, unit_id as string);
 
         res.status(200).json({
             status: 'success',

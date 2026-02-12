@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import StayListingSection from "@/components/sections/StayListingSection";
+import PropertyListingSection from "@/components/sections/PropertyListingSection";
 import Container from "@/components/layout/Container";
 
 export const metadata: Metadata = {
@@ -36,7 +36,7 @@ export default function HomestaysPage() {
                     <p className="text-muted text-lg">Live like a local and experience authentic Nepali hospitality.</p>
                 </div>
                 <Suspense fallback={<div className="h-96 animate-pulse bg-stone-100 dark:bg-stone-900 rounded-xl" />}>
-                    <StayListingSection selectedCategory="homestay" />
+                    <PropertyListingSection selectedCategory="homestay" />
                 </Suspense>
             </Container>
         </main>

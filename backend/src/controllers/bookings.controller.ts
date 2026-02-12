@@ -44,31 +44,18 @@ export const BookingsController = {
     /**
      * Create a new booking
      */
-    /**
-     * Create a new booking with strict validation and price calculation
-     */
     createBooking: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-        const { stayId, unitId, checkIn, checkOut, guestName, guestEmail, guestPhone } = req.body;
+        const { property_id, unit_id, check_in, check_out } = req.body;
 
-        if (!stayId || !checkIn || !checkOut) {
-            return next(new AppError('Missing required fields: stayId, checkIn, checkOut', 400));
+        if (!property_id || !check_in || !check_out) {
+            return next(new AppError('Missing required fields: property_id, check_in, check_out', 400));
         }
 
-        // Logic for Unit-based booking (Hostels/Homestays) vs Whole-Stay (Flats)
-        // Ideally, even flats should have a single "unit" representing the flat.
-        // If unitId is provided, we use it. If not, we might need default behavior or error.
-        // For this Principal Engineer implementation, we enforce unitId if the stay has units.
-
-        // However, to keep it compatible with potentially legacy calls or flat logic:
-        // We really should validate the existence of the unit here or in service.
-        // Let's delegate detailed validation to Service but ensure unitId is passed.
-
-        // TODO: ideally fetch unit price here to prevent frontend price manipulation.
-        // For now, simple pass-through with improved error handling context.
+        const user = (req as any).user;
 
         const bookingData = {
             ...req.body,
-            userId: (req as any).user ? (req as any).user.id : undefined,
+            customer_id: user ? user.id : undefined,
             // status handled by service (default: reserved)
         };
 
@@ -85,7 +72,7 @@ export const BookingsController = {
      */
     updateBookingStatus: catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         const { id } = req.params;
-        const { status, cancellationReason } = req.body;
+        const { status, cancellation_reason } = req.body;
 
         if (!status) {
             return next(new AppError('Status is required', 400));
@@ -97,8 +84,8 @@ export const BookingsController = {
             const booking = await BookingsService.getById(id as string);
             if (!booking) return next(new AppError('Booking not found', 404));
 
-            const isOwner = booking.ownerId === user.id;
-            const isCustomer = booking.customerId === user.id;
+            const isOwner = booking.owner_id === user.id;
+            const isCustomer = booking.customer_id === user.id;
             const isAdmin = user.role === 'admin';
 
             if (!isOwner && !isCustomer && !isAdmin) {
@@ -107,8 +94,8 @@ export const BookingsController = {
         }
 
         const updatedBooking = await BookingsService.transitionStatus(id as string, status, {
-            cancelledBy: user?.role || 'system',
-            cancellationReason,
+            cancelled_by: user?.role || 'system',
+            cancellation_reason,
         });
 
         if (!updatedBooking) {
@@ -125,7 +112,6 @@ export const BookingsController = {
      * Get my bookings
      */
     getMyBookings: catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
-        // req.user is guaranteed by protect middleware
         const bookings = await BookingsService.getMyBookings((req as any).user.id);
 
         res.status(200).json({
@@ -134,6 +120,7 @@ export const BookingsController = {
             data: { bookings },
         });
     }),
+
     /**
      * Get owner's bookings (RBAC: Owner only)
      */

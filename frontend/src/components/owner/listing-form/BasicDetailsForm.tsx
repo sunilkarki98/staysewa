@@ -1,20 +1,17 @@
-"use client";
-
-import type { StayCategory, StayIntent } from "@/types/stay";
+import type { PropertyCategory } from "@/types/property";
 
 export interface BasicDetailsData {
     name: string;
     description: string;
-    intent: StayIntent;
     city: string;
     district: string;
-    addressLine: string;
+    address_line: string;
     province: string;
 }
 
 interface BasicDetailsFormProps {
     data: BasicDetailsData;
-    propertyType: StayCategory;
+    propertyType: PropertyCategory;
     onChange: (data: BasicDetailsData) => void;
 }
 
@@ -27,15 +24,6 @@ const DISTRICTS = [
 export default function BasicDetailsForm({ data, propertyType, onChange }: BasicDetailsFormProps) {
     const update = (field: keyof BasicDetailsData, value: string) => {
         onChange({ ...data, [field]: value });
-    };
-
-    // Default intent based on property type
-    const defaultIntents: Record<StayCategory, StayIntent> = {
-        hotel: "short_stay",
-        hostel: "short_stay",
-        homestay: "both",
-        apartment: "long_stay",
-        room: "long_stay",
     };
 
     return (
@@ -67,10 +55,11 @@ export default function BasicDetailsForm({ data, propertyType, onChange }: Basic
                         onChange={(e) => update("name", e.target.value)}
                         placeholder={
                             propertyType === "hotel" ? "e.g. Hotel Everest View" :
-                                propertyType === "hostel" ? "e.g. Backpackers Haven" :
-                                    propertyType === "apartment" ? "e.g. Sunrise Apartment" :
-                                        propertyType === "room" ? "e.g. Cozy Private Room" :
-                                            "e.g. Mountain View Homestay"
+                                propertyType === "resort" ? "e.g. Pokhara Lake Resort" :
+                                    propertyType === "hostel" ? "e.g. Backpackers Haven" :
+                                        propertyType === "apartment" ? "e.g. Sunrise Apartment" :
+                                            propertyType === "room" ? "e.g. Cozy Private Room" :
+                                                "e.g. Mountain View Homestay"
                         }
                         className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
                     />
@@ -91,39 +80,6 @@ export default function BasicDetailsForm({ data, propertyType, onChange }: Basic
                     />
                     <p className="text-xs text-stone-400 mt-1">
                         {data.description.length}/500 characters
-                    </p>
-                </div>
-
-                {/* Intent */}
-                <div>
-                    <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                        Stay Duration
-                    </label>
-                    <div className="grid grid-cols-3 gap-3">
-                        {([
-                            { value: "short_stay", label: "Short Stay", desc: "Per night" },
-                            { value: "long_stay", label: "Long Stay", desc: "Per month" },
-                            { value: "both", label: "Both", desc: "Flexible" },
-                        ] as const).map((option) => (
-                            <button
-                                key={option.value}
-                                type="button"
-                                onClick={() => update("intent", option.value)}
-                                className={`p-3 rounded-xl border-2 text-center transition-all ${data.intent === option.value
-                                    ? "border-primary bg-primary/5 dark:bg-primary/10"
-                                    : "border-stone-200 dark:border-stone-700 hover:border-stone-300"
-                                    }`}
-                            >
-                                <span className={`block text-sm font-bold ${data.intent === option.value ? "text-primary" : "text-stone-900 dark:text-white"
-                                    }`}>
-                                    {option.label}
-                                </span>
-                                <span className="block text-xs text-stone-500 mt-0.5">{option.desc}</span>
-                            </button>
-                        ))}
-                    </div>
-                    <p className="text-xs text-stone-400 mt-2">
-                        Default for {propertyType}: <span className="font-semibold capitalize">{defaultIntents[propertyType].replace("_", " ")}</span>
                     </p>
                 </div>
             </div>
@@ -173,8 +129,8 @@ export default function BasicDetailsForm({ data, propertyType, onChange }: Basic
                         </label>
                         <input
                             type="text"
-                            value={data.addressLine}
-                            onChange={(e) => update("addressLine", e.target.value)}
+                            value={data.address_line}
+                            onChange={(e) => update("address_line", e.target.value)}
                             placeholder="e.g. Thamel Marg"
                             className="w-full px-4 py-3 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-white placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
                         />

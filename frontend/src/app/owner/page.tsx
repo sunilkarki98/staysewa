@@ -19,11 +19,11 @@ export default function OwnerDashboardPage() {
                 </div>
 
                 <Link
-                    href="/owner/listings"
+                    href="/owner/properties/new"
                     className="inline-flex items-center justify-center gap-2 bg-primary text-white font-semibold py-2.5 px-5 rounded-xl hover:bg-primary/90 transition shadow-sm active:scale-95"
                 >
                     <PlusIcon size={18} weight="bold" />
-                    <span>Add New Listing</span>
+                    <span>Add New Property</span>
                 </Link>
             </div>
 

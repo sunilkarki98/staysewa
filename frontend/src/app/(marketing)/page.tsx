@@ -1,5 +1,5 @@
 import Hero from "@/components/sections/Hero";
-import FeaturedStays from "@/components/sections/FeaturedStays";
+import FeaturedProperties from "@/components/sections/FeaturedProperties";
 import HowItWorks from "@/components/sections/HowItWorks";
 import CallToAction from "@/components/sections/CallToAction";
 import WhyChooseUs from "@/components/sections/WhyChooseUs";
@@ -11,8 +11,8 @@ export default function Home() {
       {/* Hero + Search */}
       <Hero />
 
-      {/* Popular Hostels / Flats */}
-      <FeaturedStays />
+      {/* Popular Properties */}
+      <FeaturedProperties />
 
       <WhyChooseUs />
       {/* How it works */}

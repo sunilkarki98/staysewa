@@ -17,18 +17,17 @@ export const AuditService = {
     }) {
         try {
             await db.insert(auditLogs).values({
-                userId: data.userId || null,
+                user_id: data.userId || null,
                 action: data.action,
-                entityType: data.entityType,
-                entityId: data.entityId,
-                oldValues: data.oldValues || null,
-                newValues: data.newValues || null,
-                ipAddress: data.ipAddress || null,
-                userAgent: data.userAgent || null,
+                entity_type: data.entityType,
+                entity_id: data.entityId,
+                old_values: data.oldValues || null,
+                new_values: data.newValues || null,
+                ip_address: data.ipAddress || null,
+                user_agent: data.userAgent || null,
             });
         } catch (error) {
             // We don't want audit logging failures to crash the main request flow
-            // But we should at least log it internally
             console.error('Failed to write audit log:', error);
         }
     }

@@ -4,21 +4,16 @@ import { protect, restrictTo } from '@/middlewares/auth.middleware';
 
 const router = Router({ mergeParams: true });
 
-// Protect all routes
+// Protected routes to CREATE/UPDATE reviews
 router.use(protect);
 
 router.route('/')
-    .post(restrictTo('user'), ReviewsController.createReview);
+    .post(restrictTo('customer'), ReviewsController.createReview);
 
-// Public route to get reviews for a stay? 
-// No, getting reviews for a stay usually happens on stay details page, which might be public.
-// But we put `protect` above.
-// If we want public access, we should move it above `protect` or restructure.
-// Let's make getStayReviews public.
-
+// Public router for nested property reviews
 const publicRouter = Router({ mergeParams: true });
 
-publicRouter.route('/stay/:stayId')
-    .get(ReviewsController.getStayReviews);
+publicRouter.route('/')
+    .get(ReviewsController.getPropertyReviews);
 
 export { router as reviewsRouter, publicRouter as publicReviewsRouter };

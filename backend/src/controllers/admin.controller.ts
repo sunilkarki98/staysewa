@@ -55,16 +55,16 @@ export const AdminController = {
     }),
 
     /**
-     * Ban/Unban owner
+     * Ban/Unban user
      */
-    banOwner: catchAsync(async (req: Request, res: Response) => {
+    banUser: catchAsync(async (req: Request, res: Response) => {
         const { ban } = req.body; // Expect { ban: true/false }
         const id = req.params.id as string;
-        await AdminService.banOwner(id, ban);
+        await AdminService.banUser(id, ban);
 
         res.status(200).json({
             status: 'success',
-            message: `Owner ${ban ? 'banned' : 'unbanned'} successfully`
+            message: `User ${ban ? 'banned' : 'unbanned'} successfully`
         });
     }),
 

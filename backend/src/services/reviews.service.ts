@@ -5,12 +5,12 @@ import { AppError } from '@/utils/AppError';
 
 export const ReviewsService = {
     // Create a review
-    async create(data: { bookingId: string; rating: number; comment?: string; userId: string }) {
+    async create(data: { booking_id: string; overall_rating: number; comment?: string; reviewer_id: string }) {
         // 1. Verify booking exists and belongs to user
         const booking = await db.query.bookings.findFirst({
             where: and(
-                eq(bookings.id, data.bookingId),
-                eq(bookings.customerId, data.userId)
+                eq(bookings.id, data.booking_id),
+                eq(bookings.customer_id, data.reviewer_id)
             )
         });
 
@@ -18,12 +18,11 @@ export const ReviewsService = {
             throw new AppError('Booking not found or access denied', 404);
         }
 
-        // 2. Verify booking is completed (removed strict status check for now to allow testing, 
-        //    but ideally should be status='completed' or checkOut < now)
+        // 2. Verify booking is completed (ideally status='completed')
 
         // 3. Check if review already exists
         const existing = await db.query.reviews.findFirst({
-            where: eq(reviews.bookingId, data.bookingId)
+            where: eq(reviews.booking_id, data.booking_id)
         });
 
         if (existing) {
@@ -32,42 +31,44 @@ export const ReviewsService = {
 
         // 4. Create review
         const [review] = await db.insert(reviews).values({
-            bookingId: data.bookingId,
-            stayId: booking.stayId,
-            userId: data.userId,
-            rating: data.rating,
-            comment: data.comment
+            booking_id: data.booking_id,
+            property_id: booking.property_id,
+            reviewer_id: data.reviewer_id,
+            overall_rating: data.overall_rating,
+            comment: data.comment,
+            status: 'approved' // Automatically approve for now or set to 'pending'
         }).returning();
 
         return review;
     },
 
-    // Get reviews for a stay
-    async getByStay(stayId: string) {
+    // Get reviews for a property
+    async getByProperty(property_id: string) {
         return await db.query.reviews.findMany({
-            where: eq(reviews.stayId, stayId),
-            orderBy: [desc(reviews.createdAt)],
+            where: eq(reviews.property_id, property_id),
+            orderBy: [desc(reviews.created_at)],
             with: {
-                user: {
+                reviewer: {
                     columns: {
-                        name: true,
-                        // avatar: true // assuming user has avatar/image if supported
+                        full_name: true,
+                        avatar_url: true
                     }
                 }
             }
         });
     },
 
-    // Get stats for a stay
-    async getStats(stayId: string) {
+    // Get stats for a property
+    async getStats(property_id: string) {
         const stats = await db
             .select({
-                averageRating: sql<string>`avg(${reviews.rating})::numeric(10,1)`,
+                averageRating: sql<string>`avg(${reviews.overall_rating})::numeric(10,1)`,
                 count: sql<number>`count(*)`
             })
             .from(reviews)
-            .where(eq(reviews.stayId, stayId));
+            .where(eq(reviews.property_id, property_id));
 
         return stats[0] || { averageRating: '0', count: 0 };
     }
 };
+

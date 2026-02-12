@@ -19,7 +19,6 @@ export default function BecomeHostPage() {
     const [formData, setFormData] = useState({
         fullName: "",
         email: "",
-        mobile: "",
         password: "",
         confirmPassword: "",
     });
@@ -71,7 +70,7 @@ export default function BecomeHostPage() {
                 // If auto-signin works (data.session exists), we rely on AuthContext to update.
 
                 if (data.session) {
-                    router.push("/owner");
+                    router.push("/owner/onboarding");
                 } else {
                     // Email confirmation required
                     alert("Registration successful! Please check your email to confirm your account.");
@@ -173,18 +172,7 @@ export default function BecomeHostPage() {
                                 />
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Mobile Number</label>
-                                <input
-                                    type="tel"
-                                    name="mobile"
-                                    value={formData.mobile}
-                                    onChange={handleChange}
-                                    placeholder="98XXXXXXXX"
-                                    className="w-full px-4 py-3 rounded-xl bg-stone-50 dark:bg-stone-800 border-stone-200 dark:border-stone-700 focus:ring-2 focus:ring-primary/50 outline-none transition"
-                                    required
-                                />
-                            </div>
+
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
@@ -220,6 +208,24 @@ export default function BecomeHostPage() {
                             >
                                 {isLoading ? <CircleNotch size={24} className="animate-spin" /> : "Start Hosting Now"}
                                 {!isLoading && <ArrowRight size={20} weight="bold" />}
+                            </button>
+
+                            <div className="relative my-6">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-stone-200 dark:border-stone-700"></div>
+                                </div>
+                                <div className="relative flex justify-center text-sm">
+                                    <span className="px-2 bg-white dark:bg-stone-900 text-stone-500">Or continue with</span>
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => loginWithGoogle('owner')}
+                                className="w-full bg-white dark:bg-stone-800 text-stone-700 dark:text-stone-200 font-semibold py-3 rounded-xl border border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700 transition flex items-center justify-center gap-3"
+                            >
+                                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" className="w-5 h-5" />
+                                Sign up with Google
                             </button>
                         </form>
 

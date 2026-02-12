@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 
 const NAV_ITEMS = [
     { name: "Overview", href: "/owner", icon: HouseIcon },
-    { name: "My Listings", href: "/owner/listings", icon: ListDashesIcon },
+    { name: "My Properties", href: "/owner/properties", icon: ListDashesIcon },
     { name: "Bookings", href: "/owner/bookings", icon: CalendarCheckIcon },
     { name: "Settings", href: "/owner/settings", icon: GearIcon },
 ];

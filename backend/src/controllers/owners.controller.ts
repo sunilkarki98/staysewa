@@ -62,4 +62,31 @@ export const OwnersController = {
             data: { owner: newOwner },
         });
     }),
+
+    /**
+     * Update owner profile (Self)
+     */
+    updateProfile: catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
+        const userId = (req as any).user.id;
+
+        // Whitelist allowed fields supported by the users table schema
+        const allowedFields = ['full_name', 'phone', 'avatar_url', 'bio', 'language', 'timezone'] as const;
+        const profileData: Record<string, unknown> = {};
+        for (const field of allowedFields) {
+            if (req.body[field] !== undefined) {
+                profileData[field] = req.body[field];
+            }
+        }
+
+        // Handle legacy camelCase to snake_case mapping for backward compatibility if needed
+        if (req.body.fullName) profileData.full_name = req.body.fullName;
+        if (req.body.avatarUrl) profileData.avatar_url = req.body.avatarUrl;
+
+        const updatedProfile = await OwnersService.updateProfile(userId, profileData as any);
+
+        res.status(200).json({
+            status: 'success',
+            data: { profile: updatedProfile },
+        });
+    }),
 };

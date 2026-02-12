@@ -1,64 +1,80 @@
-import { pgTable, text, uuid, timestamp, boolean, integer, date, jsonb, index } from 'drizzle-orm/pg-core';
-import { userRoleEnum, verificationStatusEnum, idTypeEnum } from '@/db/schema/enums';
+import { pgTable, text, uuid, timestamp, boolean, jsonb, index } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
+import { properties } from '@/db/schema/properties';
+import { bookings } from '@/db/schema/bookings';
+import { reviews } from '@/db/schema/reviews';
+import { favorites, notifications } from '@/db/schema/social';
+import { payouts } from '@/db/schema/bookings'; // Will update payouts later
 
-// ─── Users (Unified Auth) ───────────────────────────────────
+/* ───── USERS ───── */
 export const users = pgTable('users', {
     id: uuid('id').defaultRandom().primaryKey(),
+    full_name: text('full_name').notNull(),
     email: text('email').notNull().unique(),
-    phone: text('phone').unique(),
-    fullName: text('full_name').notNull(),
-    avatarUrl: text('avatar_url'),
-    role: userRoleEnum('role').default('customer').notNull(),
-    password: text('password'), // Add password field
-    emailVerified: boolean('email_verified').default(false),
-    phoneVerified: boolean('phone_verified').default(false),
-    isActive: boolean('is_active').default(true),
-    lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
-});
+    phone: text('phone'),
+    avatar_url: text('avatar_url'),
+    role: text('role').default('guest').notNull(),
 
-// ─── Owner Profiles ─────────────────────────────────────────
-export const ownerProfiles = pgTable('owner_profiles', {
-    id: uuid('id').defaultRandom().primaryKey(),
-    userId: uuid('user_id').references(() => users.id).notNull().unique(),
-    nationality: text('nationality').default('Nepali'),
-    businessName: text('business_name'),
-    panNumber: text('pan_number'),
-    idType: idTypeEnum('id_type'),
-    idNumber: text('id_number'),
-    idFrontUrl: text('id_front_url'),
-    idBackUrl: text('id_back_url'),
-    bankName: text('bank_name'),
-    bankAccount: text('bank_account'),
-    address: text('address'),
-    verificationStatus: verificationStatusEnum('verification_status').default('pending'),
-    totalEarnings: integer('total_earnings').default(0), // stored in paisa
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-});
+    // Auth Integration
+    password: text('password'), // Retaining for existing auth
 
-// ─── Customer Profiles ──────────────────────────────────────
-export const customerProfiles = pgTable('customer_profiles', {
-    id: uuid('id').defaultRandom().primaryKey(),
-    userId: uuid('user_id').references(() => users.id).notNull().unique(),
-    dateOfBirth: date('date_of_birth'),
-    nationality: text('nationality').default('Nepali'),
-    idType: idTypeEnum('id_type'),
-    idNumber: text('id_number'),
-    idFrontUrl: text('id_front_url'),
-    idBackUrl: text('id_back_url'),
-    emergencyContact: text('emergency_contact'),
-    preferences: jsonb('preferences').default({}),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
-});
+    // Verification
+    email_verified: boolean('email_verified').default(false),
+    phone_verified: boolean('phone_verified').default(false),
+    id_verified: boolean('id_verified').default(false),
+    verification_status: text('verification_status').default('pending'),
 
-// ─── User Sessions (Optional, if not using Supabase Auth only) ─
-export const sessions = pgTable('sessions', {
-    id: uuid('id').defaultRandom().primaryKey(),
-    userId: uuid('user_id').references(() => users.id).notNull(),
-    token: text('token').notNull(),
-    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+    // Profile
+    bio: text('bio'),
+    language: text('language').default('en'),
+    timezone: text('timezone').default('Asia/Kathmandu'),
+
+    // Settings
+    notification_preferences: jsonb('notification_preferences').default({}),
+
+    // Security
+    is_active: boolean('is_active').default(true),
+    blocked_at: timestamp('blocked_at', { withTimezone: true }),
+    blocked_reason: text('blocked_reason'),
+
+    created_at: timestamp('created_at', { withTimezone: true }).defaultNow(),
+    updated_at: timestamp('updated_at', { withTimezone: true }).defaultNow()
 }, (table) => ({
-    tokenIdx: index('session_token_idx').on(table.token),
+    email_idx: index('users_email_idx').on(table.email),
+    role_idx: index('users_role_idx').on(table.role)
+}));
+
+/* ───── USER VERIFICATION DOCUMENTS ───── */
+export const userVerificationDocuments = pgTable('user_verification_documents', {
+    id: uuid('id').defaultRandom().primaryKey(),
+    user_id: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+    document_type: text('document_type').notNull(), // citizenship, passport, license
+    document_number: text('document_number'),
+    front_image_url: text('front_image_url').notNull(),
+    back_image_url: text('back_image_url'),
+    selfie_url: text('selfie_url'),
+    status: text('status').default('pending').notNull(),
+    reviewed_by: uuid('reviewed_by').references(() => users.id),
+    reviewed_at: timestamp('reviewed_at', { withTimezone: true }),
+    rejection_reason: text('rejection_reason'),
+    created_at: timestamp('created_at', { withTimezone: true }).defaultNow()
+}, (table) => ({
+    user_idx: index('verification_user_idx').on(table.user_id)
+}));
+
+/* ───── RELATIONS ───── */
+export const usersRelations = relations(users, ({ many }) => ({
+    ownedProperties: many(properties),
+    bookingsAsCustomer: many(bookings, { relationName: 'customer' }),
+    bookingsAsOwner: many(bookings, { relationName: 'owner' }),
+    reviews: many(reviews),
+    favorites: many(favorites),
+    notifications: many(notifications),
+    payouts: many(payouts),
+    verificationDocuments: many(userVerificationDocuments)
+}));
+
+export const userVerificationDocumentsRelations = relations(userVerificationDocuments, ({ one }) => ({
+    user: one(users, { fields: [userVerificationDocuments.user_id], references: [users.id] }),
+    reviewer: one(users, { fields: [userVerificationDocuments.reviewed_by], references: [users.id] })
 }));
